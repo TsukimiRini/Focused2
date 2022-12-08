@@ -12,17 +12,21 @@ public class URIPattern extends URIBase<SegmentPattern> {
   public URIPattern(String label, String lang, String file, String element, List<String> branches) {
     super(label);
 
+    if (lang == null || lang.length() == 0) lang = "ANY";
     this.lang = lang;
 
+    if (file == null || file.length() == 0) file = "**";
     this.file = new SegmentPattern(SegmentType.FILE, file);
     this.captures.addAll(this.file.captures);
 
-    List<String> segments = MatcherUtils.matchSegments(element);
-    if (segments == null) {
-      logger.error("Invalid Element {}", label);
-      throw new IllegalArgumentException("invalid config");
+    if (element != null && element.length() != 0) {
+      List<String> segments = MatcherUtils.matchSegments(element);
+      if (segments == null) {
+        logger.error("Invalid Element {}", label);
+        throw new IllegalArgumentException("invalid config");
+      }
+      this.elementRoot = getPatternRoot(segments);
     }
-    this.elementRoot = getPatternRoot(segments);
 
     branches.forEach(this::addBranch);
   }
@@ -39,7 +43,7 @@ public class URIPattern extends URIBase<SegmentPattern> {
 
   private SegmentPattern getPatternRoot(List<String> segments) {
     SegmentPattern root = null;
-    if (segments == null) return null;
+    if (segments == null || segments.isEmpty()) return null;
     for (String seg : segments) {
       SegmentPattern cur;
       if (MatcherUtils.isEdge(seg)) {
@@ -53,7 +57,8 @@ public class URIPattern extends URIBase<SegmentPattern> {
       root = cur;
       this.captures.addAll(cur.captures);
     }
-    if (root.segType == SegmentType.EDGE && root.text.text.length() == 0) root = (SegmentPattern) root.parent;
+    if (root.segType == SegmentType.EDGE && root.text.text.length() == 0)
+      root = (SegmentPattern) root.parent;
     return root;
   }
 }
