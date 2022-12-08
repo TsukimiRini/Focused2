@@ -9,17 +9,37 @@ import java.util.Map;
 public class SegmentBase<T extends IdentifierBase> {
   protected static final Logger logger = LoggerFactory.getLogger(SegmentBase.class);
   public SegmentType segType;
-  public T text;
-  public T type;
-  public String anchor;
+  public T text = null;
+  public T type = null;
+  public String anchor = null;
   public Map<String, T> attributes = new HashMap<>();
-  public SegmentBase parent;
+  public SegmentBase<T> parent = null;
 
   public SegmentBase(SegmentType segType) {
     this.segType = segType;
   }
 
-  public void setParent(SegmentBase p) {
+  public void setParent(SegmentBase<T> p) {
     this.parent = p;
+  }
+
+  public String toString() {
+    StringBuilder sb = new StringBuilder(text.toString());
+    if (type != null) sb.append("::").append(type);
+    if (anchor != null && anchor.length() > 0) sb.append("#").append(anchor);
+    if (!attributes.isEmpty()) {
+      sb.append("[");
+      boolean flag = true;
+      for (String name : attributes.keySet()) {
+        if (flag) {
+          sb.append(",");
+          flag = false;
+        }
+        sb.append(name).append(":").append(attributes.get(name));
+      }
+      sb.append("]");
+    }
+    String parentStr = (parent == null) ? "" : parent.toString();
+    return parentStr + sb;
   }
 }
