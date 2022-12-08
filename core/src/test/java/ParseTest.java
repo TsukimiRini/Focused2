@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ParseTest {
   @Test
   public void testSegmentParsing(){
-    String seg = "test(cap1):key1#anchor[val1=(cap2),val2=123,val3=\\:def\\:]";
+    String seg = "test(cap1)::key1#anchor[val1=(cap2),val2=123,val3=\\:def\\:]";
     SegmentPattern p = new SegmentPattern(SegmentType.NODE, seg);
     assertEquals(p.text.text, "test(cap1)");
     assertEquals(p.type.text, "key1");
@@ -19,6 +19,7 @@ public class ParseTest {
     assertEquals(p.captures.size(), 2);
     System.out.println(p.attributes);
     System.out.println(p.captures);
+    System.out.println(p);
   }
 
   @Test
