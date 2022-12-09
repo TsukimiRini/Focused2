@@ -64,7 +64,7 @@ public class Focused2Souffle {
         List<Pair<String, String>> branches = new ArrayList<>();
         for (int i = 0; i < pattern.branches.size(); i++) {
           SegmentPattern br = pattern.branches.get(i);
-          branches.add(Pair.of("_" + i, br.toString()));
+          branches.add(Pair.of("_" + i, "Symbol"));
         }
         adt.addBranch(pattern.label + "Br", branches);
       }

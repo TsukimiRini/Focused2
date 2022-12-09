@@ -14,10 +14,10 @@ public class MatcherUtils {
   private static final String attrPattern =
       String.format("(?<key>\\w+)=(?<val>%s+)", escapedPattern);
   private static final Pattern uriPattern = Pattern.compile("(?<seg>.*?)(?:((?<!\\\\)/)|$)");
-  private static final Pattern capPattern = Pattern.compile("\\(\\w+\\)");
+  private static final Pattern capPattern = Pattern.compile("\\((?<cap>\\w+)\\)");
   private static final Pattern attrsPattern =
-      Pattern.compile(String.format("%s(?:,\\s*|$)", attrPattern, attrPattern));
-  private static final Pattern edgePattern = Pattern.compile(String.format("^~.*~$"));
+      Pattern.compile(String.format("%s(?:,\\s*|$)", attrPattern));
+  private static final Pattern edgePattern = Pattern.compile("^~.*~$");
   private static final Pattern segPattern =
       Pattern.compile(
           String.format(
@@ -28,7 +28,7 @@ public class MatcherUtils {
     Set<String> matched = new HashSet<>();
     Matcher matcher = capPattern.matcher(identifier);
     while (matcher.find()) {
-      matched.add(matcher.group());
+      matched.add(matcher.group("cap"));
     }
     return matched;
   }
