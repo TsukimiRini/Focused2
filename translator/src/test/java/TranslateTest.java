@@ -1,4 +1,6 @@
-import model.*;
+import model.souffle.SouffleADT;
+import model.souffle.SoufflePredicateDecl;
+import model.souffle.SouffleRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
