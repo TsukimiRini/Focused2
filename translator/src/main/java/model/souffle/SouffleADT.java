@@ -1,11 +1,11 @@
-package model;
+package model.souffle;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class SouffleADT {
+public class SouffleADT extends SouffleStmt {
   public String typeName;
   public String defaultBranch;
   public HashMap<String, List<Pair<String, String>>> fields = new HashMap<>();

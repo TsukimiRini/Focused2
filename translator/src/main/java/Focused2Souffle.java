@@ -1,4 +1,7 @@
 import model.*;
+import model.souffle.SouffleADT;
+import model.souffle.SoufflePredicateDecl;
+import model.souffle.SouffleRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.FileUtil;
 
@@ -49,7 +52,7 @@ public class Focused2Souffle {
       if (!pattern.captures.isEmpty()) {
         List<Pair<String, String>> captures = new ArrayList<>();
         for (String cap : pattern.captures) {
-          captures.add(Pair.of(cap, "Symbol"));
+          captures.add(Pair.of(cap, "symbol"));
         }
         adt.addBranch(pattern.label + "Cap", captures);
       }
@@ -64,7 +67,7 @@ public class Focused2Souffle {
         List<Pair<String, String>> branches = new ArrayList<>();
         for (int i = 0; i < pattern.branches.size(); i++) {
           SegmentPattern br = pattern.branches.get(i);
-          branches.add(Pair.of("_" + i, "Symbol"));
+          branches.add(Pair.of("_" + i, "symbol"));
         }
         adt.addBranch(pattern.label + "Br", branches);
       }

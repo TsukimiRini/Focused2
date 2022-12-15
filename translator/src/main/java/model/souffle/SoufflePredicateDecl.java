@@ -1,11 +1,11 @@
-package model;
+package model.souffle;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SoufflePredicateDecl {
+public class SoufflePredicateDecl extends SouffleStmt {
   public String predicateName;
   List<Pair<String, String>> params = new ArrayList<>();
 
