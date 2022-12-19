@@ -24,6 +24,10 @@ public class MatcherUtils {
               "^(?<content>%s*)(?:::(?<type>\\w+))?(?:#(?<anchor>\\w+))?(?:\\[(?<attrs>.+)\\])?$",
               escapedPattern));
 
+  private static final Pattern predicatePattern =
+      Pattern.compile("^(?<name>\\w+)\\((?<paras>.+)\\)$");
+  private static final Pattern parasPattern = Pattern.compile("(?<paraName>\\w+?)(?:,\\s*|$)");
+
   public static Set<String> matchCapturesInPattern(String identifier) {
     Set<String> matched = new HashSet<>();
     Matcher matcher = capPattern.matcher(identifier);
@@ -76,5 +80,29 @@ public class MatcherUtils {
     }
     if (res.isEmpty()) return null;
     return res;
+  }
+
+  public static Pair<String, List<String>> parsePredicate(String predicate) {
+    Matcher nameMatcher = predicatePattern.matcher(predicate);
+    String predicateName, params;
+    List<String> paraNames = new ArrayList<>();
+    if (nameMatcher.find()) {
+      predicateName = nameMatcher.group("name");
+      params = nameMatcher.group("paras");
+    } else return null;
+
+    int parenDepth = 0, start = 0;
+    for (int i = 0; i < params.length(); i++) {
+      if (params.charAt(i) == ',' && parenDepth == 0) {
+        paraNames.add(params.substring(start, i).strip());
+        start = i + 1;
+      } else if (params.charAt(i) == '(') {
+        parenDepth++;
+      } else if (params.charAt(i) == ')') {
+        parenDepth--;
+      }
+    }
+    paraNames.add(params.substring(start).strip());
+    return Pair.of(predicateName, paraNames);
   }
 }
