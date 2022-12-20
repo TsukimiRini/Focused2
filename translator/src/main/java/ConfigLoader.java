@@ -20,7 +20,7 @@ public class ConfigLoader {
       throws IOException {
     readContent(config_path);
     Map<String, ConfigElement> rules = parseElements();
-    Map<String, ConfigLinkBlock> blocks = parseLinks();
+    Map<String, ConfigLinkBlock> blocks = parseLinks(new ArrayList<>(rules.keySet()));
     List<URIPattern> patterns = new ArrayList<>();
     for (String label : rules.keySet()) {
       ConfigElement curRule = rules.get(label);
@@ -82,7 +82,7 @@ public class ConfigLoader {
     return res;
   }
 
-  private static Map<String, ConfigLinkBlock> parseLinks() {
+  private static Map<String, ConfigLinkBlock> parseLinks(List<String> elementPredicates) {
     String curBlockLabel = null;
     Map<String, ConfigLinkBlock> blocks = new HashMap<>();
     ConfigLinkBlock curBlock = null;
@@ -107,6 +107,7 @@ public class ConfigLoader {
         if (curBlock == null | curBlockLabel == null) {
           throw new IllegalArgumentException("illegal config");
         }
+        curBlock.getParaTypes(elementPredicates);
         blocks.put(curBlockLabel, curBlock);
       } else if (lineStrip.equals("public:")) {
         isPublic = true;

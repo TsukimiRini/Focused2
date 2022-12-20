@@ -11,7 +11,7 @@ import static utils.MatcherUtils.parsePredicate;
 
 public class ConfigPredicate {
   public String predicateName;
-  public List<Pair<String, String>> params = new ArrayList<>();
+  public List<String> params = new ArrayList<>();
   public LogicRelationType logicType = LogicRelationType.NONE;
   public int logicDepth  = 0;
 
@@ -26,9 +26,7 @@ public class ConfigPredicate {
 
   public void setUp(String predicateName, List<String> paraNames) {
     this.predicateName = predicateName;
-    for (String para : paraNames) {
-      params.add(Pair.of(para, null));
-    }
+    params.addAll(paraNames);
   }
 
   public void setLogic(LogicRelationType type, int logicDepth){

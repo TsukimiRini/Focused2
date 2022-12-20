@@ -28,6 +28,8 @@ public class MatcherUtils {
       Pattern.compile("^(?<name>\\w+)\\((?<paras>.+)\\)$");
   private static final Pattern parasPattern = Pattern.compile("(?<paraName>\\w+?)(?:,\\s*|$)");
 
+  private static final Pattern configURIattr = Pattern.compile("^(?<uri>\\w+)((?:\\[.+\\])|(?:\\..+))$");
+
   public static Set<String> matchCapturesInPattern(String identifier) {
     Set<String> matched = new HashSet<>();
     Matcher matcher = capPattern.matcher(identifier);
@@ -104,5 +106,13 @@ public class MatcherUtils {
     }
     paraNames.add(params.substring(start).strip());
     return Pair.of(predicateName, paraNames);
+  }
+
+  public static Pair<Boolean, String> parseURIRefAttrInConfig(String variable){
+    Matcher uriMatcher = configURIattr.matcher(variable);
+    if(uriMatcher.find()){
+      return Pair.of(true, uriMatcher.group("uri"));
+    }
+    return Pair.of(false, null);
   }
 }
