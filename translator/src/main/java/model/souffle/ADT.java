@@ -5,12 +5,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.HashMap;
 import java.util.List;
 
-public class SouffleADT extends SouffleStmt {
+public class ADT extends SouffleStmt {
   public String typeName;
   public String defaultBranch;
   public HashMap<String, List<Pair<String, String>>> fields = new HashMap<>();
 
-  public SouffleADT(String typeName, String defaultBranch) {
+  public ADT(String typeName, String defaultBranch) {
     this.typeName = typeName;
     this.defaultBranch = defaultBranch;
   }

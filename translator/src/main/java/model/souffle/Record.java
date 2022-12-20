@@ -5,11 +5,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SouffleRecord extends SouffleStmt {
+public class Record extends SouffleStmt {
   public String typeName;
   List<Pair<String, String>> fields = new ArrayList<>();
 
-  public SouffleRecord(String typeName) {
+  public Record(String typeName) {
     this.typeName = typeName;
   }
 

@@ -1,6 +1,6 @@
-import model.souffle.SouffleADT;
-import model.souffle.SoufflePredicateDecl;
-import model.souffle.SouffleRecord;
+import model.souffle.ADT;
+import model.souffle.PredicateDecl;
+import model.souffle.Record;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public class TranslateTest {
   @Test
   public void testADT() {
-    SouffleADT adt = new SouffleADT("Capture", "Default");
+    ADT adt = new ADT("Capture", "Default");
     List<Pair<String, String>> field1 = parseFields("layoutFile: symbol");
     adt.addBranch("MenuFileStandardCap", field1);
     List<Pair<String, String>> field2 = parseFields("javaFile: symbol, layoutFile: symbol");
@@ -20,14 +20,14 @@ public class TranslateTest {
 
   @Test
   public void testPredicateDecl() {
-    SoufflePredicateDecl decl = new SoufflePredicateDecl("MenuFileStandard", "uri", "URI");
+    PredicateDecl decl = new PredicateDecl("MenuFileStandard", "uri", "URI");
     decl.addParam("file", "Symbol");
     System.out.println(decl);
   }
 
   @Test
   public void testRecord() {
-    SouffleRecord decl = new SouffleRecord("MenuFileStandard");
+    Record decl = new Record("MenuFileStandard");
     decl.parseFields(
         "lang: symbol,\n"
             + "    file: symbol,\n"

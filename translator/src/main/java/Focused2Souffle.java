@@ -1,7 +1,8 @@
 import model.*;
-import model.souffle.SouffleADT;
-import model.souffle.SoufflePredicateDecl;
-import model.souffle.SouffleRecord;
+import model.config.ConfigLinkBlock;
+import model.souffle.ADT;
+import model.souffle.PredicateDecl;
+import model.souffle.Record;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.FileUtil;
 
@@ -22,10 +23,11 @@ public class Focused2Souffle {
       System.getProperty("user.dir") + "/translator/src/main/resources/" + framework + "_config.dl";
 
   public static void main(String[] args) throws IOException {
-    List<URIPattern> patterns = ConfigLoader.load(config_path);
-    SouffleADT capType = generateCaptureType(patterns);
-    SouffleADT brType = generateBranchType(patterns);
-    SouffleRecord URIType = generateURIType();
+    Pair<List<URIPattern>, List<ConfigLinkBlock>> pair = ConfigLoader.load(config_path);
+    List<URIPattern> patterns = pair.getLeft();
+    ADT capType = generateCaptureType(patterns);
+    ADT brType = generateBranchType(patterns);
+    Record URIType = generateURIType();
 
     String[] types = {capType + "\n", brType + "\n", URIType + "\n"};
     String[] predicates =
@@ -39,15 +41,15 @@ public class Focused2Souffle {
     FileUtil.appendTo(opt, predicates);
   }
 
-  public static SouffleRecord generateURIType() {
-    SouffleRecord decl = new SouffleRecord("URI");
+  public static Record generateURIType() {
+    Record decl = new Record("URI");
     decl.parseFields(
         "lang: symbol, file: symbol, element: symbol, branches: Branch, caps: Capture");
     return decl;
   }
 
-  public static SouffleADT generateCaptureType(List<URIPattern> patterns) {
-    SouffleADT adt = new SouffleADT("Capture", "ZeroCap");
+  public static ADT generateCaptureType(List<URIPattern> patterns) {
+    ADT adt = new ADT("Capture", "ZeroCap");
     for (URIPattern pattern : patterns) {
       if (!pattern.captures.isEmpty()) {
         List<Pair<String, String>> captures = new ArrayList<>();
@@ -60,8 +62,8 @@ public class Focused2Souffle {
     return adt;
   }
 
-  public static SouffleADT generateBranchType(List<URIPattern> patterns) {
-    SouffleADT adt = new SouffleADT("Branch", "ZeroBranch");
+  public static ADT generateBranchType(List<URIPattern> patterns) {
+    ADT adt = new ADT("Branch", "ZeroBranch");
     for (URIPattern pattern : patterns) {
       if (!pattern.branches.isEmpty()) {
         List<Pair<String, String>> branches = new ArrayList<>();
@@ -75,10 +77,10 @@ public class Focused2Souffle {
     return adt;
   }
 
-  public static List<SoufflePredicateDecl> generateElePredicates(List<URIPattern> patterns) {
-    List<SoufflePredicateDecl> decls = new ArrayList<>();
+  public static List<PredicateDecl> generateElePredicates(List<URIPattern> patterns) {
+    List<PredicateDecl> decls = new ArrayList<>();
     for (URIPattern pattern : patterns) {
-      decls.add(new SoufflePredicateDecl(pattern.label, "uri", "URI"));
+      decls.add(new PredicateDecl(pattern.label, "uri", "URI"));
     }
     return decls;
   }

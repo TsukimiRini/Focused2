@@ -5,16 +5,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SoufflePredicateDecl extends SouffleStmt {
+public class PredicateDecl extends SouffleStmt {
   public String predicateName;
   List<Pair<String, String>> params = new ArrayList<>();
 
-  public SoufflePredicateDecl(String predicateName, String paramName, String paramType) {
+  public PredicateDecl(String predicateName, String paramName, String paramType) {
     this.predicateName = predicateName;
     addParam(paramName, paramType);
   }
 
-  public SoufflePredicateDecl(String predicateName) {
+  public PredicateDecl(String predicateName) {
     this.predicateName = predicateName;
   }
 
