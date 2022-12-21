@@ -124,18 +124,20 @@ public class ConfigLoader {
           throw new IllegalArgumentException("illegal config");
         }
         boolean and = true;
-        int i, depth = 0;
+        int i, depth = 0, opCnt = 0;
         for (i = 0; i < line.length(); i++) {
           if (line.charAt(i) == '&') {
             and = true;
             depth = i;
+            opCnt++;
           } else if (line.charAt(i) == '|') {
             and = false;
             depth = i;
+            opCnt++;
           } else if (line.charAt(i) != ' ') break;
         }
         curLink.addCondition(
-            line.substring(i), and ? LogicRelationType.AND : LogicRelationType.OR, (depth - 8) / 4);
+            line.substring(i), and ? LogicRelationType.AND : LogicRelationType.OR, (depth - 8) / 4, opCnt);
       }
     }
     return blocks;
