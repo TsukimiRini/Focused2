@@ -1,11 +1,8 @@
 package utils;
 
 import java.util.*;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -28,7 +25,10 @@ public class MatcherUtils {
       Pattern.compile("^(?<name>\\w+)\\((?<paras>.+)\\)$");
   private static final Pattern parasPattern = Pattern.compile("(?<paraName>\\w+?)(?:,\\s*|$)");
 
-  private static final Pattern configURIattr = Pattern.compile("^(?<uri>\\w+)((?:\\[.+\\])|(?:\\..+))$");
+  private static final Pattern configURIattr =
+      Pattern.compile("^(?<uri>\\w+)((?:\\[(?<capName>.+)\\])|(?:\\.(?<layerName>.+)))$");
+
+  private static final Pattern varPattern = Pattern.compile("^\\w+$");
 
   public static Set<String> matchCapturesInPattern(String identifier) {
     Set<String> matched = new HashSet<>();
@@ -108,11 +108,20 @@ public class MatcherUtils {
     return Pair.of(predicateName, paraNames);
   }
 
-  public static Pair<Boolean, String> parseURIRefAttrInConfig(String variable){
+  public static Pair<String, Pair<Boolean, String>> parseURIRefAttrInConfig(String variable) {
     Matcher uriMatcher = configURIattr.matcher(variable);
-    if(uriMatcher.find()){
-      return Pair.of(true, uriMatcher.group("uri"));
+    if (uriMatcher.find()) {
+      return Pair.of(
+          uriMatcher.group("uri"),
+          uriMatcher.group("layerName") != null
+              ? Pair.of(false, uriMatcher.group("layerName"))
+              : Pair.of(true, uriMatcher.group("capName")));
     }
-    return Pair.of(false, null);
+    return null;
+  }
+
+  public static boolean matchVariable(String variable) {
+    Matcher matcher = varPattern.matcher(variable);
+    return matcher.find();
   }
 }

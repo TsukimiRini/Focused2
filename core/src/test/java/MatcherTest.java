@@ -24,10 +24,10 @@ public class MatcherTest {
   @Test
   public void testURIAttr(){
     String uriAttr = "def[widgetID]";
-    Pair<Boolean, String> res = parseURIRefAttrInConfig(uriAttr);
-    assertEquals(res.getRight(), "def");
+    Pair<String, Pair<Boolean, String>> res = parseURIRefAttrInConfig(uriAttr);
+    assertEquals(res.getLeft(), "def");
     uriAttr = "ref.file";
     res = parseURIRefAttrInConfig(uriAttr);
-    assertEquals(res.getRight(), "ref");
+    assertEquals(res.getLeft(), "ref");
   }
 }
