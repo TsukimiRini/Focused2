@@ -1,7 +1,6 @@
 package model.config;
 
 import model.enums.PredicateType;
-import org.apache.commons.lang3.tuple.Pair;
 import utils.MatcherUtils;
 
 import java.util.*;
@@ -11,7 +10,7 @@ public class ConfigLinkBlock {
   public List<ConfigLinkBlock> baseBlocks = new ArrayList<>();
   public Map<String, List<ConfigLink>> predicateDecls = new HashMap<>();
   public Map<String, PredicateType> predicateTypes = new HashMap<>();
-  public Map<String, List<String>> paramTypes = new HashMap<>();
+  public Map<String, List<Set<String>>> paramTypes = new HashMap<>();
 
   public ConfigLinkBlock(String name) {
     this.blockName = name;
@@ -31,7 +30,7 @@ public class ConfigLinkBlock {
   }
 
   public void getParaTypes(List<String> elementPredicates) {
-    Map<String, List<String>> baseBlockPredicates =
+    Map<String, List<Set<String>>> baseBlockPredicates =
         baseBlocks.stream()
             .reduce(
                 new HashMap<>(),
@@ -47,18 +46,20 @@ public class ConfigLinkBlock {
     }
   }
 
+  // TODO: refer para types completely
   private void getParaTypesFromDeclStmt(
       List<String> elementPredicates,
-      Map<String, List<String>> baseBlockPredicates,
+      Map<String, List<Set<String>>> baseBlockPredicates,
       Set<String> visited,
       String predicateName) {
     if (visited.contains(predicateName)) return;
     visited.add(predicateName);
-    List<String> curParamTypes = new ArrayList<>();
+    List<Set<String>> curParamTypes = new ArrayList<>();
     for (int i = 0; i < predicateDecls.get(predicateName).get(0).decl.params.size(); i++)
-      curParamTypes.add("");
+      curParamTypes.add(new HashSet<>());
     for (ConfigLink link : predicateDecls.get(predicateName)) {
-      List<String> paramNames = link.decl.params;
+      List<ConfigPredicate> paramNames = link.decl.params;
+      Map<String, Set<String>> varTypes = link.varTypes;
       for (ConfigPredicate condition : link.conditions) {
         boolean isElementPredicate = false, isBaseBlockPredicate = false, isInnerPredicate = false;
         String conditionName = condition.predicateName;
@@ -66,34 +67,48 @@ public class ConfigLinkBlock {
         else if (baseBlockPredicates.containsKey(conditionName)) isBaseBlockPredicate = true;
         else if (predicateDecls.containsKey(conditionName)) isInnerPredicate = true;
         for (int i = 0; i < condition.params.size(); i++) {
-          String param = condition.params.get(i);
-          Pair<Boolean, String> parseAsAttr = MatcherUtils.parseURIRefAttrInConfig(param);
-          param = parseAsAttr.getRight();
-          int idxInDecl = paramNames.indexOf(param);
-          if (idxInDecl == -1 || curParamTypes.get(idxInDecl).length() != 0) continue;
-          else if (parseAsAttr.getKey()) {
-            curParamTypes.set(idxInDecl, "URI");
-          } else if (isElementPredicate) {
-            curParamTypes.set(idxInDecl, "URI");
+          String param = condition.params.get(i).toString();
+          //          Pair<Boolean, String> parseAsAttr =
+          // MatcherUtils.parseURIRefAttrInConfig(param);
+          //          if (parseAsAttr.getKey()) param = parseAsAttr.getRight();
+          if (!MatcherUtils.matchVariable(param)) continue;
+          int idxInDecl = indexOfParamInPredicateList(paramNames, param);
+          if (!varTypes.containsKey(param)) varTypes.put(param, new HashSet<>());
+          if (isElementPredicate) {
+            varTypes.get(param).add(conditionName);
           } else if (isBaseBlockPredicate) {
-            curParamTypes.set(idxInDecl, baseBlockPredicates.get(conditionName).get(i));
+            varTypes.get(param).addAll(baseBlockPredicates.get(conditionName).get(i));
           } else if (isInnerPredicate) {
             getParaTypesFromDeclStmt(
                 elementPredicates, baseBlockPredicates, visited, conditionName);
             if (paramTypes.containsKey(conditionName)) {
-              curParamTypes.set(idxInDecl, paramTypes.get(conditionName).get(i));
+              varTypes.get(param).addAll(paramTypes.get(conditionName).get(i));
             }
-          } else {
-            curParamTypes.set(idxInDecl, "symbol");
           }
+          if (idxInDecl != -1) curParamTypes.get(idxInDecl).addAll(varTypes.get(param));
+          //          else {
+          //            Set<String> curParamSet = curParamTypes.get(idxInDecl);
+          //            if (curParamSet.size() > 1
+          //                || !curParamSet.isEmpty() && !curParamSet.toArray()[0].equals("symbol"))
+          // {
+          //              throw new IllegalArgumentException("ambiguous type");
+          //            }
+          //            curParamTypes.get(idxInDecl).add("symbol");
+          //          }
         }
       }
     }
-    curParamTypes.replaceAll(
-        ele -> {
-          if (ele.length() == 0) return "symbol";
-          return ele;
-        });
+    //    curParamTypes.forEach(
+    //        ele -> {
+    //          if (ele.size() == 0) ele.add("symbol");
+    //        });
     paramTypes.put(predicateName, curParamTypes);
+  }
+
+  private int indexOfParamInPredicateList(List<ConfigPredicate> predicates, String param) {
+    for (int i = 0; i < predicates.size(); i++) {
+      if (predicates.get(i).toString().equals(param)) return i;
+    }
+    return -1;
   }
 }
