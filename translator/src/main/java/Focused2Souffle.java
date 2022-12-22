@@ -38,6 +38,7 @@ public class Focused2Souffle {
     File opt = FileUtil.createOrClearFile(souffle_output);
     FileUtil.appendTo(opt, types);
     FileUtil.appendTo(opt, predicates);
+    FileUtil.appendTo(opt, "\n");
 
     List<ConfigLinkBlock> blocks = pair.getRight();
     Map<String, URIPattern> patternMap = new HashMap<>();
@@ -127,7 +128,7 @@ public class Focused2Souffle {
     block.predicateTypes.forEach(
         (predicateName, type) -> {
           if (type == PredicateType.PUBLIC) {
-            cur.postfixStmts.add(new IOStmt(true, instanceName+"."+predicateName));
+            cur.postfixStmts.add(new IOStmt(true, instanceName + "." + predicateName));
           }
         });
     return cur;

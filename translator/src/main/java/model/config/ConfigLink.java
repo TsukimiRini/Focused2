@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
+import static utils.StringUtil.capitalize;
 
 public class ConfigLink {
   public ConfigPredicate decl;
@@ -116,6 +117,7 @@ public class ConfigLink {
     List<String> defStmts =
         types.stream()
             .map(type -> getDefForEachVarAndType(varName, layers, caps, type))
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
     assert defStmts.size() > 0;
     if (defStmts.size() == 1) {
@@ -133,18 +135,19 @@ public class ConfigLink {
 
   private String getDefForEachVarAndType(
       String varName, List<String> layers, List<String> caps, URIPattern type) {
+    if ((layers == null || layers.isEmpty()) && (caps == null || caps.isEmpty())) return null;
     StringBuilder sb = new StringBuilder(varName);
     sb.append("=[");
     String[] layerList = {"lang", "file", "element", "branches"};
     for (int i = 0; i < layerList.length; i++) {
       if (i != 0) sb.append(",");
-      if (layers != null && !layers.contains(layerList[i])) {
+      if (layers == null || !layers.contains(layerList[i])) {
         sb.append("_");
       }
-      sb.append("Attr").append(varName).append(layerList[i]);
+      sb.append("attr").append(capitalize(varName)).append(capitalize(layerList[i]));
     }
     if (caps == null || caps.isEmpty()) {
-      sb.append(",_Cap").append(varName);
+      sb.append(",_cap").append(varName);
     } else {
       sb.append(",$").append(type.label).append("Cap(");
       List<String> capList = new ArrayList<>(type.captures);
@@ -153,7 +156,7 @@ public class ConfigLink {
         if (!caps.contains(capList.get(i))) {
           sb.append("_");
         }
-        sb.append("Cap").append(varName).append(layerList[i]);
+        sb.append("cap").append(capitalize(varName)).append(capitalize(capList.get(i)));
       }
       sb.append(")");
     }

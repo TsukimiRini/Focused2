@@ -3,10 +3,13 @@ package model.config;
 import model.enums.LogicRelationType;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.MatcherUtils;
+import utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static utils.StringUtil.capitalize;
 
 public class ConfigPredicate {
   public String predicateName;
@@ -50,12 +53,18 @@ public class ConfigPredicate {
           if (!caps.containsKey(layerOrCap.getLeft()))
             caps.put(layerOrCap.getLeft(), new ArrayList<>());
           caps.get(layerOrCap.getLeft()).add(layerOrCap.getRight().getRight());
-          param.predicateName = "Cap" + layerOrCap.getLeft() + layerOrCap.getRight().getRight();
+          param.predicateName =
+              "cap"
+                  + capitalize(layerOrCap.getLeft())
+                  + capitalize(layerOrCap.getRight().getRight());
         } else {
           if (!layers.containsKey(layerOrCap.getLeft()))
             layers.put(layerOrCap.getLeft(), new ArrayList<>());
           layers.get(layerOrCap.getLeft()).add(layerOrCap.getRight().getRight());
-          param.predicateName = "Attr" + layerOrCap.getLeft() + layerOrCap.getRight().getRight();
+          param.predicateName =
+              "attr"
+                  + capitalize(layerOrCap.getLeft())
+                  + capitalize(layerOrCap.getRight().getRight());
         }
       } else {
         param.replaceLayerAndCaps(layers, caps);
@@ -65,7 +74,7 @@ public class ConfigPredicate {
 
   public String toString() {
     StringBuilder sb = new StringBuilder(predicateName);
-    if(params!=null){
+    if (params != null) {
       sb.append("(").append(params.get(0));
       for (int i = 1; i < params.size(); i++) {
         sb.append(", ").append(params.get(i));
