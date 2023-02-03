@@ -47,6 +47,9 @@ public class ConfigLink {
     Stack<Integer> depthStack = new Stack<>();
     for (ConfigPredicate predicate : conditions) {
       predicate.replaceLayerAndCaps(variableToLayer, variableToCap);
+    }
+    Set<ConfigPredicate> haveDefined = new HashSet<>();
+    for (ConfigPredicate predicate : conditions) {
       int foreground = predicate.logicDepth - predicate.logicOps + 1,
           background = predicate.logicDepth;
       LogicRelationType curOp = predicate.logicType;
@@ -75,6 +78,14 @@ public class ConfigLink {
         depthStack.push(i);
       }
       sb.append(predicate);
+      if (predicate.params.size() > 0) {
+        for (ConfigPredicate param : predicate.params) {
+          if (!haveDefined.contains(param)) {
+            addDefForEachVar(sb, param.toString(), variableToLayer, variableToCap, patterns);
+            haveDefined.add(param);
+          }
+        }
+      }
     }
     while (!depthStack.isEmpty()) {
       int layer = depthStack.pop();
@@ -87,7 +98,7 @@ public class ConfigLink {
       }
     }
 
-    addDefForVars(sb, variableToLayer, variableToCap, patterns);
+    //    addDefForVars(sb, variableToLayer, variableToCap, patterns);
 
     sb.append(".");
     return sb.toString();
@@ -101,32 +112,42 @@ public class ConfigLink {
     Set<String> varNames = new HashSet<>(variableToLayer.keySet());
     varNames.addAll(variableToCap.keySet());
     for (String varName : varNames) {
-      Set<String> typesForVar = varTypes.get(varName);
-      if (typesForVar == null || typesForVar.isEmpty()) continue;
-      List<URIPattern> patternsForTypes = new ArrayList<>();
-      typesForVar.forEach(s -> patternsForTypes.add(patterns.get(s)));
-      String defStmt =
-          getDefForEachVar(
-              varName, variableToLayer.get(varName), variableToCap.get(varName), patternsForTypes);
-      sb.append(", ").append(defStmt);
+      addDefForEachVar(sb, varName, variableToLayer, variableToCap, patterns);
     }
+  }
+
+  private void addDefForEachVar(
+      StringBuilder sb,
+      String varName,
+      Map<String, List<String>> variableToLayer,
+      Map<String, List<String>> variableToCap,
+      Map<String, URIPattern> patterns) {
+    Set<String> typesForVar = varTypes.get(varName);
+    if (typesForVar == null || typesForVar.isEmpty()) return;
+    List<URIPattern> patternsForTypes = new ArrayList<>();
+    typesForVar.forEach(s -> patternsForTypes.add(patterns.get(s)));
+    String defStmt =
+        getDefForEachVar(
+            varName, variableToLayer.get(varName), variableToCap.get(varName), patternsForTypes);
+    sb.append(", ").append(defStmt);
   }
 
   private String getDefForEachVar(
       String varName, List<String> layers, List<String> caps, List<URIPattern> types) {
-    List<String> defStmts =
+    Set<String> defStmts =
         types.stream()
             .map(type -> getDefForEachVarAndType(varName, layers, caps, type))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
     assert defStmts.size() > 0;
-    if (defStmts.size() == 1) {
-      return defStmts.get(0);
+    List<String> stmtsList = new ArrayList<>(defStmts);
+    if (stmtsList.size() == 1) {
+      return stmtsList.get(0);
     } else {
       StringBuilder sb = new StringBuilder("( ");
-      sb.append(defStmts.get(0));
-      for (int i = 1; i < defStmts.size(); i++) {
-        sb.append(", ").append(defStmts.get(i));
+      sb.append(stmtsList.get(0));
+      for (int i = 1; i < stmtsList.size(); i++) {
+        sb.append("; ").append(stmtsList.get(i));
       }
       sb.append(" )");
       return sb.toString();
