@@ -8,24 +8,81 @@ import java.util.Set;
 
 public class URIPattern extends URIBase<SegmentPattern> {
   public Set<String> captures = new HashSet<>();
+  public List<String> params;
 
-  public URIPattern(String label, String lang, String file, String element, List<String> branches) {
+  public URIPattern(
+      String label,
+      String lang,
+      String file,
+      String element,
+      List<String> params,
+      List<String> branches) {
     super(label);
+    this.params = params;
 
-    if (lang == null || lang.length() == 0) lang = "ANY";
-    this.lang = lang;
+    fillInFields(lang, file, element, branches);
 
-    if (file == null || file.length() == 0) file = "**";
-    this.file = new SegmentPattern(SegmentType.FILE, file);
     this.captures.addAll(this.file.captures);
+  }
 
-    if (element != null && element.length() != 0) {
-      List<String> segments = MatcherUtils.matchSegments(element);
+  public URIPattern(
+      URIPattern template,
+      List<String> values,
+      String label,
+      String lang,
+      String file,
+      String element,
+      List<String> params,
+      List<String> branches) {
+    super(label);
+    this.params = params;
+
+    if (template.lang != null) this.lang = template.lang;
+
+    if (template.file != null) {
+      this.file =
+          new SegmentPattern(
+              SegmentType.FILE, template.replacePlaceholder(template.file.toString(), values));
+      this.captures.addAll(this.file.captures);
+    }
+
+    if (template.elementRoot != null) {
+      String elementSource = template.elementRoot.toString();
+      List<String> segments =
+          MatcherUtils.matchSegments(template.replacePlaceholder(elementSource, values));
       if (segments == null) {
         logger.error("Invalid Element {}", label);
         throw new IllegalArgumentException("invalid config");
       }
       this.elementRoot = getPatternRoot(segments);
+    }
+
+    template.branches.forEach(
+        branch -> this.addBranch(template.replacePlaceholder(branch.toString(), values)));
+
+    fillInFields(lang, file, element, branches);
+  }
+
+  private void fillInFields(String lang, String file, String element, List<String> branches) {
+    if (this.lang == null) this.lang = lang;
+    else if (lang != null) throw new IllegalArgumentException("invalid config");
+
+    if (file != null) {
+      if (this.file == null) {
+        this.file = new SegmentPattern(SegmentType.FILE, file);
+        this.captures.addAll(this.file.captures);
+      } else throw new IllegalArgumentException("invalid config");
+    }
+
+    if (element != null) {
+      if (this.elementRoot == null) {
+        List<String> segments = MatcherUtils.matchSegments(element);
+        if (segments == null) {
+          logger.error("Invalid Element {}", label);
+          throw new IllegalArgumentException("invalid config");
+        }
+        this.elementRoot = getPatternRoot(segments);
+      } else throw new IllegalArgumentException("invalid config");
     }
 
     branches.forEach(this::addBranch);
@@ -60,5 +117,19 @@ public class URIPattern extends URIBase<SegmentPattern> {
     if (root.segType == SegmentType.EDGE && root.text.text.length() == 0)
       root = (SegmentPattern) root.parent;
     return root;
+  }
+
+  public String replacePlaceholder(String source, List<String> values) {
+    if (source == null || values == null) return source;
+    String res = source;
+    for (int i = 0; i < params.size(); i++) {
+      String value = values.get(i), paramName = params.get(i);
+      if (value.startsWith("\"") || value.startsWith("`")) {
+        res = res.replace("<" + paramName + ">", value.substring(1, value.length() - 1));
+      } else {
+        res = res.replace("<" + paramName + ">", "<" + value + ">");
+      }
+    }
+    return res;
   }
 }

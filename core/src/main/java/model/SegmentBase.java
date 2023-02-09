@@ -39,7 +39,8 @@ public class SegmentBase<T extends IdentifierBase> {
       }
       sb.append("]");
     }
-    String parentStr = (parent == null) ? "" : parent.toString();
-    return parentStr + sb;
+    String parentStr = (parent == null) ? "" : parent + "/";
+    if (segType == SegmentType.EDGE && sb.length() > 0) return parentStr + "~" + sb + "~";
+    else return parentStr + sb;
   }
 }

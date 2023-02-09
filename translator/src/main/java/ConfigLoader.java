@@ -4,11 +4,13 @@ import model.config.ConfigLink;
 import model.config.ConfigLinkBlock;
 import model.enums.LogicRelationType;
 import org.apache.commons.lang3.tuple.Pair;
+import utils.MatcherUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConfigLoader {
   public static final List<String> attributes =
@@ -19,21 +21,39 @@ public class ConfigLoader {
   public static Pair<List<URIPattern>, List<ConfigLinkBlock>> load(String config_path)
       throws IOException {
     readContent(config_path);
-    Map<String, ConfigElement> rules = parseElements();
-    Map<String, ConfigLinkBlock> blocks = parseLinks(new ArrayList<>(rules.keySet()));
-    List<URIPattern> patterns = new ArrayList<>();
-    for (String label : rules.keySet()) {
-      ConfigElement curRule = rules.get(label);
-      patterns.add(
-          new URIPattern(
-              label,
-              curRule.get("lang"),
-              curRule.get("file"),
-              curRule.get("element"),
-              curRule.branches));
+    List<Pair<String, ConfigElement>> rules = parseElements();
+    Map<String, ConfigLinkBlock> blocks =
+        parseLinks(rules.stream().map(Pair::getKey).collect(Collectors.toList()));
+    Map<String, URIPattern> patterns = new HashMap<>();
+    for (Pair<String, ConfigElement> rule : rules) {
+      String label = rule.getKey();
+      ConfigElement curRule = rule.getValue();
+      if (curRule.template != null) {
+        patterns.put(
+            label,
+            new URIPattern(
+                patterns.get(curRule.template.getKey()),
+                curRule.template.getValue(),
+                label,
+                curRule.get("lang"),
+                curRule.get("file"),
+                curRule.get("element"),
+                curRule.params,
+                curRule.branches));
+      } else {
+        patterns.put(
+            label,
+            new URIPattern(
+                label,
+                curRule.get("lang"),
+                curRule.get("file"),
+                curRule.get("element"),
+                curRule.params,
+                curRule.branches));
+      }
     }
 
-    return Pair.of(patterns, new ArrayList<>(blocks.values()));
+    return Pair.of(new ArrayList<>(patterns.values()), new ArrayList<>(blocks.values()));
   }
 
   private static void readContent(String config_path) throws IOException {
@@ -51,34 +71,45 @@ public class ConfigLoader {
     }
   }
 
-  private static Map<String, ConfigElement> parseElements() {
+  private static List<Pair<String, ConfigElement>> parseElements() {
     String curLabel = null;
-    Map<String, ConfigElement> res = new HashMap<>();
+    ConfigElement curRule = null;
+    List<Pair<String, ConfigElement>> res = new ArrayList<>();
     for (String line : elementsContent) {
       line = line.strip();
       if (line.startsWith("-")) {
         if (curLabel == null) {
           throw new IllegalArgumentException("invalid config");
         } else {
-          res.get(curLabel).addBranch(line.substring(2));
+          curRule.addBranch(line.substring(2));
         }
       } else {
         int idx = line.indexOf(':');
         String labelOrAttr = line.substring(0, idx);
         if (attributes.contains(labelOrAttr)) {
           if (labelOrAttr.equals(attributes.get(attributes.size() - 1))) continue;
-          String val = line.substring(idx + 1);
+          String val = line.substring(idx + 1).strip();
           if (curLabel == null) {
             throw new IllegalArgumentException("invalid config");
           } else {
-            res.get(curLabel).put(labelOrAttr, val);
+            curRule.put(labelOrAttr, val);
           }
         } else {
-          curLabel = labelOrAttr;
-          res.put(curLabel, new ConfigElement());
+          Pair<String, List<String>> labelObj = MatcherUtils.parseURIPatternLabel(labelOrAttr);
+          Pair<String, List<String>> template = null;
+          if (line.length() > idx + 1)
+            template = MatcherUtils.parseURIPatternTemplate(line.substring(idx + 1).strip());
+          if (labelObj == null) {
+            throw new IllegalArgumentException("invalid config");
+          } else {
+            if (curLabel != null) res.add(Pair.of(curLabel, curRule));
+            curLabel = labelObj.getKey();
+            curRule = new ConfigElement(labelObj.getValue(), template);
+          }
         }
       }
     }
+    if (curLabel != null) res.add(Pair.of(curLabel, curRule));
     return res;
   }
 
@@ -137,7 +168,10 @@ public class ConfigLoader {
           } else if (line.charAt(i) != ' ') break;
         }
         curLink.addCondition(
-            line.substring(i), and ? LogicRelationType.AND : LogicRelationType.OR, (depth - 8) / 4, opCnt);
+            line.substring(i),
+            and ? LogicRelationType.AND : LogicRelationType.OR,
+            (depth - 8) / 4,
+            opCnt);
       }
     }
     return blocks;
