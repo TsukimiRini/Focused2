@@ -3,10 +3,20 @@ package utils;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MatcherUtils {
+  private static final Pattern labelPattern =
+      Pattern.compile("(?<name>\\w+)(?:<(?<params>\\w+(?:,\\s*\\w+\\s*)?)>)?");
+  private static final String quotePattern = "(?:[^\"])";
+  private static final String singleQuotePattern = "(?:[^`])";
+  private static final Pattern templatePattern =
+      Pattern.compile(
+          String.format(
+              "(?<name>\\w+)(?:\\<(?<params>(?:\\w+|\"%s+\"|`%s+`)(?:,\\s*(?:\\w+|\"%s+\"|`%s+`)\\s*)?)\\>)?",
+              quotePattern, singleQuotePattern, quotePattern, singleQuotePattern));
   private static final String escapedPattern = "(?:[^\\\\\\[\\]:=,#/]|\\\\[\\\\\\[\\]:=,#/])";
   private static final String attrPattern =
       String.format("(?<key>\\w+)=(?<val>%s+)", escapedPattern);
@@ -47,7 +57,6 @@ public class MatcherUtils {
   public static List<String> matchSegments(String uri) {
     List<String> res = new ArrayList<>();
     if (uri.length() == 0) {
-      res.add("**");
       return res;
     }
     Matcher matcher = uriPattern.matcher(uri);
@@ -123,5 +132,37 @@ public class MatcherUtils {
   public static boolean matchVariable(String variable) {
     Matcher matcher = varPattern.matcher(variable);
     return matcher.find();
+  }
+
+  public static Pair<String, List<String>> parseURIPatternLabel(String label) {
+    Matcher labelMatcher = labelPattern.matcher(label);
+    if (labelMatcher.find()) {
+      String labelName = labelMatcher.group("name");
+      String params = labelMatcher.group("params");
+      if (params == null) return Pair.of(labelName, null);
+      else {
+        List<String> paramList =
+            Arrays.stream(params.split(",")).map(String::strip).collect(Collectors.toList());
+        return Pair.of(labelName, paramList);
+      }
+    } else {
+      return null;
+    }
+  }
+
+  public static Pair<String, List<String>> parseURIPatternTemplate(String template) {
+    Matcher tempMatcher = templatePattern.matcher(template);
+    if (tempMatcher.find()) {
+      String labelName = tempMatcher.group("name");
+      String params = tempMatcher.group("params");
+      if (params == null) return Pair.of(labelName, null);
+      else {
+        List<String> paramList =
+            Arrays.stream(params.split(",")).map(String::strip).collect(Collectors.toList());
+        return Pair.of(labelName, paramList);
+      }
+    } else {
+      return null;
+    }
   }
 }
