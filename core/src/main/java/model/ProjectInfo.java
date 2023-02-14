@@ -3,11 +3,12 @@ package model;
 import model.Language;
 import utils.FileUtil;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ProjectInfo {
   public String framework;
-  public Set<Language> languages;
+  public Set<Language> languages = new HashSet<>();
   public String projectDir;
 
   public ProjectInfo(String framework, String projectDir){
