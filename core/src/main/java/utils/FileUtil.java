@@ -4,10 +4,8 @@ import model.Language;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,6 +92,28 @@ public class FileUtil {
       e.printStackTrace();
     }
     return content;
+  }
+
+  /**
+   * Read the content of a given file.
+   *
+   * @param path to be read
+   * @return string content of the file, or null in case of errors.
+   */
+  public static List<String> readFileToLines(String path) {
+    List<String> lines = new ArrayList<>();
+    File file = new File(path);
+    if (file.exists()) {
+      try (BufferedReader reader =
+                   Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8)) {
+        lines = reader.lines().collect(Collectors.toList());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
+      return lines;
+    }
+    return lines;
   }
 
   public static Map<String, List<String>> categorizeFilesByExtension(List<String> filePaths) {
