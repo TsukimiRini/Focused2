@@ -5,14 +5,16 @@ import ai.serenade.treesitter.Tree;
 import ai.serenade.treesitter.TreeCursor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CSTTree {
-  String nodeType;
-  String filePath;
-  String snippet;
-  int startIdx, endIdx;
-  List<CSTTree> children;
+  public String nodeType;
+  public String filePath;
+  public String snippet;
+  public int startIdx, endIdx;
+  public Map<String, List<CSTTree>> children; // key: type, value: CSTTrees
 
   // init from node
   public CSTTree(
@@ -22,7 +24,7 @@ public class CSTTree {
     this.snippet = snippet;
     this.startIdx = startIdx;
     this.endIdx = endIdx;
-    children = new ArrayList<>();
+    children = new HashMap<>();
   }
 
   // init from tree
@@ -38,15 +40,23 @@ public class CSTTree {
     this.startIdx = cursor.getCurrentNode().getStartByte();
     this.endIdx = cursor.getCurrentNode().getEndByte();
     this.snippet = source.substring(startIdx, endIdx);
-    this.children = new ArrayList<>();
+    this.children = new HashMap<>();
 
     if (cursor.gotoFirstChild()) {
       Node cur = cursor.getCurrentNode();
-      children.add(new CSTTree(filePath, source, cur.walk()));
+      addChild(new CSTTree(filePath, source, cur.walk()));
       while (cursor.gotoNextSibling()) {
         cur = cursor.getCurrentNode();
-        children.add(new CSTTree(filePath, source, cur.walk()));
+        addChild(new CSTTree(filePath, source, cur.walk()));
       }
     }
+  }
+
+  private void addChild(CSTTree child){
+    String childType = child.nodeType;
+    if(!children.containsKey(childType)){
+      children.put(childType, new ArrayList<>());
+    }
+    children.get(childType).add(child);
   }
 }
