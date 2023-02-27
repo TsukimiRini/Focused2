@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TreeInfoRule extends HashMap<String, List<String>> {
+public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
   public String label;
   public List<String> parentNodeType, childNodeType;
   public TreeInfoRuleType ruleType;
@@ -60,13 +60,13 @@ public class TreeInfoRule extends HashMap<String, List<String>> {
     this(label, conf);
 
     if (isDefault) {
-      put("name", List.of("this"));
+      put("name", List.of(new TreeNodeAttrValue("this")));
     }
   }
 
   public void addAttribute(String key, String value) {
     String[] splitValue = value.split("\\|");
-    List<String> valGroup = new ArrayList<>();
+    List<TreeNodeAttrValue> valGroup = new ArrayList<>();
     for (String val : splitValue) {
       processAndRecord(val, valGroup, key.equals("name"));
     }
@@ -118,13 +118,16 @@ public class TreeInfoRule extends HashMap<String, List<String>> {
     return false;
   }
 
-  private void processAndRecord(String value, List<String> valGroup, boolean isName) {
+  private void processAndRecord(String value, List<TreeNodeAttrValue> valGroup, boolean isName) {
     value = value.strip();
     if (value.startsWith("_")) {
-      valGroup.addAll(conf.nodeVariable.get(value));
+      conf.nodeVariable
+          .get(value)
+          .forEach(
+              var -> valGroup.add(new TreeNodeAttrValue(var, TreeNodeAttrValueType.CST_NODE_TYPE)));
       if (isName) nodeTypesForName.addAll(conf.nodeVariable.get(value));
     } else {
-      valGroup.add(value);
+      valGroup.add(new TreeNodeAttrValue(value));
       if (isName && !value.startsWith("\"")) {
         nodeTypesForName.add(value);
       }

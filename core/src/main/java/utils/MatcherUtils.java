@@ -33,7 +33,10 @@ public class MatcherUtils {
 
   private static final Pattern predicatePattern =
       Pattern.compile("^(?<name>\\w+)\\((?<paras>.+)\\)$");
-  private static final Pattern parasPattern = Pattern.compile("(?<paraName>\\w+?)(?:,\\s*|$)");
+
+  private static final Pattern dollarFunctionPattern =
+      Pattern.compile("\\$(?<funcName>\\w+)\\((?<args>.*)\\)");
+  private static final Pattern parasPattern = Pattern.compile("(?<paraName>.+?)(?:,\\s*|$)");
 
   private static final Pattern configURIattr =
       Pattern.compile("^(?<uri>\\w+)((?:\\[(?<capName>.+)\\])|(?:\\.(?<layerName>.+)))$");
@@ -164,5 +167,23 @@ public class MatcherUtils {
     } else {
       return null;
     }
+  }
+
+  public static Pair<String, List<String>> parseDollarFunction(String source) {
+    Matcher funcMatcher = dollarFunctionPattern.matcher(source);
+    String funcName = null;
+    List<String> argList = null;
+    if (funcMatcher.find()) {
+      funcName = funcMatcher.group("funcName");
+      String args = funcMatcher.group("args");
+      argList = new ArrayList<>();
+      if (!args.isBlank()) {
+        Matcher argMatcher = parasPattern.matcher(args);
+        while (argMatcher.find()) {
+          argList.add(argMatcher.group("paraName"));
+        }
+      }
+    }
+    return Pair.of(funcName, argList);
   }
 }
