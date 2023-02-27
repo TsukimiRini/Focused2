@@ -3,15 +3,18 @@ package model;
 import utils.FileUtil;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TreeInfoConf {
   public String confFile;
   public Map<String, List<String>> nodeVariable = new HashMap<>();
-  public Map<String, List<TreeInfoRule>> nodeRules = new HashMap<>();
-  public Map<String, List<TreeInfoRule>> edgeRules = new HashMap<>();
+  public List<TreeInfoRule> nodeRules = new ArrayList<>();
+  public List<TreeInfoRule> edgeRules = new ArrayList<>();
 
   public TreeInfoConf(String confFile) {
     this.confFile = confFile;
+    load();
   }
 
   public void load() {
@@ -21,11 +24,11 @@ public class TreeInfoConf {
       if (line.contains(":")) {
         int commaIdx = line.indexOf(":");
         String key = line.substring(0, commaIdx),
-                value = commaIdx == line.length() - 1 ? "" : line.substring(commaIdx + 1).strip();
+            value = commaIdx == line.length() - 1 ? "" : line.substring(commaIdx + 1).strip();
         if (value.length() == 0) {
           if (curRule != null) {
             addToRuleSet(
-                    curRule.ruleType == TreeInfoRuleType.NODE ? nodeRules : edgeRules, curRule);
+                curRule.ruleType == TreeInfoRuleType.NODE ? nodeRules : edgeRules, curRule);
           }
           curRule = new TreeInfoRule(key, this);
         } else {
@@ -44,7 +47,7 @@ public class TreeInfoConf {
           addToRuleSet(curRule.ruleType == TreeInfoRuleType.NODE ? nodeRules : edgeRules, curRule);
           curRule = null;
         }
-        nodeRules.put(line.strip(), List.of(new TreeInfoRule(line.strip(), this, true)));
+        nodeRules.add(new TreeInfoRule(line.strip(), this, true));
       }
     }
     if (curRule != null) {
@@ -52,10 +55,20 @@ public class TreeInfoConf {
     }
   }
 
-  private void addToRuleSet(Map<String, List<TreeInfoRule>> ruleSet, TreeInfoRule rule) {
-    String label = rule.label;
-    if (!ruleSet.containsKey(label)) ruleSet.put(label, new ArrayList<>());
-    ruleSet.get(label).add(rule);
+  public List<TreeInfoRule> getNodeRule(String nodeType) {
+    List<TreeInfoRule> res = new ArrayList<>();
+    for (TreeInfoRule rule : nodeRules) {
+      Pattern labelPattern = Pattern.compile(rule.label);
+      Matcher matcher = labelPattern.matcher(nodeType);
+      if (matcher.find()) {
+        res.add(rule);
+      }
+    }
+    return res;
+  }
+
+  private void addToRuleSet(List<TreeInfoRule> ruleSet, TreeInfoRule rule) {
+    ruleSet.add(rule);
   }
 
   private void addNodeVariable(String left, String right) {
