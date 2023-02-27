@@ -4,5 +4,6 @@ public enum TreeNodeAttrValueType {
   LITERAL,
   INTEGER,
   CST_NODE_TYPE,
-  FUNCTION
+  FUNCTION,
+  LIST_OF_TYPE
 }
