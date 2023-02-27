@@ -15,7 +15,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
   public TreeInfoConf conf;
 
   public TreeInfoRule(String label, TreeInfoConf conf) {
-    this.label = label;
+    this.label = label.replaceAll("\\*", ".+");
     this.conf = conf;
     if (label.contains("/")) {
       ruleType = TreeInfoRuleType.EDGE;
@@ -82,11 +82,11 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     Set<String> curNodeTypes = tree.children.keySet();
     int originalSize = ruleNodeTypes.size();
     ruleNodeTypes.removeAll(curNodeTypes);
-    return curNodeTypes.size() < originalSize;
+    return ruleNodeTypes.size() < originalSize;
   }
 
-  public boolean isMatchedEdgeRule(String parentType, URINode childNode) {
-    return isMatchedChildNode(childNode) && isMatchedTypePatterns(parentType, parentNodeType);
+  public boolean isMatchedEdgeRule(URINode parentNode, URINode childNode) {
+    return isMatchedChildNode(parentNode, childNode) && isMatchedTypePatterns(parentNode.type, parentNodeType);
   }
 
   private int getChildEdgeDepth() {
@@ -94,14 +94,13 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     return childNodeType.get(0).split("\\.").length;
   }
 
-  private boolean isMatchedChildNode(URINode childNode) {
+  private boolean isMatchedChildNode(URINode parentNode, URINode childNode) {
     if (ruleType != TreeInfoRuleType.EDGE) return false;
     int childDepth = getChildEdgeDepth();
     StringBuilder sb = new StringBuilder(childNode.type);
-    URINode parent = childNode.edgeToParent.from;
-    for (int i = 1; i < childDepth && parent != null; i++) {
-      sb.insert(0, parent.type + ".");
-      parent = parent.edgeToParent.from;
+    for (int i = 1; i < childDepth && parentNode != null; i++) {
+      sb.insert(0, parentNode.type + ".");
+      parentNode = parentNode.edgeToParent.from;
     }
 
     return isMatchedTypePatterns(sb.toString(), childNodeType);
