@@ -1,4 +1,4 @@
-package model;
+package model.URI;
 
 import java.util.HashMap;
 
