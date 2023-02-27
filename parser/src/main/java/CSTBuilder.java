@@ -18,13 +18,17 @@ public class CSTBuilder {
 
   public static Parser parser = new Parser();
 
-  public static Map<String, CSTTree> buildCST() throws UnsupportedEncodingException {
+  public static Map<Language, Map<String, CSTTree>> buildCST() throws UnsupportedEncodingException {
     Map<String, List<String>> categorizedFiles =
         FileUtil.listFilePathsInLanguages(
             SharedStatus.projectInfo.projectDir, SharedStatus.projectInfo.languages);
-    Map<String, CSTTree> cstTrees = new HashMap<>();
+    Map<Language, Map<String, CSTTree>> cstTrees = new HashMap<>();
     for (String lang : categorizedFiles.keySet()) {
-      cstTrees.putAll(buildCST(Language.valueOfLabel(lang), categorizedFiles.get(lang)));
+      Language curLang = Language.valueOfLabel(lang);
+      if(!cstTrees.containsKey(Language.valueOfLabel(lang))){
+        cstTrees.put(curLang, new HashMap<>());
+      }
+      cstTrees.get(curLang).putAll(buildCST(Language.valueOfLabel(lang), categorizedFiles.get(lang)));
     }
     return cstTrees;
   }

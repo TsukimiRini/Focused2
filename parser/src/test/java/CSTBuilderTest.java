@@ -1,4 +1,5 @@
 import model.CSTTree;
+import model.Language;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -9,7 +10,7 @@ public class CSTBuilderTest {
   public void testCSTBuilder() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
         "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
-    Map<String, CSTTree> cstTrees = CSTBuilder.buildCST();
+    Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilder.buildCST();
     System.out.println(cstTrees);
   }
 }
