@@ -1,4 +1,4 @@
-import model.TreeInfoConf;
+import model.TreeInfo.TreeInfoConf;
 import org.junit.jupiter.api.Test;
 
 public class TreeInfoConfLoadTest {

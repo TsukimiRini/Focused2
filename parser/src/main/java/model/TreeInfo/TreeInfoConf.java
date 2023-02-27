@@ -1,4 +1,4 @@
-package model;
+package model.TreeInfo;
 
 import utils.FileUtil;
 

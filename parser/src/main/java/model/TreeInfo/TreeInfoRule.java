@@ -1,4 +1,7 @@
-package model;
+package model.TreeInfo;
+
+import model.CSTTree;
+import model.URI.URINode;
 
 import java.util.*;
 import java.util.regex.Matcher;
