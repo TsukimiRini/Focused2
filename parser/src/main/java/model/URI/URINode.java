@@ -18,6 +18,15 @@ public class URINode extends URISegment {
     this.type = nodeType;
   }
 
+  public String toString() {
+    return get("name")
+        + ":"
+        + entrySet().stream()
+            .filter(x -> !x.getKey().equals("name"))
+            .map(x -> x.getKey() + "=" + x.getValue())
+            .reduce((acc, x) -> acc + ", " + x);
+  }
+
   public String getEdgeType(List<TreeInfoRule> edgeRules, URINode parent) {
     for (TreeInfoRule rule : edgeRules) {
       if (rule.isMatchedEdgeRule(parent, this)) {
