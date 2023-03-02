@@ -11,6 +11,7 @@ import java.util.*;
 public class URINode extends URISegment {
   public URIEdge edgeToParent;
   public Map<String, List<URINode>> children = new HashMap<>(); // key: nodeName
+  public String snippets;
 
   public URINode(String nodeName, String nodeType) {
     put("name", nodeName);
@@ -24,7 +25,7 @@ public class URINode extends URISegment {
         if (!typeVal.isLiteralType()) {
           throw new IllegalArgumentException("invalid edge type");
         }
-        return typeVal.valueOrFunc;
+        return typeVal.valueOrFunc.iterator().next();
       }
     }
     return "";
@@ -45,7 +46,7 @@ public class URINode extends URISegment {
     for (int i = 0; i < dirOrFile.length; i++) {
       String layer = dirOrFile[i];
 
-      URINode childDir = children.containsKey(layer) ? children.get(layer).get(0) : null;
+      URINode childDir = iter.children.containsKey(layer) ? iter.children.get(layer).get(0) : null;
       if (childDir == null) {
         childDir = new URINode(layer, i == dirOrFile.length - 1 ? "FILE" : "DIRECTORY");
         childDir.setEdge("", iter);
@@ -75,6 +76,7 @@ public class URINode extends URISegment {
         nextNode = new URINode(attrs.getLeft().get(0), curNodeType);
         nextNode.analyzeAndSetEdge(conf.edgeRules, this);
         nextNode.putAll(attrs.getRight());
+        nextNode.snippets = tree.snippet;
         addChild(nextNode);
       } else {
         String edgeType = null;
@@ -83,6 +85,7 @@ public class URINode extends URISegment {
           if (edgeType == null) edgeType = oneNode.getEdgeType(conf.edgeRules, this);
           oneNode.setEdge(edgeType, this);
           oneNode.putAll(attrs.getRight());
+          nextNode.snippets = tree.snippet;
           addChild(oneNode);
         }
         nextNode = null;
@@ -126,10 +129,15 @@ public class URINode extends URISegment {
     for (String attrKey : rule.keySet()) {
       List<TreeNodeAttrValue> attrValues = rule.get(attrKey);
       for (TreeNodeAttrValue attrVal : attrValues) {
-        List<String> tryToGetVal = attrVal.getVal(tree);
+        List<String> tryToGetVal = new ArrayList<>(attrVal.getVal(tree));
         if (!tryToGetVal.isEmpty()) {
+          // TODO: remove temprate patch
+          if (!attrVal.isListType()) {
+            tryToGetVal = List.of(tryToGetVal.get(0));
+          }
           if (attrKey.equals("name")) nameVals = tryToGetVal;
           else attrMap.put(attrKey, tryToGetVal.get(0));
+          break;
         }
       }
     }

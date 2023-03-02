@@ -15,26 +15,26 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
   public TreeInfoConf conf;
 
   public TreeInfoRule(String label, TreeInfoConf conf) {
-    this.label = label.replaceAll("\\*", ".+");
+    this.label = label;
     this.conf = conf;
     if (label.contains("/")) {
       ruleType = TreeInfoRuleType.EDGE;
       int slashIdx = label.indexOf('/');
-      parentNodeType = listTypesFor(label.substring(0, slashIdx), conf);
-      childNodeType = listTypesFor(label.substring(slashIdx + 1), conf);
+      parentNodeType = listTypesFor(label.substring(0, slashIdx));
+      childNodeType = listTypesFor(label.substring(slashIdx + 1));
     } else {
       ruleType = TreeInfoRuleType.NODE;
     }
   }
 
   // iterate over all the possible type regex
-  private List<String> listTypesFor(String pattern, TreeInfoConf conf) {
+  public List<String> listTypesFor(String pattern) {
     if (pattern.isEmpty()) return List.of("");
 
     int underIdx = pattern.indexOf("._");
-    if (pattern.charAt(0) == '_') underIdx = -1;
+    if (underIdx != -1) underIdx++;
+    if (pattern.charAt(0) == '_') underIdx = 0;
     if (underIdx == -1) return List.of(pattern);
-    else underIdx += 1;
     int nextSegIdx = pattern.substring(underIdx).indexOf('.');
     if (nextSegIdx != -1) nextSegIdx += underIdx;
     else nextSegIdx = pattern.length();
@@ -45,8 +45,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     conf.nodeVariable.get(abstractVar).forEach(var -> coll.add(prefix + var));
 
     List<String> posix =
-        listTypesFor(
-            nextSegIdx + 1 >= pattern.length() ? "" : pattern.substring(nextSegIdx + 1), conf);
+        listTypesFor(nextSegIdx + 1 >= pattern.length() ? "" : pattern.substring(nextSegIdx + 1));
     List<String> res = new ArrayList<>();
     for (String left : coll) {
       for (String right : posix) {
@@ -60,7 +59,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     this(label, conf);
 
     if (isDefault) {
-      put("name", List.of(new TreeNodeAttrValue("this")));
+      put("name", List.of(new TreeNodeAttrValue("this", this)));
     }
   }
 
@@ -79,14 +78,20 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
 
   public boolean nodeTypesForNameCovered(CSTTree tree) {
     Set<String> ruleNodeTypes = new HashSet<>(nodeTypesForName);
-    Set<String> curNodeTypes = tree.children.keySet();
-    int originalSize = ruleNodeTypes.size();
-    ruleNodeTypes.removeAll(curNodeTypes);
-    return ruleNodeTypes.size() < originalSize;
+    for (String neededNodeType : ruleNodeTypes) {
+      List<CSTTree> collected = tree.getDescendants(neededNodeType);
+      if (!collected.isEmpty()) return true;
+    }
+    return false;
+  }
+
+  public boolean isMatchedLabelType(String nodeType) {
+    return nodeType.matches(getRegexPatternFromSymbol(label));
   }
 
   public boolean isMatchedEdgeRule(URINode parentNode, URINode childNode) {
-    return isMatchedChildNode(parentNode, childNode) && isMatchedTypePatterns(parentNode.type, parentNodeType);
+    return isMatchedChildNode(parentNode, childNode)
+        && isMatchedTypePatterns(parentNode.type, parentNodeType);
   }
 
   private int getChildEdgeDepth() {
@@ -108,28 +113,23 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
 
   private boolean isMatchedTypePatterns(String node, List<String> nodeTypes) {
     for (String patternString : nodeTypes) {
-      Pattern pattern = Pattern.compile(patternString);
-      Matcher matcher = pattern.matcher(node);
-      if (matcher.find()) {
+      if (node.matches(getRegexPatternFromSymbol(patternString))) {
         return true;
       }
     }
     return false;
   }
 
+  private String getRegexPatternFromSymbol(String symbol) {
+    return symbol.replaceAll("\\.", "\\.").replaceAll("\\*", ".+");
+  }
+
   private void processAndRecord(String value, List<TreeNodeAttrValue> valGroup, boolean isName) {
     value = value.strip();
-    if (value.startsWith("_")) {
-      conf.nodeVariable
-          .get(value)
-          .forEach(
-              var -> valGroup.add(new TreeNodeAttrValue(var, TreeNodeAttrValueType.CST_NODE_TYPE)));
-      if (isName) nodeTypesForName.addAll(conf.nodeVariable.get(value));
-    } else {
-      valGroup.add(new TreeNodeAttrValue(value));
-      if (isName && !value.startsWith("\"")) {
-        nodeTypesForName.add(value);
-      }
+    TreeNodeAttrValue attrValue = new TreeNodeAttrValue(value, this);
+    valGroup.add(attrValue);
+    if (isName && (attrValue.isNodeType() || attrValue.isListType())) {
+      nodeTypesForName.addAll(attrValue.valueOrFunc);
     }
   }
 }

@@ -3,8 +3,6 @@ package model.TreeInfo;
 import utils.FileUtil;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TreeInfoConf {
   public String confFile;
@@ -58,9 +56,7 @@ public class TreeInfoConf {
   public List<TreeInfoRule> getNodeRule(String nodeType) {
     List<TreeInfoRule> res = new ArrayList<>();
     for (TreeInfoRule rule : nodeRules) {
-      Pattern labelPattern = Pattern.compile(rule.label);
-      Matcher matcher = labelPattern.matcher(nodeType);
-      if (matcher.find()) {
+      if (rule.isMatchedLabelType(nodeType)) {
         res.add(rule);
       }
     }

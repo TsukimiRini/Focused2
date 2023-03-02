@@ -5,6 +5,7 @@ import model.URI.URINode;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 
 public class URITreeBuilderTest {
@@ -12,12 +13,20 @@ public class URITreeBuilderTest {
   public void testURITreeBuilder() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
         "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
-    Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilder.buildCST();
+    Map<String, CSTTree> cstTrees =
+        CSTBuilder.buildCST(
+            Language.JAVA,
+            List.of(
+                System.getProperty("user.home")
+                    + "/coding/xll/android/CloudReader/app/src/main/java/com/example/jingbin/cloudreader/app/CloudReaderApplication.java"));
     TreeInfoConf conf =
         new TreeInfoConf(
             System.getProperty("user.dir") + "/src/test/resources/androidTreeConf.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
-    URINode tree = builder.buildFromCST(cstTrees.get(Language.JAVA));
+    URINode tree = builder.buildFromCST(cstTrees);
+    URINode fileTree = tree;
+    while (!fileTree.type.equals("FILE"))
+      fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
     System.out.println(tree.type);
   }
 }

@@ -9,21 +9,23 @@ import org.slf4j.LoggerFactory;
 import utils.MatcherUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TreeNodeAttrValue {
   protected static final Logger logger = LoggerFactory.getLogger(TreeNodeAttrValue.class);
-  public String valueOrFunc;
-  public List<String> args;
+  public Set<String> valueOrFunc = new HashSet<>();
+  public List<Pair<String, List<String>>> args;
   public TreeNodeAttrValueType type;
 
-  static{
+  static {
     BasicConfigurator.configure();
     org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
   }
 
-  public TreeNodeAttrValue(String source) {
+  public TreeNodeAttrValue(String source, TreeInfoRule rule) {
     if (source.startsWith("\"") && source.endsWith("\"")) {
       type = TreeNodeAttrValueType.LITERAL;
     } else if (source.startsWith("$")) {
@@ -38,22 +40,38 @@ public class TreeNodeAttrValue {
 
     switch (type) {
       case LITERAL:
+        valueOrFunc.add(source.substring(1, source.length() - 1));
+        break;
       case LIST_OF_TYPE:
-        valueOrFunc = source.substring(1, source.length() - 1);
+        setValueByVar(source.substring(1, source.length() - 1), rule);
         break;
       case FUNCTION:
         Pair<String, List<String>> parsePair = MatcherUtils.parseDollarFunction(source);
-        valueOrFunc = parsePair.getLeft();
-        args = parsePair.getRight();
+        valueOrFunc.add(parsePair.getLeft());
+        setArgsByVar(parsePair.getRight(), rule);
         break;
       case INTEGER:
+        valueOrFunc.add(source);
+        break;
       case CST_NODE_TYPE:
-        valueOrFunc = source;
+        setValueByVar(source, rule);
+        break;
+    }
+  }
+
+  private void setValueByVar(String val, TreeInfoRule rule) {
+    valueOrFunc.addAll(rule.listTypesFor(val));
+  }
+
+  private void setArgsByVar(List<String> inputArgs, TreeInfoRule rule) {
+    args = new ArrayList<>();
+    for (String arg : inputArgs) {
+      args.add(Pair.of(arg, new ArrayList<>(rule.listTypesFor(arg))));
     }
   }
 
   public TreeNodeAttrValue(String val, TreeNodeAttrValueType type) {
-    this.valueOrFunc = val;
+    this.valueOrFunc.add(val);
     this.type = type;
   }
 
@@ -69,43 +87,43 @@ public class TreeNodeAttrValue {
     return type == TreeNodeAttrValueType.CST_NODE_TYPE;
   }
 
+  public boolean isListType() {
+    return type == TreeNodeAttrValueType.LIST_OF_TYPE;
+  }
+
   @Override
   public String toString() {
     switch (type) {
       case FUNCTION:
-        return "$"
-            + valueOrFunc
-            + "("
-            + args.stream().reduce("", (base, arg) -> base + (base.isBlank() ? "" : ", ") + arg)
-            + ")";
+        return "$" + valueOrFunc;
       case LITERAL:
       case INTEGER:
       case CST_NODE_TYPE:
-        return valueOrFunc;
+        return valueOrFunc.toString();
     }
     return null;
   }
 
-  public List<String> getVal(CSTTree curNode) {
-    List<String> res = new ArrayList<>();
+  public Set<String> getVal(CSTTree curNode) {
+    Set<String> res = new HashSet<>();
     switch (type) {
       case FUNCTION:
         res.add(getFuncReturnVal(curNode));
         break;
       case LITERAL:
       case INTEGER:
-        res.add(valueOrFunc);
+        res.addAll(valueOrFunc);
         break;
       case CST_NODE_TYPE:
-        if (valueOrFunc.equals("this")) {
-          res.add(curNode.snippet);
-          break;
-        }
       case LIST_OF_TYPE:
-        res.addAll(
-            curNode.getDescendants(valueOrFunc).stream()
-                .map(descendant -> descendant.snippet)
-                .collect(Collectors.toList()));
+        valueOrFunc.forEach(
+            value ->
+                res.addAll(
+                    value.equals("this")
+                        ? List.of(curNode.snippet)
+                        : curNode.getDescendants(value).stream()
+                            .map(descendant -> descendant.snippet)
+                            .collect(Collectors.toList())));
     }
     return res;
   }
@@ -113,22 +131,24 @@ public class TreeNodeAttrValue {
   public String getFuncReturnVal(CSTTree curNode) {
     if (type != TreeNodeAttrValueType.FUNCTION) return null;
     String res = null;
-    String arg = null;
-    switch (valueOrFunc) {
+    List<String> arg = null;
+    switch (valueOrFunc.iterator().next()) {
       case "cnt":
         if (args.size() != 1) {
           throw new IllegalArgumentException("function cnt must have 1 argument");
         }
         // TODO: can arg=this?
-        arg = args.get(0);
-        res = String.valueOf(curNode.getDescendants(arg).size());
+        arg = args.get(0).getRight();
+        res =
+            String.valueOf(
+                arg.stream().map(x -> curNode.getDescendants(x).size()).reduce(0, Integer::sum));
         break;
       case "idx":
         if (args.size() != 1) {
           throw new IllegalArgumentException("function idx must have 1 argument");
         }
-        arg = args.get(0);
-        if (!arg.equals("this")) {
+        arg = args.get(0).getRight();
+        if (!(arg.size() == 1 && arg.get(0).equals("this"))) {
           throw new IllegalArgumentException("not supported yet");
         }
         res = String.valueOf(curNode.parent.children.get(curNode.nodeType).size());
