@@ -15,6 +15,7 @@ public class CSTTree {
   public String nodeType;
   public String filePath;
   public String snippet;
+  public String fieldName;
   public int startIdx, endIdx;
   public Map<String, List<CSTTree>> children; // key: type, value: CSTTrees
   public CSTTree parent;
@@ -33,14 +34,16 @@ public class CSTTree {
 
   // init from tree
   public CSTTree(String filePath, String source, Tree tree) {
-    this(filePath, source, null, tree.getRootNode().walk());
+    this(filePath, source, null, tree.getRootNode().walk(), null);
+    System.out.println(tree.getRootNode().getNodeString());
   }
 
   // init from cursor
-  public CSTTree(String filePath, String source, CSTTree parent, TreeCursor cursor) {
+  public CSTTree(String filePath, String source, CSTTree parent, TreeCursor cursor, String fieldName) {
     if (cursor == null) return;
     this.filePath = filePath;
     this.nodeType = cursor.getCurrentNode().getType();
+    this.fieldName = fieldName;
     this.startIdx = cursor.getCurrentNode().getStartByte();
     this.endIdx = cursor.getCurrentNode().getEndByte();
     this.snippet = source.substring(startIdx, endIdx);
@@ -49,10 +52,10 @@ public class CSTTree {
 
     if (cursor.gotoFirstChild()) {
       Node cur = cursor.getCurrentNode();
-      addChild(new CSTTree(filePath, source, this, cur.walk()));
+      addChild(new CSTTree(filePath, source, this, cur.walk(), cursor.getCurrentFieldName()));
       while (cursor.gotoNextSibling()) {
         cur = cursor.getCurrentNode();
-        addChild(new CSTTree(filePath, source, this, cur.walk()));
+        addChild(new CSTTree(filePath, source, this, cur.walk(), cursor.getCurrentFieldName()));
       }
     }
   }
@@ -64,10 +67,10 @@ public class CSTTree {
         afterPoint = pointIdx == source.length() ? "" : source.substring(pointIdx + 1);
     List<CSTTree> res = new ArrayList<>();
     beforePoint = beforePoint.replaceAll("\\*", ".+");
-    Pattern layerPattern = Pattern.compile(beforePoint);
+    String finalBeforePoint = beforePoint;
     List<String> childrenKey =
         children.keySet().stream()
-            .filter(childKey -> layerPattern.matcher(childKey).find())
+            .filter(childKey -> childKey.matches(finalBeforePoint))
             .collect(Collectors.toList());
 
     if (afterPoint.isBlank()) {
