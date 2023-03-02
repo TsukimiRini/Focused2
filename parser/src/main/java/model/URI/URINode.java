@@ -58,7 +58,7 @@ public class URINode extends URISegment {
     List<TreeInfoRule> rulesForTree = conf.getNodeRule(tree.nodeType);
     TreeInfoRule matched = null;
     for (TreeInfoRule rule : rulesForTree) {
-      if (rule.nodeTypesForNameCovered(tree)) {
+      if (rule.nameCovered(tree)) {
         matched = rule;
       }
     }
@@ -110,7 +110,7 @@ public class URINode extends URISegment {
       for (CSTTree childTree : tree.children.get(type)) {
         TreeInfoRule ruleForNextNode = null;
         for (TreeInfoRule rule : curRules) {
-          if (rule.nodeTypesForNameCovered(childTree)) {
+          if (rule.nameCovered(childTree)) {
             ruleForNextNode = rule;
             break;
           }

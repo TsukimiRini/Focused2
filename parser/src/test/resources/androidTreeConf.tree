@@ -1,4 +1,4 @@
-_simple_type = void_type | integral_type | floating_point_type | boolean_type | scoped_type_identifier | generic_type | type_identifier
+_simple_type = void_type | integral_type | floating_point_type | boolean_type | scoped_type_identifier | scoped_type_identifier
 _unannotated_type = _simple_type | array_type
 _type = _unannotated_type | annotated_type
 
@@ -6,63 +6,84 @@ _name = identifier | scoped_identifier
 
 _annotaion = annotation | marker_annotation
 
-*:
-  name: _name
+_params = formal_parameter | spread_parameter
 
-*:
-  modifiers: modifiers
+field_access
 
 class_declaration:
-  name: identifier
+  name: {name}
+  modifiers: modifiers
+  type_parameters: {type_parameters}
 
 method_declaration:
-  name: identifier
-  type: _simple_type
-  param_cnt: $cnt(formal_parameters.*)
+  name: {name}
+  type: {type}
+  modifiers: modifiers
+  type_parameters: {type_parameters}
+  param_cnt: $cnt(formal_parameters._params)
+
+formal_parameter:
+  name: {name}
+  type: {type}
+  modifiers: modifiers
+
+spread_parameter:
+  name: variable_declarator.identifier
+  type: _unannotated_type | identifier
+  modifier: modeifiers
 
 assignment_expression:
-  name: identifier | filed_access | array_access
+  name: {left}
+  operator: {operator}
 
-method_reference:
-  class: _type | primary_expression | super
+method_reference
+#  class: _type | primary_expression | super
 
 # annotation
-marker_annotation:
-  name: _name
-
-annotation:
-  name: _name
+#marker_annotation:
+#  name: _name
+#
+#annotation:
+#  name: _name
 
 annotation_argument_list
 element_value_array_initializer
 element_value_pair
 
 # declaration
-module_declaration:
-  name: _name
-
-package_declaration:
-  name: _name
+#module_declaration:
+#  name: _name
+#
+#package_declaration:
+#  name: _name
 
 field_declaration:
-  name: variable_declarator
-  type: _unannotated_type
+  name: [variable_declarator.identifier]
+  type: {type}
 
 annotation_type_element_declaration:
-  type: _unannotated_type
+  name: {name}
+  type: {type}
+  dimensions: {dimensions}
+  default: {value}
 
 constant_declaration:
-  name: [variable_declarator]
-  type: _unannotated_type
+  name: [variable_declarator.identifier]
+  type: {type}
+  modifiers: {modifiers}
 
-
+super
+primary_expression
 
 # inherit
 superclass:
-  name: _type
+  name: _type | identifier
+#
+#super_interfaces:
+#  name: [interface_type_list._type]
 
-identifier
-scoped_identifier
+#identifier
+#scoped_identifier
 
 # literal
 string_literal
@@ -80,43 +101,58 @@ true
 false
 
 # expression
-expression
 # primary_expression
-# cast_expression
-# binary_expression
+cast_expression
+binary_expression
 # instanceof_expression
 # lambda_expression
-# ternary_expression
-# unary_expression
-# update_expression
+ternary_expression
+unary_expression
+update_expression
 
 # array_creation_expression
 # dimensions_expr
 
-field_access
 array_access
 
 # type
 *_type
 
 # modifiers
-modifiers
+#modifiers
+
+identifier
 
 # parameters
-type_parameter
+type_parameters
 
 type_arguments
 
+*:
+  name: {name}
+  type: {type}
 
-method_invocation/argument_list.expression:
+*:
+  name: _name
+
+method_invocation/argument_list.*:
   type: "arg"
-  idx: $idx(argument_list.expression)
+  idx: $idx(this)
 
 */super_interfaces.interface_type_list._type:
   type: "implements"
 
-*/type_parameters.type_parameter:
-  type: "param"
+*/super_interfaces.interface_type_list.identifier:
+  type: "implements"
+
+#*/type_parameters.type_parameter:
+#  type: "param"
 
 */extends_interfaces.interface_type_list._type:
   typr: "extends"
+
+*/*_parameters.*:
+  type: "param"
+
+*/superclass:
+  type: "extends"

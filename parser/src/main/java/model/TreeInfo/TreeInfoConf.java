@@ -19,7 +19,9 @@ public class TreeInfoConf {
     List<String> content = FileUtil.readFileToLines(confFile);
     TreeInfoRule curRule = null;
     for (String line : content) {
-      if (line.contains(":")) {
+      if (line.strip().startsWith("#")) {
+        continue;
+      } else if (line.contains(":")) {
         int commaIdx = line.indexOf(":");
         String key = line.substring(0, commaIdx),
             value = commaIdx == line.length() - 1 ? "" : line.substring(commaIdx + 1).strip();
@@ -40,7 +42,7 @@ public class TreeInfoConf {
         int equalIdx = line.indexOf("=");
         String left = line.substring(0, equalIdx), right = line.substring(equalIdx + 1);
         addNodeVariable(left, right);
-      } else if (!line.strip().startsWith("#") && line.strip().length() != 0) {
+      } else if (line.strip().length() != 0) {
         if (curRule != null) {
           addToRuleSet(curRule.ruleType == TreeInfoRuleType.NODE ? nodeRules : edgeRules, curRule);
           curRule = null;

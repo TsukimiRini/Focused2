@@ -32,6 +32,8 @@ public class TreeNodeAttrValue {
       type = TreeNodeAttrValueType.FUNCTION;
     } else if (source.startsWith("[") && source.endsWith("]")) {
       type = TreeNodeAttrValueType.LIST_OF_TYPE;
+    } else if (source.startsWith("{") && source.endsWith("}")) {
+      type = TreeNodeAttrValueType.FIELD_NAME;
     } else if (isInteger(source)) {
       type = TreeNodeAttrValueType.INTEGER;
     } else {
@@ -39,6 +41,7 @@ public class TreeNodeAttrValue {
     }
 
     switch (type) {
+      case FIELD_NAME:
       case LITERAL:
         valueOrFunc.add(source.substring(1, source.length() - 1));
         break;
@@ -91,6 +94,10 @@ public class TreeNodeAttrValue {
     return type == TreeNodeAttrValueType.LIST_OF_TYPE;
   }
 
+  public boolean isFieldNameType() {
+    return type == TreeNodeAttrValueType.FIELD_NAME;
+  }
+
   @Override
   public String toString() {
     switch (type) {
@@ -121,9 +128,14 @@ public class TreeNodeAttrValue {
                 res.addAll(
                     value.equals("this")
                         ? List.of(curNode.snippet)
-                        : curNode.getDescendants(value).stream()
+                        : curNode.getDescendantsByType(value).stream()
                             .map(descendant -> descendant.snippet)
                             .collect(Collectors.toList())));
+        break;
+      case FIELD_NAME:
+        String descendantSnippet = curNode.getDescendantByField(valueOrFunc.iterator().next());
+        if (descendantSnippet != null) res.add(descendantSnippet);
+        break;
     }
     return res;
   }
@@ -141,7 +153,9 @@ public class TreeNodeAttrValue {
         arg = args.get(0).getRight();
         res =
             String.valueOf(
-                arg.stream().map(x -> curNode.getDescendants(x).size()).reduce(0, Integer::sum));
+                arg.stream()
+                    .map(x -> curNode.getDescendantsByType(x).size())
+                    .reduce(0, Integer::sum));
         break;
       case "idx":
         if (args.size() != 1) {

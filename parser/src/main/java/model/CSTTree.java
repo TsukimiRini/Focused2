@@ -4,20 +4,21 @@ import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.Tree;
 import ai.serenade.treesitter.TreeCursor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class CSTTree {
+public class CSTTree implements Serializable {
   public String nodeType;
   public String filePath;
   public String snippet;
   public String fieldName;
   public int startIdx, endIdx;
   public Map<String, List<CSTTree>> children; // key: type, value: CSTTrees
+  public Map<String, String> fields;
   public CSTTree parent;
 
   // init from node
@@ -30,6 +31,7 @@ public class CSTTree {
     this.endIdx = endIdx;
     this.parent = parent;
     children = new HashMap<>();
+    fields = new HashMap<>();
   }
 
   // init from tree
@@ -39,7 +41,8 @@ public class CSTTree {
   }
 
   // init from cursor
-  public CSTTree(String filePath, String source, CSTTree parent, TreeCursor cursor, String fieldName) {
+  public CSTTree(
+      String filePath, String source, CSTTree parent, TreeCursor cursor, String fieldName) {
     if (cursor == null) return;
     this.filePath = filePath;
     this.nodeType = cursor.getCurrentNode().getType();
@@ -48,6 +51,7 @@ public class CSTTree {
     this.endIdx = cursor.getCurrentNode().getEndByte();
     this.snippet = source.substring(startIdx, endIdx);
     this.children = new HashMap<>();
+    this.fields = new HashMap<>();
     this.parent = parent;
 
     if (cursor.gotoFirstChild()) {
@@ -60,7 +64,7 @@ public class CSTTree {
     }
   }
 
-  public List<CSTTree> getDescendants(String source) {
+  public List<CSTTree> getDescendantsByType(String source) {
     int pointIdx = source.indexOf(".");
     if (pointIdx == -1) pointIdx = source.length();
     String beforePoint = source.substring(0, pointIdx),
@@ -77,9 +81,16 @@ public class CSTTree {
       childrenKey.forEach(key -> res.addAll(children.get(key)));
     } else {
       childrenKey.forEach(
-          key -> children.get(key).forEach(child -> res.addAll(child.getDescendants(afterPoint))));
+          key ->
+              children
+                  .get(key)
+                  .forEach(child -> res.addAll(child.getDescendantsByType(afterPoint))));
     }
     return res;
+  }
+
+  public String getDescendantByField(String source) {
+    return fields.get(source);
   }
 
   private void addChild(CSTTree child) {
@@ -88,5 +99,9 @@ public class CSTTree {
       children.put(childType, new ArrayList<>());
     }
     children.get(childType).add(child);
+
+    if (child.fieldName != null) {
+      fields.put(child.fieldName, child.snippet);
+    }
   }
 }

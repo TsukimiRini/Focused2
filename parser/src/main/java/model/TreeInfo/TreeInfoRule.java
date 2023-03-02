@@ -4,14 +4,13 @@ import model.CSTTree;
 import model.URI.URINode;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
   public String label;
   public List<String> parentNodeType, childNodeType;
   public TreeInfoRuleType ruleType;
   public List<String> nodeTypesForName = new ArrayList<>();
+  public String fieldNameForName;
   public TreeInfoConf conf;
 
   public TreeInfoRule(String label, TreeInfoConf conf) {
@@ -76,10 +75,14 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     put(key, valGroup);
   }
 
-  public boolean nodeTypesForNameCovered(CSTTree tree) {
+  public boolean nameCovered(CSTTree tree) {
+    if (fieldNameForName != null) {
+      return tree.getDescendantByField(fieldNameForName) != null;
+    }
     Set<String> ruleNodeTypes = new HashSet<>(nodeTypesForName);
+    if (ruleNodeTypes.isEmpty()) return true;
     for (String neededNodeType : ruleNodeTypes) {
-      List<CSTTree> collected = tree.getDescendants(neededNodeType);
+      List<CSTTree> collected = tree.getDescendantsByType(neededNodeType);
       if (!collected.isEmpty()) return true;
     }
     return false;
@@ -128,8 +131,16 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     value = value.strip();
     TreeNodeAttrValue attrValue = new TreeNodeAttrValue(value, this);
     valGroup.add(attrValue);
-    if (isName && (attrValue.isNodeType() || attrValue.isListType())) {
-      nodeTypesForName.addAll(attrValue.valueOrFunc);
+    if (isName) {
+      switch (attrValue.type) {
+        case CST_NODE_TYPE:
+        case LIST_OF_TYPE:
+          nodeTypesForName.addAll(attrValue.valueOrFunc);
+          break;
+        case FIELD_NAME:
+          fieldNameForName = attrValue.valueOrFunc.iterator().next();
+          break;
+      }
     }
   }
 }
