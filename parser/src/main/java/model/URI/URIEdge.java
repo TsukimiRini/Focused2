@@ -9,12 +9,6 @@ public class URIEdge extends URISegment {
   }
 
   public String toString() {
-    return containsKey("type")
-        ? get("type") + ":"
-        : ""
-            + entrySet().stream()
-                .filter(x -> !x.getKey().equals("type"))
-                .map(x -> x.getKey() + "=" + x.getValue())
-                .reduce((acc, x) -> acc + ", " + x);
+    return type + ":" + from.get("name");
   }
 }

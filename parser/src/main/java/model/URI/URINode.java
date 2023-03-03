@@ -19,12 +19,7 @@ public class URINode extends URISegment {
   }
 
   public String toString() {
-    return get("name")
-        + ":"
-        + entrySet().stream()
-            .filter(x -> !x.getKey().equals("name"))
-            .map(x -> x.getKey() + "=" + x.getValue())
-            .reduce((acc, x) -> acc + ", " + x);
+    return get("name") + ":" + type;
   }
 
   public String getEdgeType(List<TreeInfoRule> edgeRules, URINode parent) {
@@ -78,7 +73,7 @@ public class URINode extends URISegment {
     String curNodeType = tree.nodeType;
     // get next node
     URINode nextNode = this;
-    if (matchedNodeRule != null) {
+    if (matchedNodeRule != null && !tree.snippet.isBlank()) {
       // default behavior: attr value = the first node of the given type
       Pair<List<String>, Map<String, String>> attrs = getAttrVal(tree, matchedNodeRule);
       if (attrs.getLeft().size() == 1) {
