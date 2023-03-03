@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class URITreeBuilderTest {
   @Test
-  public void testURITreeBuilder() throws UnsupportedEncodingException {
+  public void testJava() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
         "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
     Map<String, CSTTree> cstTrees =
@@ -21,7 +21,7 @@ public class URITreeBuilderTest {
                     + "/coding/xll/android/CloudReader/app/src/main/java/com/example/jingbin/cloudreader/app/CloudReaderApplication.java"));
     TreeInfoConf conf =
         new TreeInfoConf(
-            System.getProperty("user.dir") + "/src/test/resources/androidTreeConf.tree");
+            System.getProperty("user.dir") + "/src/test/resources/java.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
     URINode tree = builder.buildFromCST(cstTrees);
     URINode fileTree = tree;
