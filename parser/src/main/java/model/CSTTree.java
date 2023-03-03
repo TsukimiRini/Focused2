@@ -45,7 +45,7 @@ public class CSTTree implements Serializable {
       String filePath, String source, CSTTree parent, TreeCursor cursor, String fieldName) {
     if (cursor == null) return;
     this.filePath = filePath;
-    this.nodeType = cursor.getCurrentNode().getType();
+    this.nodeType = removePreUnderscore(cursor.getCurrentNode().getType());
     this.fieldName = fieldName;
     this.startIdx = cursor.getCurrentNode().getStartByte();
     this.endIdx = cursor.getCurrentNode().getEndByte();
@@ -103,5 +103,12 @@ public class CSTTree implements Serializable {
     if (child.fieldName != null) {
       fields.put(child.fieldName, child.snippet);
     }
+  }
+
+  private String removePreUnderscore(String type) {
+    while (type.startsWith("_")) {
+      type = type.substring(1);
+    }
+    return type;
   }
 }

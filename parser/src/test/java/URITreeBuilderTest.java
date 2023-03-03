@@ -29,4 +29,25 @@ public class URITreeBuilderTest {
       fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
     System.out.println(tree.type);
   }
+
+  @Test
+  public void testXML() throws UnsupportedEncodingException {
+    SharedStatus.initProjectInfo(
+            "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
+    Map<String, CSTTree> cstTrees =
+            CSTBuilder.buildCST(
+                    Language.XML,
+                    List.of(
+                            System.getProperty("user.home")
+                                    + "/coding/xll/android/CloudReader/app/src/main/res/layout/footer_item_book.xml"));
+    TreeInfoConf conf =
+            new TreeInfoConf(
+                    System.getProperty("user.dir") + "/src/test/resources/xml.tree");
+    URITreeBuilder builder = new URITreeBuilder(conf);
+    URINode tree = builder.buildFromCST(cstTrees);
+    URINode fileTree = tree;
+    while (!fileTree.type.equals("FILE"))
+      fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
+    System.out.println(tree.type);
+  }
 }
