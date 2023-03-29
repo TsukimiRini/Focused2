@@ -43,4 +43,12 @@ public class SegmentBase<T extends IdentifierBase> {
     if (segType == SegmentType.EDGE && sb.length() > 0) return parentStr + "~" + sb + "~";
     else return parentStr + sb;
   }
+
+  public SegmentBase<T> getHead() {
+    SegmentBase<T> cur = this;
+    while (cur.parent != null) {
+      cur = cur.parent;
+    }
+    return cur;
+  }
 }

@@ -58,7 +58,11 @@ public class URIPattern extends URIBase<SegmentPattern> {
     }
 
     template.branches.forEach(
-        branch -> this.addBranch(template.replacePlaceholder(branch.toString(), values)));
+        (anchor, branch) ->
+            this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
+
+    template.defaultBranches.forEach(
+        branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
 
     fillInFields(lang, file, element, branches);
   }
@@ -88,14 +92,31 @@ public class URIPattern extends URIBase<SegmentPattern> {
     branches.forEach(this::addBranch);
   }
 
-  public void addBranch(String branch) {
+  public SegmentPattern getBranchNode(String branch) {
     List<String> segments = MatcherUtils.matchSegments(branch);
     if (segments == null) {
       logger.error("Invalid Branch {}", branch);
       throw new IllegalArgumentException("invalid config");
     }
-    SegmentPattern branchRoot = getPatternRoot(segments);
-    branches.add(branchRoot);
+    return getPatternRoot(segments);
+  }
+
+  public void addAnchoredBranch(String anchor, String branch) {
+    branches.put(anchor, getBranchNode(branch));
+  }
+
+  public void addDefaultBranch(String branch) {
+    defaultBranches.add(getBranchNode(branch));
+  }
+
+  public void addBranch(String branch) {
+    SegmentPattern branchRoot = getBranchNode(branch);
+    String firstSeg = branchRoot.getHead().text.text;
+    if (firstSeg.startsWith("@")) {
+      branches.put(firstSeg.substring(1), branchRoot);
+    } else {
+      defaultBranches.add(branchRoot);
+    }
   }
 
   private SegmentPattern getPatternRoot(List<String> segments) {
