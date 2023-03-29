@@ -14,6 +14,7 @@ public class SegmentBase<T extends IdentifierBase> {
   public String anchor = null;
   public Map<String, T> attributes = new HashMap<>();
   public SegmentBase<T> parent = null;
+  public SegmentBase<T> child = null;
 
   public SegmentBase(SegmentType segType) {
     this.segType = segType;
@@ -21,6 +22,7 @@ public class SegmentBase<T extends IdentifierBase> {
 
   public void setParent(SegmentBase<T> p) {
     this.parent = p;
+    if (p != null) p.child = this;
   }
 
   public String toString() {
@@ -32,10 +34,11 @@ public class SegmentBase<T extends IdentifierBase> {
       boolean flag = true;
       for (String name : attributes.keySet()) {
         if (flag) {
-          sb.append(",");
           flag = false;
+        }else{
+          sb.append(",");
         }
-        sb.append(name).append(":").append(attributes.get(name));
+        sb.append(name).append("=").append(attributes.get(name));
       }
       sb.append("]");
     }
@@ -44,10 +47,10 @@ public class SegmentBase<T extends IdentifierBase> {
     else return parentStr + sb;
   }
 
-  public SegmentBase<T> getHead() {
+  public SegmentBase<T> getTail() {
     SegmentBase<T> cur = this;
-    while (cur.parent != null) {
-      cur = cur.parent;
+    while (cur.child != null) {
+      cur = cur.child;
     }
     return cur;
   }

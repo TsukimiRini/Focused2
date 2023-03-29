@@ -9,6 +9,7 @@ import utils.FileUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Focused2Souffle {
@@ -75,8 +76,9 @@ public class Focused2Souffle {
     for (URIPattern pattern : patterns) {
       if (!pattern.branches.isEmpty()) {
         List<Pair<String, String>> branches = new ArrayList<>();
-        for (int i = 0; i < pattern.branches.size(); i++) {
-          SegmentPattern br = pattern.branches.get(i);
+        AtomicInteger branchCnt = new AtomicInteger();
+        pattern.branches.forEach((key, value) -> branchCnt.addAndGet(value.size()));
+        for (int i = 0; i < branchCnt.get() + pattern.defaultBranches.size(); i++) {
           branches.add(Pair.of("_" + i, "symbol"));
         }
         adt.addBranch(pattern.label + "Br", branches);

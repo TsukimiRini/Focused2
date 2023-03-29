@@ -2,6 +2,7 @@ package model;
 
 import utils.MatcherUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,13 @@ public class URIPattern extends URIBase<SegmentPattern> {
       this.captures.addAll(this.file.captures);
     }
 
+    template.branches.forEach(
+            (anchor, branch) ->
+                    this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
+
+    template.defaultBranches.forEach(
+            branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
+
     if (template.elementRoot != null) {
       String elementSource = template.elementRoot.toString();
       List<String> segments =
@@ -57,13 +65,6 @@ public class URIPattern extends URIBase<SegmentPattern> {
       this.elementRoot = getPatternRoot(segments);
     }
 
-    template.branches.forEach(
-        (anchor, branch) ->
-            this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
-
-    template.defaultBranches.forEach(
-        branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
-
     fillInFields(lang, file, element, branches);
   }
 
@@ -71,10 +72,17 @@ public class URIPattern extends URIBase<SegmentPattern> {
     if (this.lang == null) this.lang = lang;
     else if (lang != null) throw new IllegalArgumentException("invalid config");
 
+    branches.forEach(this::addBranch);
+
     if (file != null) {
       if (this.file == null) {
-        this.file = new SegmentPattern(SegmentType.FILE, file);
-        this.captures.addAll(this.file.captures);
+        List<String> segments = MatcherUtils.matchSegments(file);
+        if (segments == null) {
+          logger.error("Invalid Element {}", label);
+          throw new IllegalArgumentException("invalid config");
+        }
+        this.file = getPatternRoot(segments);
+        //        this.captures.addAll(this.file.captures);
       } else throw new IllegalArgumentException("invalid config");
     }
 
@@ -88,8 +96,6 @@ public class URIPattern extends URIBase<SegmentPattern> {
         this.elementRoot = getPatternRoot(segments);
       } else throw new IllegalArgumentException("invalid config");
     }
-
-    branches.forEach(this::addBranch);
   }
 
   public SegmentPattern getBranchNode(String branch) {
@@ -102,7 +108,7 @@ public class URIPattern extends URIBase<SegmentPattern> {
   }
 
   public void addAnchoredBranch(String anchor, String branch) {
-    branches.put(anchor, getBranchNode(branch));
+    addToBranchMap(anchor, getBranchNode(branch));
   }
 
   public void addDefaultBranch(String branch) {
@@ -111,32 +117,40 @@ public class URIPattern extends URIBase<SegmentPattern> {
 
   public void addBranch(String branch) {
     SegmentPattern branchRoot = getBranchNode(branch);
-    String firstSeg = branchRoot.getHead().text.text;
+    String firstSeg = branchRoot.text.text;
     if (firstSeg.startsWith("@")) {
-      branches.put(firstSeg.substring(1), branchRoot);
+      addToBranchMap(firstSeg.substring(1), branchRoot);
     } else {
       defaultBranches.add(branchRoot);
     }
   }
 
+  private void addToBranchMap(String anchor, SegmentPattern branch) {
+    if (!branches.containsKey(anchor)) {
+      branches.put(anchor, new ArrayList<>());
+    }
+    branches.get(anchor).add(branch);
+  }
+
   private SegmentPattern getPatternRoot(List<String> segments) {
     SegmentPattern root = null;
+    SegmentPattern cur = null;
     if (segments == null || segments.isEmpty()) return null;
     for (String seg : segments) {
-      SegmentPattern cur;
+      SegmentPattern p = cur;
       if (MatcherUtils.isEdge(seg)) {
-        cur = new SegmentPattern(SegmentType.EDGE, seg.substring(1, seg.length() - 1));
+        cur = new SegmentPattern(SegmentType.EDGE, seg.substring(1, seg.length() - 1), branches);
       } else if (seg.length() == 0) {
-        cur = new SegmentPattern(SegmentType.EDGE, "*");
+        cur = new SegmentPattern(SegmentType.EDGE, "*", branches);
       } else {
-        cur = new SegmentPattern(SegmentType.NODE, seg);
+        cur = new SegmentPattern(SegmentType.NODE, seg, branches);
       }
-      cur.setParent(root);
-      root = cur;
+      cur.setParent(p);
+      if (root == null) root = cur;
       this.captures.addAll(cur.captures);
     }
-    if (root.segType == SegmentType.EDGE && root.text.text.length() == 0)
-      root = (SegmentPattern) root.parent;
+    //    if (root.segType == SegmentType.EDGE && root.text.text.length() == 0)
+    //      root = (SegmentPattern) root.parent;
     return root;
   }
 

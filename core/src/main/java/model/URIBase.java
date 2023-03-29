@@ -14,7 +14,7 @@ public class URIBase<T extends SegmentBase> {
   public String lang;
   public T file;
   public T elementRoot;
-  public Map<String, T> branches = new HashMap<>();
+  public Map<String, List<T>> branches = new HashMap<>();
   public List<T> defaultBranches = new ArrayList<>();
 
   public URIBase(String label) {

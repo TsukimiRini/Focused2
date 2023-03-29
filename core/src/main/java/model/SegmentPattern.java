@@ -1,30 +1,33 @@
 package model;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import utils.MatcherUtils;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SegmentPattern extends SegmentBase<IdentifierPattern> {
   public Set<String> captures = new HashSet<>();
+  public List<SegmentPattern> branches = new ArrayList<>();
 
-  public SegmentPattern(SegmentType segType, String text, String type) {
-    super(segType);
-    this.text = new IdentifierPattern(text);
-    this.type = new IdentifierPattern(type);
-    captures.addAll(this.text.captures);
-    captures.addAll(this.type.captures);
-  }
+  //  public SegmentPattern(SegmentType segType, String text, String type) {
+  //    super(segType);
+  //    this.text = new IdentifierPattern(text);
+  //    this.type = new IdentifierPattern(type);
+  //    captures.addAll(this.text.captures);
+  //    captures.addAll(this.type.captures);
+  //  }
 
   public SegmentPattern(SegmentType segType, String source) {
+    this(segType, source, null);
+  }
+
+  public SegmentPattern(
+      SegmentType segType, String source, Map<String, List<SegmentPattern>> branchMap) {
     super(segType);
-    if (segType == SegmentType.FILE) {
-      this.text = new IdentifierPattern(source);
-      captures.addAll(this.text.captures);
-    } else if (segType == SegmentType.NODE | segType == SegmentType.EDGE) {
+    //    if (segType == SegmentType.FILE) {
+    //      this.text = new IdentifierPattern(source);
+    //      captures.addAll(this.text.captures);
+    //    } else
+    if (segType == SegmentType.FILE | segType == SegmentType.NODE | segType == SegmentType.EDGE) {
       Map<String, String> parts = MatcherUtils.splitSegment(source);
       if (parts == null) {
         logger.error("Invalid Segment {}", source);
@@ -42,6 +45,9 @@ public class SegmentPattern extends SegmentBase<IdentifierPattern> {
               break;
             case "anchor":
               this.anchor = parts.get(label);
+              if (branchMap != null && branchMap.containsKey(this.anchor)) {
+                branches = branchMap.get(this.anchor);
+              }
               break;
             case "attrs":
               addAttributes(parts.get(label));
