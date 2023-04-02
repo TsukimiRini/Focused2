@@ -1,0 +1,158 @@
+_simple_type = void_type | integral_type | floating_point_type | boolean_type | scoped_type_identifier | scoped_type_identifier
+_unannotated_type = _simple_type | array_type
+_type = _unannotated_type | annotated_type
+
+_name = identifier | scoped_identifier
+
+_annotaion = annotation | marker_annotation
+
+_params = formal_parameter | spread_parameter
+
+field_access
+
+class_declaration:
+  name: {name}
+  modifiers: modifiers
+  type_parameters: {type_parameters}
+
+method_declaration:
+  name: {name}
+  type: {type}
+  modifiers: modifiers
+  type_parameters: {type_parameters}
+  param_cnt: $cnt(formal_parameters._params)
+
+formal_parameter:
+  name: {name}
+  type: {type}
+  modifiers: modifiers
+
+spread_parameter:
+  name: variable_declarator.identifier
+  type: _unannotated_type | identifier
+  modifier: modeifiers
+
+assignment_expression:
+  name: {left}
+  operator: {operator}
+
+method_reference
+#  class: _type | primary_expression | super
+
+# annotation
+#marker_annotation:
+#  name: _name
+#
+#annotation:
+#  name: _name
+
+annotation_argument_list
+element_value_array_initializer
+element_value_pair
+
+# declaration
+#module_declaration:
+#  name: _name
+#
+#package_declaration:
+#  name: _name
+
+field_declaration:
+  name: [variable_declarator.identifier]
+  type: {type}
+
+annotation_type_element_declaration:
+  name: {name}
+  type: {type}
+  dimensions: {dimensions}
+  default: {value}
+
+constant_declaration:
+  name: [variable_declarator.identifier]
+  type: {type}
+  modifiers: {modifiers}
+
+super
+primary_expression
+
+# inherit
+superclass:
+  name: _type | identifier
+#
+#super_interfaces:
+#  name: [interface_type_list._type]
+
+#identifier
+#scoped_identifier
+
+# literal
+string_literal
+character_literal
+decimal_integer_literal
+hex_integer_literal
+octal_integer_literal
+binary_integer_literal
+decimal_floating_point_literal
+hex_floating_point_literal
+null_literal
+class_literal
+asterisk
+true
+false
+
+# expression
+# primary_expression
+cast_expression
+binary_expression
+# instanceof_expression
+# lambda_expression
+ternary_expression
+unary_expression
+update_expression
+
+# array_creation_expression
+# dimensions_expr
+
+array_access
+
+# type
+*_type
+
+# modifiers
+#modifiers
+
+identifier
+
+# parameters
+type_parameters
+
+type_arguments
+
+*:
+  name: {name}
+  type: {type}
+
+*:
+  name: _name
+
+method_invocation/argument_list.*:
+  type: "arg"
+  idx: $idx(this)
+
+*/super_interfaces.interface_type_list._type:
+  type: "implements"
+
+*/super_interfaces.interface_type_list.identifier:
+  type: "implements"
+
+#*/type_parameters.type_parameter:
+#  type: "param"
+
+*/extends_interfaces.interface_type_list._type:
+  typr: "extends"
+
+*/*_parameters.*:
+  type: "param"
+
+*/superclass:
+  type: "extends"

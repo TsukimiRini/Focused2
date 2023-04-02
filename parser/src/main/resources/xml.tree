@@ -1,0 +1,71 @@
+prolog:
+  name: "?xml"
+
+version_info
+encoding_decl
+standalone_decl
+
+doctype_decl:
+  name: name
+
+element_decl
+attlist_decl
+entity_decl
+processing_instructions
+notation_decl
+
+text-decl:
+  name: "?xml"
+
+include_sect
+ignore_sect
+pe_reference
+language_id
+iso639_code
+iana_code
+user_code
+
+element:
+  name: start_tag.name | empty_elem_tag.name
+
+attribute:
+  name: name
+
+attribute_value
+text
+
+cdata_sect
+
+children
+
+attlist_decl:
+  name: name
+
+attribute_def:
+  name: name
+
+string_type
+tokenized_type
+enumerated_type
+
+notation_type:
+  name: name
+
+enumeration
+nm_token
+
+default_decl
+
+include_sect:
+  name: "INCLUDE"
+
+ignore_sect:
+  name: "IGNORE"
+
+ignore_sect_contents
+
+element/attribute:
+  type: "attr"
+
+element/text:
+  type: "content"
