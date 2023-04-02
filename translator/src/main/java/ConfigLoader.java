@@ -18,6 +18,7 @@ public class ConfigLoader {
   public static List<String> elementsContent = new ArrayList<>();
   public static List<String> linksContent = new ArrayList<>();
 
+  // TODO: separate element parsing and block parsing
   public static Pair<List<URIPattern>, List<ConfigLinkBlock>> load(String config_path)
       throws IOException {
     readContent(config_path);
