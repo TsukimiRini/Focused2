@@ -105,7 +105,7 @@ public class FileUtil {
     File file = new File(path);
     if (file.exists()) {
       try (BufferedReader reader =
-                   Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8)) {
+          Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8)) {
         lines = reader.lines().collect(Collectors.toList());
       } catch (Exception e) {
         e.printStackTrace();
@@ -129,11 +129,11 @@ public class FileUtil {
   }
 
   public static Map<String, List<String>> categorizeFilesByExtensionInLanguages(
-          List<String> filePaths, Set<Language> languages) {
+      List<String> filePaths, Set<Language> languages) {
     Set<String> extensions =
-            languages.stream()
-                    .map(language -> language.extension.replace(".", ""))
-                    .collect(Collectors.toSet());
+        languages.stream()
+            .map(language -> language.extension.replace(".", ""))
+            .collect(Collectors.toSet());
 
     Map<String, List<String>> result = new LinkedHashMap<>();
     for (String path : filePaths) {
@@ -160,11 +160,11 @@ public class FileUtil {
         result = walk.filter(Files::isRegularFile).map(Path::toString).collect(Collectors.toList());
       } else {
         result =
-                walk.filter(Files::isRegularFile)
-                        .map(Path::toString)
-                        .filter(path -> path.endsWith(extension))
-                        //              .map(s -> s.substring(dir.length()))
-                        .collect(Collectors.toList());
+            walk.filter(Files::isRegularFile)
+                .map(Path::toString)
+                .filter(path -> path.endsWith(extension))
+                //              .map(s -> s.substring(dir.length()))
+                .collect(Collectors.toList());
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -180,32 +180,38 @@ public class FileUtil {
    * @return
    */
   public static Map<String, List<String>> listFilePathsInLanguages(
-          String dir, Set<Language> languages) {
+      String dir, Set<Language> languages) {
     if (languages.isEmpty()) {
       return new HashMap<>();
     }
     Map<String, List<String>> result = new LinkedHashMap<>();
 
     Set<String> extensions =
-            languages.stream()
-                    .map(language -> language.extension.replace(".", ""))
-                    .collect(Collectors.toSet());
+        languages.stream()
+            .map(language -> language.extension.replace(".", ""))
+            .collect(Collectors.toSet());
     try (Stream<Path> walk = Files.walk(Paths.get(dir))) {
       walk.filter(Files::isRegularFile)
-              .map(Path::toString)
-              .forEach(
-                      path -> {
-                        String ext = FilenameUtils.getExtension(path);
-                        if (extensions.contains(ext)) {
-                          if (!result.containsKey(ext)) {
-                            result.put(ext, new ArrayList<>());
-                          }
-                          result.get(ext).add(path);
-                        }
-                      });
+          .map(Path::toString)
+          .forEach(
+              path -> {
+                String ext = FilenameUtils.getExtension(path);
+                if (extensions.contains(ext)) {
+                  if (!result.containsKey(ext)) {
+                    result.put(ext, new ArrayList<>());
+                  }
+                  result.get(ext).add(path);
+                }
+              });
     } catch (IOException e) {
       e.printStackTrace();
     }
     return result;
+  }
+
+  public static boolean deleteFile(String path) {
+    File f = new File(path);
+    if (f.exists()) return f.delete();
+    return true;
   }
 }
