@@ -1,6 +1,5 @@
 package model;
 
-import model.Language;
 import utils.FileUtil;
 
 import java.util.HashSet;
@@ -10,10 +9,16 @@ public class ProjectInfo {
   public String framework;
   public Set<Language> languages = new HashSet<>();
   public String projectDir;
+  public String configPath;
 
-  public ProjectInfo(String framework, String projectDir){
+  public ProjectInfo(String framework, String projectDir) {
     this.framework = framework;
-    switch(framework){
+    configPath =
+        System.getProperty("user.dir")
+            + "/translator/src/main/resources/"
+            + framework
+            + "_config.fcs";
+    switch (framework) {
       case "android":
         addLanguage(Language.JAVA);
         addLanguage(Language.XML);
@@ -35,7 +40,7 @@ public class ProjectInfo {
     FileUtil.setRootPath(projectDir);
   }
 
-  private void addLanguage(Language lang){
+  private void addLanguage(Language lang) {
     this.languages.add(lang);
   }
 }
