@@ -9,7 +9,7 @@ public class IdentifierPattern extends IdentifierBase {
   public Set<String> captures = new HashSet<>();
 
   public IdentifierPattern(String text) {
-    super(text);
+    super(text.replaceAll("\\\\([\\\\\\[\\]:=,#/*])", "$1"));
     captures.addAll(MatcherUtils.matchCapturesInPattern(text));
   }
 }
