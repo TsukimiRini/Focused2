@@ -9,6 +9,6 @@ public class URIEdge extends URISegment {
   }
 
   public String toString() {
-    return type + ":" + from.get("name");
+    return "~" + (type == null ? "NONE" : type) + getAttrStr() + "~";
   }
 }

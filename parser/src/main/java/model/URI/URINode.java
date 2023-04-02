@@ -19,7 +19,18 @@ public class URINode extends URISegment {
   }
 
   public String toString() {
-    return get("name") + ":" + type;
+    boolean isFilePath = isDir();
+    boolean noNeedToAppendParent = edgeToParent == null || !isFilePath && edgeToParent.from.isDir();
+    return (noNeedToAppendParent
+            ? ""
+            : (edgeToParent.from.toString()
+                + (isFilePath ? "//" : "/" + edgeToParent.toString() + "/")))
+        + get("name")
+        + (isFilePath ? "" : ("::" + (type == null ? "NONE" : type) + getAttrStr()));
+  }
+
+  public Boolean isDir() {
+    return type.equals("FILE") || type.equals("DIRECTORY") || type.equals("ROOT");
   }
 
   public String getEdgeType(List<TreeInfoRule> edgeRules, URINode parent) {
@@ -140,7 +151,7 @@ public class URINode extends URISegment {
             tryToGetVal = List.of(tryToGetVal.get(0));
           }
           if (attrKey.equals("name")) nameVals = tryToGetVal;
-          else attrMap.put(attrKey, tryToGetVal.get(0));
+          else attrMap.put(attrKey, tryToGetVal.get(0).replaceAll("\\s+", " "));
           break;
         }
       }
