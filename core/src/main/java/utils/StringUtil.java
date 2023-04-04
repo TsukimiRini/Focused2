@@ -9,4 +9,8 @@ public class StringUtil {
     }
     return first + var.substring(1);
   }
+
+  public static String quoteStr(String str) {
+    return "\"" + str.replaceAll("\\\"", "\\\\\"") + "\"";
+  }
 }

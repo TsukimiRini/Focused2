@@ -1,6 +1,7 @@
 import model.Language;
 import model.URI.URINode;
 import model.URIPattern;
+import utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class ElementInstance implements Cloneable {
     StringBuilder builder = new StringBuilder("[");
     builder.append(lang.toString()).append(", ");
     builder.append(filePath).append(", ");
-    builder.append(element.toString()).append(", ");
+    builder.append(StringUtil.quoteStr(element.toString())).append(", ");
 
     if (branches.isEmpty()) builder.append("$None, ");
     else {
@@ -71,7 +72,7 @@ public class ElementInstance implements Cloneable {
           .append("$")
           .append(pattern.label)
           .append("Br(")
-          .append(String.join(", ", branchStrs))
+          .append(branchStrs.stream().map(StringUtil::quoteStr).collect(Collectors.joining(", ")))
           .append("), ");
     }
 
@@ -83,7 +84,7 @@ public class ElementInstance implements Cloneable {
           .append("$")
           .append(pattern.label)
           .append("Cap(")
-          .append(String.join(", ", capValStrs))
+          .append(capValStrs.stream().map(StringUtil::quoteStr).collect(Collectors.joining(", ")))
           .append(")");
     }
 
