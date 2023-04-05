@@ -1,0 +1,26 @@
+.type Capture = ZeroCap {}
+              | LayoutFileStandardCap {layoutFile: symbol}
+              | LayoutFileExtendedCap {layoutFile: symbol}
+              | LayoutIDCap {layoutFile: symbol, javaFile: symbol}
+
+.type Branch = ZeroBranch {}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl LayoutFileStandard(uri:URI)
+.decl LayoutFileExtended(uri:URI)
+.decl LayoutID(uri:URI)
+
+.comp LayoutMenu {
+    .decl LayoutXLL(param0:URI, param1:URI)
+    LayoutXLL(def, ref) :- ( LayoutFileStandard(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ; LayoutFileExtended(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ), LayoutID(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$LayoutIDCap(capRefLayoutFile,_capRefJavaFile)], match(capDefLayoutFile, capRefLayoutFile).
+}
+.init layoutmenuInstance = LayoutMenu
+.output layoutmenuInstance.LayoutXLL
+

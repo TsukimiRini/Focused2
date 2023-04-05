@@ -1,0 +1,136 @@
+[Elements]
+    LayoutFileStandard:
+        lang: XML
+        file: layout//(layoutFile).xml
+
+    LayoutFileExtended:
+        lang: XML
+        file: layout-*//(layoutFile).xml
+
+    MenuFileStandard:
+        lang: XML
+        file: menu//(layoutFile).xml
+
+    MenuFileExtended:
+        lang: XML
+        file: menu-*//(layoutFile).xml
+
+    LayoutID:
+        lang: JAVA
+        file: (javaFile).java
+        element: R.layout.(layoutFile)
+
+    MenuID:
+        lang: JAVA
+        file: (javaFile).java
+        element: R.menu.(layoutFile)
+
+    IncludeLayout:
+        lang: XML
+        file: (layoutFile).xml
+        element: include::element/~attr~/layout//"@layout\/(includeLayout)"
+
+    WidgetDef:
+        lang: XML
+        file: (layoutFile).xml
+        element: (elementTag)::element/~attr~/android\:id//"@+id\/(widgetID)"
+
+    WidgetResourceRef:
+        lang: JAVA
+        file: (javaFile).java
+        element: R.id.(widgetID)
+
+    DatabindingRef:
+        lang: JAVA
+        file: (javaFile).java
+        element: (function)::method_declaration#func//**//(bindingVar).(widgetID)
+        branches:
+            - @func//**//(bindingVar)::field_declaration/~varType~/(layoutName)Binding
+
+    DatabindingIncludeRef:
+        lang: JAVA
+        file: (javaFile).java
+        element: (function)::method_declaration#func//**//(bindingVar).(includeID).(widgetID)
+        branches:
+            - @func//**//(bindingVar)::field_declaration/~varType~/(layoutName)Binding
+
+    MainClass:
+        lang: JAVA
+        file: (javaFile).jave
+        element: (mainClass)::class_declaration
+
+    ClassExtends:
+        lang: JAVA
+        file: (javaFile).java
+        element: (mainClass)::class_declaration/~extends~/(superClass)
+
+[Links]
+    Utils {
+        LayoutRefInContext(file, layoutRef):
+            & LayoutID(layoutRef)
+            & match(file, layoutRef.file)
+        LayoutRefInContext(file, layoutRef):
+            & SuperClass(file, super)
+            & LayoutRefInContext(super, layoutRef)
+
+        WidgetRefInContext(file, widgetRef):
+            & WidgetResourceRef(widgetRef)
+            & match(file, widgetRef.file)
+        WidgetRefInContext(file, widgetRef):
+            & SuperClass(file, super)
+            & WidgetRefInContext(super, widgetRef)
+        SuperClass(file, super):
+            & ClassExtends(classExtends)
+            & match(file, classExtends.file)
+            & MainClass(superClass)
+            & match(super, superClass.file)
+    }
+
+    LayoutMenu {
+    public:
+        LayoutXLL(def, ref): 
+            &   | LayoutFileStandard(def)
+                | LayoutFileExtended(def)
+            & LayoutID(ref)
+            & match(def[layoutFile], ref[layoutFile])
+        MenuXLL(def, ref):
+            &   | MenuFileStandard(def)
+                | MenuFileExtended(def)
+            & MenuID(ref)
+            & match(def[layoutFile], ref[layoutFile])
+    }
+
+    Widget << LayoutMenu {
+	public:
+        WidgetXLL(def, ref):
+            & WidgetDef(def)
+            & WidgetResourceRef(ref)
+            & LayoutXLL(layoutFile, layoutRef)
+            & match(layoutRef.file, ref.file)
+            &   | match(layoutFile.file, def.file)
+                |   & ends_with(def.file, cat(include[includeLayout], ".xml"))
+                    & match(include.file, layoutFile.file)
+                    & IncludeLayout(include)
+            & match(def[widgetID], ref[widgetID])
+    }
+
+    Databinding {
+    public:
+        DatabindingXLL(def, ref):
+            & WidgetDef(def)
+            & DatabindingRef(ref)
+            & match(Snake2Pascal(def[layoutFile]), ref[layoutName])
+            & match(def[widgetID], ref[widgetID])
+    }
+
+    DatabindingInclude {
+        HasInclude(def, includeLayout):
+            & ends_with(def.file, cat(include[includeLayout], ".xml"))
+    public:
+        DatabindingXLL(def, ref):
+            & WidgetDef(def)
+            & DatabindingRef(ref)
+            & HasInclude(def, includeLayout)
+            & match(Snake2Pascal(includeLayout[layoutFile]), ref[layoutName])
+            & match(def[widgetID], ref[widgetID])
+    }

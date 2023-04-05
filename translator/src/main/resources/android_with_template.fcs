@@ -1,0 +1,26 @@
+[Elements]
+    LayoutFile<layout>:
+        file: <layout>//(layoutFile).xml
+
+    LayoutFileStandard: LayoutFile<"layout">
+
+    LayoutFileExtended: LayoutFile<"layout-*">
+
+    Widget<layout, attrName>: LayoutFile<layout>
+		lang: XML
+		element: *::XMLTag/~attr~/<attrName>//(widget)
+
+    LayoutID:
+        lang: JAVA
+        file: (javaFile).java
+        element: R.layout.(layoutFile)
+
+[Links]
+    LayoutMenu {
+    public:
+    LayoutXLL(def, ref):
+        &   |LayoutFileStandard(def)
+            |LayoutFileExtended(def)
+        & LayoutID(ref)
+        & match(def[layoutFile], ref[layoutFile])
+    }

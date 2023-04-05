@@ -1,0 +1,87 @@
+.type Capture = ZeroCap {}
+              | ClassExtendsCap {javaFile: symbol, mainClass: symbol, superClass: symbol}
+              | WidgetDefCap {layoutFile: symbol, widgetID: symbol, elementTag: symbol}
+              | LayoutIDCap {layoutFile: symbol, javaFile: symbol}
+              | DatabindingRefCap {javaFile: symbol, widgetID: symbol, function: symbol, bindingVar: symbol, layoutName: symbol}
+              | MainClassCap {javaFile: symbol, mainClass: symbol}
+              | IncludeLayoutCap {layoutFile: symbol, includeLayout: symbol}
+              | WidgetResourceRefCap {javaFile: symbol, widgetID: symbol}
+              | MenuFileStandardCap {layoutFile: symbol}
+              | LayoutFileStandardCap {layoutFile: symbol}
+              | DatabindingIncludeRefCap {javaFile: symbol, includeID: symbol, widgetID: symbol, function: symbol, bindingVar: symbol, layoutName: symbol}
+              | MenuIDCap {layoutFile: symbol, javaFile: symbol}
+              | MenuFileExtendedCap {layoutFile: symbol}
+              | LayoutFileExtendedCap {layoutFile: symbol}
+
+.type Branch = ZeroBranch {}
+             | DatabindingRefBr {_0: symbol}
+             | DatabindingIncludeRefBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl IncludeLayout(uri:URI)
+.decl LayoutID(uri:URI)
+.decl DatabindingRef(uri:URI)
+.decl MenuFileStandard(uri:URI)
+.decl WidgetResourceRef(uri:URI)
+.decl MenuID(uri:URI)
+.decl MainClass(uri:URI)
+.decl LayoutFileStandard(uri:URI)
+.decl LayoutFileExtended(uri:URI)
+.decl WidgetDef(uri:URI)
+.decl DatabindingIncludeRef(uri:URI)
+.decl MenuFileExtended(uri:URI)
+.decl ClassExtends(uri:URI)
+
+.comp LayoutMenu {
+    .decl MenuXLL(param0:URI, param1:URI)
+    .decl LayoutXLL(param0:URI, param1:URI)
+    MenuXLL(def, ref) :- ( MenuFileStandard(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$MenuFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$MenuFileStandardCap(capDefLayoutFile)] ) ; MenuFileExtended(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$MenuFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$MenuFileStandardCap(capDefLayoutFile)] ) ), MenuID(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$MenuIDCap(capRefLayoutFile,_capRefJavaFile)], match(capDefLayoutFile, capRefLayoutFile).
+    LayoutXLL(def, ref) :- ( LayoutFileStandard(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ; LayoutFileExtended(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ), LayoutID(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$LayoutIDCap(capRefLayoutFile,_capRefJavaFile)], match(capDefLayoutFile, capRefLayoutFile).
+}
+.init layoutmenuInstance = LayoutMenu
+.output layoutmenuInstance.MenuXLL
+.output layoutmenuInstance.LayoutXLL
+
+.comp Utils {
+    .decl WidgetRefInContext(param0:symbol, param1:URI)
+    .decl LayoutRefInContext(param0:symbol, param1:URI)
+    .decl SuperClass(param0:symbol, param1:symbol)
+    WidgetRefInContext(file, widgetRef) :- WidgetResourceRef(widgetRef), widgetRef=[_attrWidgetRefLang,attrWidgetRefFile,_attrWidgetRefElement,_attrWidgetRefBranches,_capwidgetRef], match(file, attrWidgetRefFile).
+    WidgetRefInContext(file, widgetRef) :- SuperClass(file, super), WidgetRefInContext(super, widgetRef).
+    LayoutRefInContext(file, layoutRef) :- LayoutID(layoutRef), layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], match(file, attrLayoutRefFile).
+    LayoutRefInContext(file, layoutRef) :- SuperClass(file, super), LayoutRefInContext(super, layoutRef).
+    SuperClass(file, super) :- ClassExtends(classExtends), classExtends=[_attrClassExtendsLang,attrClassExtendsFile,_attrClassExtendsElement,_attrClassExtendsBranches,_capclassExtends], match(file, attrClassExtendsFile), MainClass(superClass), superClass=[_attrSuperClassLang,attrSuperClassFile,_attrSuperClassElement,_attrSuperClassBranches,_capsuperClass], match(super, attrSuperClassFile).
+}
+.init utilsInstance = Utils
+
+.comp DatabindingInclude {
+    .decl HasInclude(param0:symbol, param1:symbol)
+    .decl DatabindingXLL(param0:URI, param1:URI)
+    HasInclude(def, includeLayout) :- ends_with(attrDefFile, cat(capIncludeIncludeLayout, ".xml")).
+    DatabindingXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefFunction,_capRefBindingVar,capRefLayoutName)], HasInclude(def, includeLayout), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], match(Snake2Pascal(capIncludeLayoutLayoutFile), capRefLayoutName), match(capDefWidgetID, capRefWidgetID).
+}
+.init databindingincludeInstance = DatabindingInclude
+.output databindingincludeInstance.HasInclude
+.output databindingincludeInstance.DatabindingXLL
+
+.comp Widget : LayoutMenu {
+    .decl WidgetXLL(param0:URI, param1:URI)
+    WidgetXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], WidgetResourceRef(ref), ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBranches,$WidgetResourceRefCap(_capRefJavaFile,capRefWidgetID)], LayoutXLL(layoutFile, layoutRef), layoutFile=[_attrLayoutFileLang,attrLayoutFileFile,_attrLayoutFileElement,_attrLayoutFileBranches,_caplayoutFile], layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], match(attrLayoutRefFile, attrRefFile), ( match(attrLayoutFileFile, attrDefFile) ; ends_with(attrDefFile, cat(capIncludeIncludeLayout, ".xml")), match(attrIncludeFile, attrLayoutFileFile), IncludeLayout(include), include=[_attrIncludeLang,attrIncludeFile,_attrIncludeElement,_attrIncludeBranches,$IncludeLayoutCap(_capIncludeLayoutFile,capIncludeIncludeLayout)] ), match(capDefWidgetID, capRefWidgetID).
+}
+.init widgetInstance = Widget
+.output widgetInstance.WidgetXLL
+
+.comp Databinding {
+    .decl DatabindingXLL(param0:URI, param1:URI)
+    DatabindingXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(capDefLayoutFile,capDefWidgetID,_capDefElementTag)], DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefFunction,_capRefBindingVar,capRefLayoutName)], match(Snake2Pascal(capDefLayoutFile), capRefLayoutName), match(capDefWidgetID, capRefWidgetID).
+}
+.init databindingInstance = Databinding
+.output databindingInstance.DatabindingXLL
+
