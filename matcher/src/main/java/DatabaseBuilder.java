@@ -21,7 +21,7 @@ public class DatabaseBuilder {
   //  public static final String projectDir =
   //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
   public static final String outputDir =
-      System.getProperty("user.home") + "/coding/dlData/android/" + projectName;
+      System.getProperty("user.home") + "/coding/dlData/android/" + projectName + "/inputs";
 
   public static Map<Language, TreeInfoConf> treeInfoConfs = new HashMap<>();
 
@@ -95,6 +95,7 @@ public class DatabaseBuilder {
       SegmentPattern wildCardRoot = new SegmentPattern(SegmentType.NODE, "**");
       wildCardRoot.child = pattern.file;
       fileNodes.addAll(matchPatternLayer(new ElementInstance(lang), wildCardRoot, tree, true));
+      if (pattern.elementRoot == null) return fileNodes;
       for (ElementInstance fileNode : fileNodes) {
         res.addAll(matchPatternLayer(fileNode, pattern.elementRoot, fileNode.file, false));
         wildCardRoot.child = pattern.elementRoot;
@@ -270,10 +271,6 @@ public class DatabaseBuilder {
 
   private static void outputInstances(
       URIPattern pattern, Set<ElementInstance> instances, String outputPath) throws IOException {
-    if (instances.isEmpty()) {
-      FileUtil.deleteFile(outputPath);
-      return;
-    }
     File outputFile = FileUtil.createOrClearFile(outputPath);
     for (ElementInstance instance : instances) {
       FileUtil.appendTo(outputFile, instance.toOutputString(pattern) + "\n");

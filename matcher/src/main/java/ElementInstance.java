@@ -62,9 +62,11 @@ public class ElementInstance implements Cloneable {
     StringBuilder builder = new StringBuilder("[");
     builder.append(lang.toString()).append(", ");
     builder.append(filePath).append(", ");
-    builder.append(StringUtil.quoteStr(element.toString())).append(", ");
+    builder
+        .append(element == null ? "" : StringUtil.quoteStr(element.toString()))
+        .append(", ");
 
-    if (branches.isEmpty()) builder.append("$None, ");
+    if (branches.isEmpty()) builder.append("$ZeroBranch, ");
     else {
       List<String> branchStrs =
           branches.stream().map(URINode::toString).collect(Collectors.toList());
