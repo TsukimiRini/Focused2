@@ -53,11 +53,11 @@
     .decl WidgetRefInContext(param0:symbol, param1:URI)
     .decl LayoutRefInContext(param0:symbol, param1:URI)
     .decl SuperClass(param0:symbol, param1:symbol)
-    WidgetRefInContext(file, widgetRef) :- WidgetResourceRef(widgetRef), widgetRef=[_attrWidgetRefLang,attrWidgetRefFile,_attrWidgetRefElement,_attrWidgetRefBranches,_capwidgetRef], match(file, attrWidgetRefFile).
+    WidgetRefInContext(file, widgetRef) :- WidgetResourceRef(widgetRef), widgetRef=[_attrWidgetRefLang,attrWidgetRefFile,_attrWidgetRefElement,_attrWidgetRefBranches,_capwidgetRef], file=attrWidgetRefFile.
     WidgetRefInContext(file, widgetRef) :- SuperClass(file, super), WidgetRefInContext(super, widgetRef).
-    LayoutRefInContext(file, layoutRef) :- LayoutID(layoutRef), layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], match(file, attrLayoutRefFile).
+    LayoutRefInContext(file, layoutRef) :- LayoutID(layoutRef), layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], file=attrLayoutRefFile.
     LayoutRefInContext(file, layoutRef) :- SuperClass(file, super), LayoutRefInContext(super, layoutRef).
-    SuperClass(file, super) :- ClassExtends(classExtends), classExtends=[_attrClassExtendsLang,attrClassExtendsFile,_attrClassExtendsElement,_attrClassExtendsBranches,_capclassExtends], match(file, attrClassExtendsFile), MainClass(superClass), superClass=[_attrSuperClassLang,attrSuperClassFile,_attrSuperClassElement,_attrSuperClassBranches,_capsuperClass], match(super, attrSuperClassFile).
+    SuperClass(file, super) :- ClassExtends(classExtends), classExtends=[_attrClassExtendsLang,attrClassExtendsFile,_attrClassExtendsElement,_attrClassExtendsBranches,$ClassExtendsCap(_capClassExtendsJavaFile,_capClassExtendsMainClass,capClassExtendsSuperClass)], file=attrClassExtendsFile, MainClass(superClass), superClass=[_attrSuperClassLang,attrSuperClassFile,_attrSuperClassElement,_attrSuperClassBranches,$MainClassCap(_capSuperClassJavaFile,capSuperClassMainClass)], match(capSuperClassMainClass, capClassExtendsSuperClass), super=attrSuperClassFile.
 }
 .init utilsInstance = Utils
 

@@ -3,7 +3,6 @@ package model.config;
 import model.enums.LogicRelationType;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.MatcherUtils;
-import utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +72,12 @@ public class ConfigPredicate {
   }
 
   public String toString() {
+    if (predicateName.equals("assign")) {
+      if (params == null || params.size() != 2) {
+        throw new IllegalArgumentException("assign predicate should accept 2 params");
+      }
+      return params.get(0) + "=" + params.get(1);
+    }
     StringBuilder sb = new StringBuilder(predicateName);
     if (params != null) {
       sb.append("(").append(params.get(0));

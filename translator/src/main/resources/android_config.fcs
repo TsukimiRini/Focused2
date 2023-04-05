@@ -56,7 +56,7 @@
 
     MainClass:
         lang: JAVA
-        file: (javaFile).jave
+        file: (javaFile).java
         element: (mainClass)::class_declaration
 
     ClassExtends:
@@ -68,22 +68,23 @@
     Utils {
         LayoutRefInContext(file, layoutRef):
             & LayoutID(layoutRef)
-            & match(file, layoutRef.file)
+            & assign(file, layoutRef.file)
         LayoutRefInContext(file, layoutRef):
             & SuperClass(file, super)
             & LayoutRefInContext(super, layoutRef)
 
         WidgetRefInContext(file, widgetRef):
             & WidgetResourceRef(widgetRef)
-            & match(file, widgetRef.file)
+            & assign(file, widgetRef.file)
         WidgetRefInContext(file, widgetRef):
             & SuperClass(file, super)
             & WidgetRefInContext(super, widgetRef)
         SuperClass(file, super):
             & ClassExtends(classExtends)
-            & match(file, classExtends.file)
+            & assign(file, classExtends.file)
             & MainClass(superClass)
-            & match(super, superClass.file)
+            & match(superClass[mainClass], classExtends[superClass])
+            & assign(super, superClass.file)
     }
 
     LayoutMenu {
