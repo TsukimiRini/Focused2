@@ -38,34 +38,34 @@ public class URIPattern extends URIBase<SegmentPattern> {
     super(label);
     this.params = params;
 
+    if (template == null) {
+      throw new IllegalArgumentException("template not found");
+    }
+
+    String finalLang = lang, finalFile = file, finalElement = element;
+
+    // TODO: can lang & file be override
     if (template.lang != null) this.lang = template.lang;
 
     if (template.file != null) {
-      this.file =
-          new SegmentPattern(
-              SegmentType.FILE, template.replacePlaceholder(template.file.toString(), values));
-      this.captures.addAll(this.file.captures);
+      finalFile = template.replacePlaceholder(template.file.toString(), values);
     }
 
     template.branches.forEach(
-            (anchor, branch) ->
-                    this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
+        (anchor, branch) ->
+            this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
 
     template.defaultBranches.forEach(
-            branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
+        branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
 
     if (template.elementRoot != null) {
+      if (finalElement != null)
+        throw new IllegalArgumentException("template element can't be override");
       String elementSource = template.elementRoot.toString();
-      List<String> segments =
-          MatcherUtils.matchSegments(template.replacePlaceholder(elementSource, values));
-      if (segments == null) {
-        logger.error("Invalid Element {}", label);
-        throw new IllegalArgumentException("invalid config");
-      }
-      this.elementRoot = getPatternRoot(segments);
+      finalElement = template.replacePlaceholder(elementSource, values);
     }
 
-    fillInFields(lang, file, element, branches);
+    fillInFields(finalLang, finalFile, finalElement, branches);
   }
 
   private void fillInFields(String lang, String file, String element, List<String> branches) {

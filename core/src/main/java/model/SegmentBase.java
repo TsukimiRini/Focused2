@@ -35,16 +35,16 @@ public class SegmentBase<T extends IdentifierBase> {
       for (String name : attributes.keySet()) {
         if (flag) {
           flag = false;
-        }else{
+        } else {
           sb.append(",");
         }
         sb.append(name).append("=").append(attributes.get(name));
       }
       sb.append("]");
     }
-    String parentStr = (parent == null) ? "" : parent + "/";
-    if (segType == SegmentType.EDGE && sb.length() > 0) return parentStr + "~" + sb + "~";
-    else return parentStr + sb;
+    String childStr = (child == null) ? "" : "/" + child;
+    if (segType == SegmentType.EDGE && sb.length() > 0) return "~" + sb + "~" + childStr;
+    else return sb.append(childStr).toString();
   }
 
   public SegmentBase<T> getTail() {

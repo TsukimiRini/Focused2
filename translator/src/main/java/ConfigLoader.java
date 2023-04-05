@@ -25,32 +25,38 @@ public class ConfigLoader {
     List<Pair<String, ConfigElement>> rules = parseElements();
     Map<String, ConfigLinkBlock> blocks =
         parseLinks(rules.stream().map(Pair::getKey).collect(Collectors.toList()));
+    Map<String, URIPattern> templates = new HashMap<>();
     Map<String, URIPattern> patterns = new HashMap<>();
     for (Pair<String, ConfigElement> rule : rules) {
       String label = rule.getKey();
       ConfigElement curRule = rule.getValue();
+      URIPattern curPattern;
       if (curRule.template != null) {
-        patterns.put(
-            label,
+        curPattern =
             new URIPattern(
-                patterns.get(curRule.template.getKey()),
+                templates.get(curRule.template.getKey()),
                 curRule.template.getValue(),
                 label,
                 curRule.get("lang"),
                 curRule.get("file"),
                 curRule.get("element"),
                 curRule.params,
-                curRule.branches));
+                curRule.branches);
       } else {
-        patterns.put(
-            label,
+        curPattern =
             new URIPattern(
                 label,
                 curRule.get("lang"),
                 curRule.get("file"),
                 curRule.get("element"),
                 curRule.params,
-                curRule.branches));
+                curRule.branches);
+      }
+
+      if (curRule.params != null) {
+        templates.put(label, curPattern);
+      } else {
+        patterns.put(label, curPattern);
       }
     }
 
