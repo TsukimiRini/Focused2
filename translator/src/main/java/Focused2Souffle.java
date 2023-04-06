@@ -35,10 +35,16 @@ public class Focused2Souffle {
             .map(p -> p.toString() + "\n")
             .collect(Collectors.toList())
             .toArray(new String[patterns.size()]);
+    String[] inputs =
+        generateInputPredicates(patterns).stream()
+            .map(p -> p.toString() + "\n")
+            .collect(Collectors.toList())
+            .toArray(new String[patterns.size()]);
 
     File opt = FileUtil.createOrClearFile(souffle_output);
     FileUtil.appendTo(opt, types);
     FileUtil.appendTo(opt, predicates);
+    FileUtil.appendTo(opt, inputs);
     FileUtil.appendTo(opt, "\n");
 
     List<ConfigLinkBlock> blocks = pair.getRight();
@@ -93,6 +99,14 @@ public class Focused2Souffle {
       decls.add(new PredicateDecl(pattern.label, "uri", "URI"));
     }
     return decls;
+  }
+
+  public static List<IOStmt> generateInputPredicates(List<URIPattern> patterns) {
+    List<IOStmt> inputs = new ArrayList<>();
+    for (URIPattern pattern : patterns) {
+      inputs.add(new IOStmt(false, pattern.label));
+    }
+    return inputs;
   }
 
   public static List<Component> generateComponents(

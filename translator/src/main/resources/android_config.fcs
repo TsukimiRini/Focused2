@@ -43,16 +43,16 @@
     DatabindingRef:
         lang: JAVA
         file: (javaFile).java
-        element: (function)::method_declaration#func//**//(bindingVar).(widgetID)
+        element: (class)::class_declaration#class//**//(bindingVar).(widgetID)
         branches:
-            - @func//**//(bindingVar)::field_declaration/~varType~/(layoutName)Binding
+            - @class//**//(bindingVar)[type=(layoutName)Binding]
 
     DatabindingIncludeRef:
         lang: JAVA
         file: (javaFile).java
-        element: (function)::method_declaration#func//**//(bindingVar).(includeID).(widgetID)
+        element: (class)::class_declaration#class//**//(bindingVar).(includeID).(widgetID)
         branches:
-            - @func//**//(bindingVar)::field_declaration/~varType~/(layoutName)Binding
+            - @class//**//(bindingVar)[type=(layoutName)Binding]
 
     MainClass:
         lang: JAVA
@@ -120,8 +120,8 @@
         DatabindingXLL(def, ref):
             & WidgetDef(def)
             & DatabindingRef(ref)
-            & match(Snake2Pascal(def[layoutFile]), ref[layoutName])
-            & match(def[widgetID], ref[widgetID])
+            & match(snake2pascal(def[layoutFile]), ref[layoutName])
+            & match(snake2camel(def[widgetID]), ref[widgetID])
     }
 
     DatabindingInclude {
@@ -132,6 +132,6 @@
             & WidgetDef(def)
             & DatabindingRef(ref)
             & HasInclude(def, includeLayout)
-            & match(Snake2Pascal(includeLayout[layoutFile]), ref[layoutName])
+            & match(snake2pascal(includeLayout[layoutFile]), ref[layoutName])
             & match(def[widgetID], ref[widgetID])
     }
