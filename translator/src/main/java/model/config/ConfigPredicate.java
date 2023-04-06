@@ -72,7 +72,8 @@ public class ConfigPredicate {
   }
 
   public String toString() {
-    if (predicateName.equals("assign")) {
+    // assign predicate or match predicate: reduced to equal constraint
+    if (predicateName.equals("assign")||predicateName.equals("match")) {
       if (params == null || params.size() != 2) {
         throw new IllegalArgumentException("assign predicate should accept 2 params");
       }
