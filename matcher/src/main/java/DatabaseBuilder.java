@@ -256,12 +256,13 @@ public class DatabaseBuilder {
       throws CloneNotSupportedException {
     Set<ElementInstance> res = Set.of(instance);
     for (SegmentPattern branchPattern : pattern.branches) {
+      Set<ElementInstance> curBranch = new HashSet<>();
       for (ElementInstance iterateInst : res) {
-        Set<ElementInstance> curBranch =
-            matchPatternLayer(iterateInst, (SegmentPattern) branchPattern.child, node, false);
+        curBranch.addAll(
+            matchPatternLayer(iterateInst, (SegmentPattern) branchPattern.child, node, false));
         if (curBranch.isEmpty()) return null;
-        res = curBranch;
       }
+      res = curBranch;
     }
     return res;
   }
