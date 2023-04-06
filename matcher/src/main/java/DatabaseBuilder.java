@@ -6,6 +6,7 @@ import model.URI.URISegment;
 import model.config.ConfigLinkBlock;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.FileUtil;
+import utils.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,7 +132,7 @@ public class DatabaseBuilder {
       if (matcher.find()) {
         ElementInstance newInstance = inst.clone();
         // fill in captures of new instance
-        for (String capName : pattern.captures) {
+        for (String capName : pattern.text.captures) {
           if (!newInstance.capVal.containsKey(capName)) {
             newInstance.capVal.put(capName, matcher.group(capName));
           }
@@ -157,10 +158,7 @@ public class DatabaseBuilder {
             // find all possible children
             Set<ElementInstance> childSet =
                 matchPatternLayer(
-                    newInstance,
-                    pattern.child == null ? null : nextNodePattern,
-                    child,
-                    toFindFiles);
+                    childInst, pattern.child == null ? null : nextNodePattern, child, toFindFiles);
 
             // check branch
             for (ElementInstance toCheck : childSet) {
@@ -202,12 +200,16 @@ public class DatabaseBuilder {
   }
 
   private static String replaceCapture(IdentifierPattern text, ElementInstance instance) {
-    String regex = text.text.replaceAll("(?<toEscape>[$+.\\[\\]?\\\\^{}|])", "\\\\${toEscape}");
+    String regex = StringUtil.escapedForRegex(text.text);
     regex = regex.replaceAll("(?<!\\\\)\\*", ".+");
     for (String capName : text.captures) {
-      if (instance.capVal.containsKey(capName))
-        regex = regex.replaceAll("\\(" + capName + "\\)", instance.capVal.get(capName));
-      else regex = regex.replaceAll("\\(" + capName + "\\)", "(?<" + capName + ">.+)");
+      // TODO: corner case -- when capVal contains variable enclosed by brackets with the same name
+      // as captures
+      if (instance.capVal.containsKey(capName)) {
+        String replaceVal =
+            StringUtil.escapedForRegex(StringUtil.escapedForRegex(instance.capVal.get(capName)));
+        regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", replaceVal);
+      } else regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", "(?<" + capName + ">.+)");
     }
 
     return regex;
@@ -255,7 +257,8 @@ public class DatabaseBuilder {
     Set<ElementInstance> res = Set.of(instance);
     for (SegmentPattern branchPattern : pattern.branches) {
       for (ElementInstance iterateInst : res) {
-        Set<ElementInstance> curBranch = matchPatternLayer(iterateInst, pattern, node, false);
+        Set<ElementInstance> curBranch =
+            matchPatternLayer(iterateInst, (SegmentPattern) branchPattern.child, node, false);
         if (curBranch.isEmpty()) return null;
         res = curBranch;
       }

@@ -13,4 +13,8 @@ public class StringUtil {
   public static String quoteStr(String str) {
     return "\"" + str.replaceAll("\\\"", "\\\\\"") + "\"";
   }
+
+  public static String escapedForRegex(String str) {
+    return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|])", "\\\\${toEscape}");
+  }
 }

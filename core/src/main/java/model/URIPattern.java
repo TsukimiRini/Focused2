@@ -149,6 +149,7 @@ public class URIPattern extends URIBase<SegmentPattern> {
       if (root == null) root = cur;
       this.captures.addAll(cur.captures);
     }
+    cur.addDefaultBranches(defaultBranches);
     //    if (root.segType == SegmentType.EDGE && root.text.text.length() == 0)
     //      root = (SegmentPattern) root.parent;
     return root;

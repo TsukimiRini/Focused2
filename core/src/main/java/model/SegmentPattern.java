@@ -3,6 +3,7 @@ package model;
 import utils.MatcherUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SegmentPattern extends SegmentBase<IdentifierPattern> {
   public Set<String> captures = new HashSet<>();
@@ -46,7 +47,10 @@ public class SegmentPattern extends SegmentBase<IdentifierPattern> {
             case "anchor":
               this.anchor = parts.get(label);
               if (branchMap != null && branchMap.containsKey(this.anchor)) {
-                branches = branchMap.get(this.anchor);
+                branches.addAll(
+                    branchMap.get(this.anchor).stream()
+                        .map(br -> (SegmentPattern) br.child)
+                        .collect(Collectors.toList()));
               }
               break;
             case "attrs":
@@ -69,5 +73,9 @@ public class SegmentPattern extends SegmentBase<IdentifierPattern> {
     for (String key : kvPairs.keySet()) {
       addAttribute(key, kvPairs.get(key));
     }
+  }
+
+  public void addDefaultBranches(List<SegmentPattern> branches) {
+    this.branches.addAll(branches);
   }
 }
