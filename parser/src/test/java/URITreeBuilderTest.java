@@ -18,9 +18,9 @@ public class URITreeBuilderTest {
             Language.JAVA,
             List.of(
                 System.getProperty("user.home")
-                    + "/coding/xll/android/CloudReader/app/src/main/java/com/example/jingbin/cloudreader/app/CloudReaderApplication.java"));
+                    + "/coding/xll/android/CloudReader/app/src/main/java/com/example/jingbin/cloudreader/ui/gank/child/EverydayFragment.java"));
     TreeInfoConf conf =
-        new TreeInfoConf(System.getProperty("user.dir") + "/src/test/resources/java.tree");
+        new TreeInfoConf(System.getProperty("user.dir") + "/src/resources/java.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
     URINode tree = builder.buildFromCST(cstTrees);
     URINode fileTree = tree;
@@ -40,7 +40,7 @@ public class URITreeBuilderTest {
                 System.getProperty("user.home")
                     + "/coding/xll/android/CloudReader/app/src/main/res/layout/footer_item_book.xml"));
     TreeInfoConf conf =
-        new TreeInfoConf(System.getProperty("user.dir") + "/src/test/resources/xml.tree");
+        new TreeInfoConf(System.getProperty("user.dir") + "/src/resources/xml.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
     URINode tree = builder.buildFromCST(cstTrees);
     URINode fileTree = tree;

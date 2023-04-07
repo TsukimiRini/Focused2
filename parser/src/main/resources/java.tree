@@ -30,7 +30,7 @@ formal_parameter:
 spread_parameter:
   name: variable_declarator.identifier
   type: _unannotated_type | identifier
-  modifier: modeifiers
+  modifier: modifiers
 
 assignment_expression:
   name: {left}
@@ -116,6 +116,10 @@ update_expression
 array_access
 
 # type
+generic_type:
+  name: identifier
+  args: [type_arguments.identifier]
+
 *_type
 
 # modifiers
@@ -149,10 +153,13 @@ method_invocation/argument_list.*:
 #  type: "param"
 
 */extends_interfaces.interface_type_list._type:
-  typr: "extends"
+  type: "extends"
 
 */*_parameters.*:
   type: "param"
 
 */superclass:
+  type: "extends"
+
+class_declaration/generic_type:
   type: "extends"
