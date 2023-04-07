@@ -106,7 +106,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     if (ruleType != TreeInfoRuleType.EDGE) return false;
     int childDepth = getChildEdgeDepth();
     StringBuilder sb = new StringBuilder(childNode.type);
-    for (int i = 1; i < childDepth && parentNode != null; i++) {
+    for (int i = 1; i < childDepth && parentNode != null && parentNode.edgeToParent != null; i++) {
       sb.insert(0, parentNode.type + ".");
       parentNode = parentNode.edgeToParent.from;
     }
