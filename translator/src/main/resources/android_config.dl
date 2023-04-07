@@ -75,10 +75,10 @@
 .init utilsInstance = Utils
 
 .comp DatabindingInclude {
-    .decl HasInclude(param0:symbol, param1:symbol)
+    .decl HasInclude(param0:URI, param1:URI)
     .decl DatabindingXLL(param0:URI, param1:URI)
-    HasInclude(def, includeLayout) :- ends_with(attrDefFile, cat(capIncludeIncludeLayout, ".xml")).
-    DatabindingXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefBindingVar,_capRefClass,capRefLayoutName)], HasInclude(def, includeLayout), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], snake2pascal(capIncludeLayoutLayoutFile)=capRefLayoutName, capDefWidgetID=capRefWidgetID.
+    HasInclude(def, include) :- WidgetDef(def), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBranches,_capdef], IncludeLayout(include), include=[_attrIncludeLang,_attrIncludeFile,_attrIncludeElement,_attrIncludeBranches,$IncludeLayoutCap(_capIncludeLayoutFile,capIncludeIncludeLayout)], ends_with(attrDefFile, cat(capIncludeIncludeLayout, ".xml")).
+    DatabindingXLL(def, ref) :- DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefBindingVar,_capRefClass,capRefLayoutName)], HasInclude(def, include), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], include=[_attrIncludeLang,_attrIncludeFile,_attrIncludeElement,_attrIncludeBranches,$IncludeLayoutCap(capIncludeLayoutFile,_capIncludeIncludeLayout)], snake2pascal(capIncludeLayoutFile)=capRefLayoutName, capDefWidgetID=capRefWidgetID.
 }
 .init databindingincludeInstance = DatabindingInclude
 .output databindingincludeInstance.HasInclude

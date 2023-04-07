@@ -125,13 +125,14 @@
     }
 
     DatabindingInclude {
-        HasInclude(def, includeLayout):
+        HasInclude(def, include):
+            & WidgetDef(def)
+            & IncludeLayout(include)
             & ends_with(def.file, cat(include[includeLayout], ".xml"))
     public:
         DatabindingXLL(def, ref):
-            & WidgetDef(def)
             & DatabindingRef(ref)
-            & HasInclude(def, includeLayout)
-            & match(snake2pascal(includeLayout[layoutFile]), ref[layoutName])
+            & HasInclude(def, include)
+            & match(snake2pascal(include[layoutFile]), ref[layoutName])
             & match(def[widgetID], ref[widgetID])
     }
