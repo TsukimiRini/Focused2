@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ElementInstance implements Cloneable {
-  public Map<String, String> capVal = new HashMap<>();
+  public CaptureHolder capVal = new CaptureHolder();
   public URINode element = null;
   public URINode file = null;
   public List<URINode> branches = new ArrayList<>();
@@ -44,16 +44,27 @@ public class ElementInstance implements Cloneable {
     element = ele;
   }
 
+  @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof ElementInstance)) return false;
     ElementInstance ele = (ElementInstance) obj;
-    return element == ele.element && capVal.equals(ele.capVal);
+    return filePath.equals(ele.filePath)
+        && element.toString().equals(ele.element.toString())
+        && capVal.toString().equals(ele.capVal.toString());
+  }
+
+  public int hashCode() {
+    CaptureHolder tmp = new CaptureHolder(capVal);
+    return (filePath
+            + (element == null ? "" : element.toString())
+            + (capVal == null ? 0 : capVal.toString()))
+        .hashCode();
   }
 
   @Override
   public ElementInstance clone() throws CloneNotSupportedException {
     ElementInstance cloned = (ElementInstance) super.clone();
-    cloned.capVal = new HashMap<>(capVal);
+    cloned.capVal = new CaptureHolder(capVal);
     cloned.branches = new ArrayList<>(branches);
     return cloned;
   }
@@ -62,9 +73,7 @@ public class ElementInstance implements Cloneable {
     StringBuilder builder = new StringBuilder("[");
     builder.append(lang.toString()).append(", ");
     builder.append(filePath).append(", ");
-    builder
-        .append(element == null ? "" : StringUtil.quoteStr(element.toString()))
-        .append(", ");
+    builder.append(element == null ? "" : StringUtil.quoteStr(element.toString())).append(", ");
 
     if (branches.isEmpty()) builder.append("$ZeroBranch, ");
     else {

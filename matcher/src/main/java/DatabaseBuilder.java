@@ -92,15 +92,17 @@ public class DatabaseBuilder {
     Set<ElementInstance> res = new HashSet<>();
     try {
       Set<ElementInstance> fileNodes =
-          matchPatternLayer(new ElementInstance(lang), pattern.file, tree, true);
+          matchPatternLayer(new ElementInstance(lang), pattern.file, tree, MatchedType.FILE);
       SegmentPattern wildCardRoot = new SegmentPattern(SegmentType.NODE, "**");
       wildCardRoot.child = pattern.file;
-      fileNodes.addAll(matchPatternLayer(new ElementInstance(lang), wildCardRoot, tree, true));
+      fileNodes.addAll(
+          matchPatternLayer(new ElementInstance(lang), wildCardRoot, tree, MatchedType.FILE));
       if (pattern.elementRoot == null) return fileNodes;
       for (ElementInstance fileNode : fileNodes) {
-        res.addAll(matchPatternLayer(fileNode, pattern.elementRoot, fileNode.file, false));
+        res.addAll(
+            matchPatternLayer(fileNode, pattern.elementRoot, fileNode.file, MatchedType.ELEMENT));
         wildCardRoot.child = pattern.elementRoot;
-        res.addAll(matchPatternLayer(fileNode, wildCardRoot, fileNode.file, false));
+        res.addAll(matchPatternLayer(fileNode, wildCardRoot, fileNode.file, MatchedType.ELEMENT));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -109,12 +111,21 @@ public class DatabaseBuilder {
   }
 
   private static Set<ElementInstance> matchPatternLayer(
-      ElementInstance inst, SegmentPattern pattern, URINode tree, boolean toFindFiles)
+      ElementInstance inst, SegmentPattern pattern, URINode tree, MatchedType checkObject)
       throws CloneNotSupportedException {
     if (pattern == null) {
       ElementInstance newInstance = inst.clone();
-      if (toFindFiles) newInstance.setFilePath(tree);
-      else newInstance.element = tree;
+      switch (checkObject) {
+        case FILE:
+          newInstance.setFilePath(tree);
+          break;
+        case ELEMENT:
+          newInstance.element = tree;
+          break;
+        case BRANCH:
+          newInstance.addBranch(tree);
+          break;
+      }
       return Set.of(newInstance);
     }
 
@@ -122,7 +133,7 @@ public class DatabaseBuilder {
       throw new IllegalArgumentException("the first segment of the pattern should be node pattern");
     }
 
-    if (tree == null || toFindFiles && !tree.isDir()) return new HashSet<>();
+    if (tree == null || checkObject == MatchedType.FILE && !tree.isDir()) return new HashSet<>();
 
     Set<ElementInstance> res = new HashSet<>();
     Pattern textPattern = getTextPattern(pattern, inst);
@@ -158,7 +169,7 @@ public class DatabaseBuilder {
             // find all possible children
             Set<ElementInstance> childSet =
                 matchPatternLayer(
-                    childInst, pattern.child == null ? null : nextNodePattern, child, toFindFiles);
+                    childInst, pattern.child == null ? null : nextNodePattern, child, checkObject);
 
             // check branch
             for (ElementInstance toCheck : childSet) {
@@ -176,7 +187,7 @@ public class DatabaseBuilder {
     if (pattern.text.text.equals("**")) {
       for (List<URINode> children : tree.children.values()) {
         for (URINode child : children)
-          res.addAll(matchPatternLayer(inst, pattern, child, toFindFiles));
+          res.addAll(matchPatternLayer(inst, pattern, child, checkObject));
       }
     }
 
@@ -259,7 +270,8 @@ public class DatabaseBuilder {
       Set<ElementInstance> curBranch = new HashSet<>();
       for (ElementInstance iterateInst : res) {
         curBranch.addAll(
-            matchPatternLayer(iterateInst, (SegmentPattern) branchPattern.child, node, false));
+            matchPatternLayer(
+                iterateInst, (SegmentPattern) branchPattern.child, node, MatchedType.BRANCH));
         if (curBranch.isEmpty()) return null;
       }
       res = curBranch;
