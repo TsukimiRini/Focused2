@@ -15,12 +15,18 @@ public class ConfigPredicate {
   public List<ConfigPredicate> params = new ArrayList<>();
   public LogicRelationType logicType = LogicRelationType.NONE;
   public int logicDepth = 0, logicOps = 0;
+  // TODO: fully support not logic
+  public boolean not = false;
 
   public ConfigPredicate(String predicateName, List<String> paraNames) {
     setUp(predicateName, paraNames);
   }
 
   public ConfigPredicate(String source) {
+    if (source.startsWith("!")) {
+      source = source.substring(1);
+      not = true;
+    }
     Pair<String, List<String>> parseRes = MatcherUtils.parsePredicate(source);
     if (parseRes == null) {
       predicateName = source;
@@ -73,13 +79,13 @@ public class ConfigPredicate {
 
   public String toString() {
     // assign predicate or match predicate: reduced to equal constraint
-    if (predicateName.equals("assign")||predicateName.equals("match")) {
+    if (predicateName.equals("assign") || predicateName.equals("match")) {
       if (params == null || params.size() != 2) {
         throw new IllegalArgumentException("assign predicate should accept 2 params");
       }
-      return params.get(0) + "=" + params.get(1);
+      return params.get(0) + (not ? "!=" : "=") + params.get(1);
     }
-    StringBuilder sb = new StringBuilder(predicateName);
+    StringBuilder sb = new StringBuilder((not ? "!" : "") + predicateName);
     if (params != null) {
       sb.append("(").append(params.get(0));
       for (int i = 1; i < params.size(); i++) {
