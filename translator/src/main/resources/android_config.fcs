@@ -1,29 +1,24 @@
 [Elements]
-    LayoutFileStandard:
+    LayoutFile<layout>:
         lang: XML
-        file: layout//(layoutFile).xml
+        file: <layout>//(layoutFile).xml
 
-    LayoutFileExtended:
-        lang: XML
-        file: layout-*//(layoutFile).xml
+    LayoutFileStandard: LayoutFile<"layout">
 
-    MenuFileStandard:
-        lang: XML
-        file: menu//(layoutFile).xml
+    LayoutFileExtended: LayoutFile<"layout-*">
 
-    MenuFileExtended:
-        lang: XML
-        file: menu-*//(layoutFile).xml
+    MenuFileStandard: LayoutFile<"menu">
 
-    LayoutID:
+    MenuFileExtended: LayoutFile<"menu-*">
+
+    FileID<dir>:
         lang: JAVA
         file: (javaFile).java
-        element: R.layout.(layoutFile)
+        element: R.<dir>.(layoutFile)
 
-    MenuID:
-        lang: JAVA
-        file: (javaFile).java
-        element: R.menu.(layoutFile)
+    LayoutID: FileID<"layout">
+
+    MenuID: FileID<"menu">
 
     IncludeLayout:
         lang: XML
@@ -70,8 +65,9 @@
             & LayoutID(layoutRef)
             & assign(file, layoutRef.file)
         LayoutRefInContext(file, layoutRef):
-            & SuperClass(file, super)
-            & LayoutRefInContext(super, layoutRef)
+            & SuperClass(mainFile, super)
+            & assign(file, super)
+            & LayoutRefInContext(mainFile, layoutRef)
 
         WidgetRefInContext(file, widgetRef):
             & WidgetResourceRef(widgetRef)

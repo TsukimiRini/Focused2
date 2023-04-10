@@ -69,7 +69,7 @@
     WidgetRefInContext(file, widgetRef) :- WidgetResourceRef(widgetRef), widgetRef=[_attrWidgetRefLang,attrWidgetRefFile,_attrWidgetRefElement,_attrWidgetRefBranches,_capwidgetRef], file=attrWidgetRefFile.
     WidgetRefInContext(file, widgetRef) :- SuperClass(file, super), WidgetRefInContext(super, widgetRef).
     LayoutRefInContext(file, layoutRef) :- LayoutID(layoutRef), layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], file=attrLayoutRefFile.
-    LayoutRefInContext(file, layoutRef) :- SuperClass(file, super), LayoutRefInContext(super, layoutRef).
+    LayoutRefInContext(file, layoutRef) :- SuperClass(mainFile, super), file=super, LayoutRefInContext(mainFile, layoutRef).
     SuperClass(file, super) :- ClassExtends(classExtends), classExtends=[_attrClassExtendsLang,attrClassExtendsFile,_attrClassExtendsElement,_attrClassExtendsBranches,$ClassExtendsCap(_capClassExtendsJavaFile,_capClassExtendsMainClass,capClassExtendsSuperClass)], file=attrClassExtendsFile, MainClass(superClass), superClass=[_attrSuperClassLang,attrSuperClassFile,_attrSuperClassElement,_attrSuperClassBranches,$MainClassCap(_capSuperClassJavaFile,capSuperClassMainClass)], capSuperClassMainClass=capClassExtendsSuperClass, super=attrSuperClassFile.
 }
 .init utilsInstance = Utils
