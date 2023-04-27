@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import model.Language;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class MatcherUtils {
@@ -185,5 +186,18 @@ public class MatcherUtils {
       }
     }
     return Pair.of(funcName, argList);
+  }
+
+  public static String cleanCommentsAndSpecSym(Language lang, String code) {
+    String commentsRegex = "";
+    switch (lang) {
+      case JAVA:
+      case XML:
+        commentsRegex = "(\\\\\\\\.*\n|/\\*.*\\*/)";
+    }
+    code = code.replaceAll(commentsRegex, " ");
+    code = code.replaceAll("[^\\w]", " ");
+    code = code.replaceAll("\\s+", " ");
+    return code;
   }
 }
