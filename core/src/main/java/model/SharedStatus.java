@@ -1,3 +1,5 @@
+package model;
+
 import model.ProjectInfo;
 
 public class SharedStatus {

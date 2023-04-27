@@ -2,6 +2,7 @@ import ai.serenade.treesitter.Languages;
 import ai.serenade.treesitter.Parser;
 import model.CSTTree;
 import model.Language;
+import model.SharedStatus;
 import utils.FileUtil;
 
 import java.io.UnsupportedEncodingException;

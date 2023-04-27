@@ -1,5 +1,6 @@
 import model.CSTTree;
 import model.Language;
+import model.SharedStatus;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
