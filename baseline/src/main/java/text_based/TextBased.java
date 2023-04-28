@@ -1,6 +1,7 @@
 package text_based;
 
 import model.Language;
+import model.Range;
 import model.SharedStatus;
 import models.Baseline;
 import models.CodeSource;
@@ -23,7 +24,7 @@ public class TextBased extends Baseline {
   }
 
   public void run(Map<String, List<String>> categorizedFiles) {
-    super.run();
+    super.run(categorizedFiles);
     for (String lang : categorizedFiles.keySet()) {
       fileCnt.put(Language.valueOfLabel(lang), categorizedFiles.get(lang).size());
       allFileCnt += categorizedFiles.get(lang).size();
@@ -33,6 +34,12 @@ public class TextBased extends Baseline {
     }
 
     Set<String> filteredTokens = filter();
+    Map<String, List<CodeSource>> res = new HashMap<>();
+    filteredTokens.forEach(
+        token -> {
+          res.put(token, new ArrayList<>());
+          tokenMap.get(token).values().forEach(sourceList -> res.get(token).addAll(sourceList));
+        });
   }
 
   private void parseFile(Language lang, String filePath) {
@@ -48,7 +55,10 @@ public class TextBased extends Baseline {
                 SharedStatus.projectInfo.languages.forEach(
                     language -> tokenMap.get(token).put(language, new ArrayList<>()));
               }
-              tokenMap.get(token).get(lang).add(new CodeSource(lang, null, token));
+              tokenMap
+                  .get(token)
+                  .get(lang)
+                  .add(new CodeSource(lang, new Range("", filePath), token));
 
               if (!wordsCnt.containsKey(token)) {
                 wordsCnt.put(token, new HashMap<>());
@@ -63,11 +73,12 @@ public class TextBased extends Baseline {
 
   private Set<String> filter() {
     Set<String> tokenList = tokenMap.keySet();
-    tokenList = tokenList.stream()
-        .filter(this::appearInMultipleLanguages)
-        .filter(this::tooFrequentInOneFile)
-        .filter(this::tooManyFilesCovered)
-        .collect(Collectors.toSet());
+    tokenList =
+        tokenList.stream()
+            .filter(this::appearInMultipleLanguages)
+            .filter(this::tooFrequentInOneFile)
+            .filter(this::tooManyFilesCovered)
+            .collect(Collectors.toSet());
     return tokenList;
   }
 
@@ -77,7 +88,7 @@ public class TextBased extends Baseline {
     for (List<CodeSource> list : modList.values()) {
       if (list.size() != 0) cnt++;
     }
-    return cnt > 0;
+    return cnt > 1;
   }
 
   private double frequencyInOneFile = 0.01;
@@ -92,7 +103,7 @@ public class TextBased extends Baseline {
     return false;
   }
 
-  private double fileCoveredRate = 0.3;
+  private double fileCoveredRate = 0.1;
 
   private boolean tooManyFilesCovered(String token) {
     int fileCnt = wordsCnt.get(token).size();

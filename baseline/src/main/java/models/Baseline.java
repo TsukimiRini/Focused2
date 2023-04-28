@@ -14,7 +14,7 @@ public abstract class Baseline {
     this.projectName = projectName;
     this.projectDir = projectDir;
   }
-  public void run(){
+  public void run(Map<String, List<String>> categorizedFiles){
 
   }
 }

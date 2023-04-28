@@ -8,9 +8,13 @@ public class CodeSource {
   public Range range;
   public String identifier;
 
-  public CodeSource(Language lang, Range range, String identifier){
+  public CodeSource(Language lang, Range range, String identifier) {
     this.lang = lang;
     this.range = range;
     this.identifier = identifier;
+  }
+
+  public String toString() {
+    return range.getFileName();
   }
 }
