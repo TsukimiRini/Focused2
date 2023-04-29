@@ -13,7 +13,7 @@ public class BaselineMain {
   public static String projectDir = "D:\\Projects\\XLL\\" + projectName;
   public static String outputDir = "D:\\Projects\\Focused2\\baseline\\src\\main\\resources\\text_based_output";
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     Baseline baseline = new TextBased(framework, projectName, projectDir, outputDir);
     SharedStatus.initProjectInfo(framework, projectDir);
     Map<String, List<String>> categorizedFiles =

@@ -105,7 +105,7 @@ public class TextBased extends Baseline {
                 moduleCnt.get(token).put(lang, 0);
               }
               int curModCnt = moduleCnt.get(token).get(lang);
-              moduleCnt.get(token).put(lang, curModCnt);
+              moduleCnt.get(token).put(lang, curModCnt + 1);
             });
   }
 
@@ -115,7 +115,7 @@ public class TextBased extends Baseline {
         tokenList.stream()
             .filter(this::identifierFormat)
             .filter(this::appearInMultipleLanguages)
-            .filter(this::tooFrequentInOneFile)
+//            .filter(this::tooFrequentInOneFile)
             .filter(this::tooManyFilesCovered)
             .collect(Collectors.toSet());
     return tokenList;
@@ -134,8 +134,8 @@ public class TextBased extends Baseline {
     return cnt > 1;
   }
 
-  private double frequencyInOneFile = 0.01;
-  private int appearanceInOneFile = 15;
+  private final double frequencyInOneFile = 0.01;
+  private final int appearanceInOneFile = 15;
 
   private boolean tooFrequentInOneFile(String token) {
     Map<String, Integer> fileToCnt = wordsCnt.get(token);
@@ -148,17 +148,19 @@ public class TextBased extends Baseline {
     return true;
   }
 
-  private double perModuleThreshold = 0.35;
+  private final double perModuleThreshold = 0.35;
 
   private boolean tooManyFilesCovered(String token) {
     for (Language lang : SharedStatus.projectInfo.languages) {
-      int fileCnt = moduleCnt.get(token).get(lang);
-      if ((double) fileCnt / allFileCnt > perModuleThreshold) return false;
+      int modCntForToken = moduleCnt.get(token).get(lang);
+      if ((double) modCntForToken / fileCnt.get(lang) > perModuleThreshold) {
+        return false;
+      }
     }
     return true;
   }
 
-  private int lowWeightThreshold = 4;
+  private final int lowWeightThreshold = 4;
 
   private Map<Pair<String, String>, Set<String>> filterOutLowWeight(
       Map<Pair<String, String>, Set<String>> dependencies) {
