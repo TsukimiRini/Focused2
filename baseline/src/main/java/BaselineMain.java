@@ -3,7 +3,6 @@ import models.Baseline;
 import text_based.TextBased;
 import utils.FileUtil;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
