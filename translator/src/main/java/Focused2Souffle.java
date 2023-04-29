@@ -3,6 +3,7 @@ import model.config.ConfigLink;
 import model.config.ConfigLinkBlock;
 import model.enums.PredicateType;
 import model.souffle.*;
+import model.souffle.Record;
 import org.apache.commons.lang3.tuple.Pair;
 import utils.FileUtil;
 
