@@ -49,7 +49,9 @@ public class FileUtil {
    * @return
    */
   public static String getRelativePath(String absolutePath) {
-    return FilenameUtils.separatorsToUnix(FileUtil.getRelativePath(rootPath, absolutePath));
+    if (absolutePath.startsWith(rootPath))
+      return FilenameUtils.separatorsToUnix(FileUtil.getRelativePath(rootPath, absolutePath));
+    return absolutePath;
   }
 
   /**
