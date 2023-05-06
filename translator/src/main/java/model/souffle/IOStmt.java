@@ -10,7 +10,7 @@ public class IOStmt extends SouffleStmt {
   }
 
   public String toString() {
-    if (isOutput) return ".output " + object;
+    if (isOutput) return ".output " + object + "(IO=file, rfc4180=true)";
     else return ".input " + object;
   }
 }

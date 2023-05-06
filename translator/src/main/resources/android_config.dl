@@ -59,8 +59,8 @@
     LayoutXLL(def, ref) :- ( LayoutFileStandard(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ; LayoutFileExtended(def), ( def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileExtendedCap(capDefLayoutFile)]; def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$LayoutFileStandardCap(capDefLayoutFile)] ) ), LayoutID(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$LayoutIDCap(capRefLayoutFile,_capRefJavaFile)], capDefLayoutFile=capRefLayoutFile.
 }
 .init layoutmenuInstance = LayoutMenu
-.output layoutmenuInstance.MenuXLL
-.output layoutmenuInstance.LayoutXLL
+.output layoutmenuInstance.MenuXLL(IO=file, rfc4180=true)
+.output layoutmenuInstance.LayoutXLL(IO=file, rfc4180=true)
 
 .comp Utils {
     .decl WidgetRefInContext(param0:symbol, param1:URI)
@@ -81,20 +81,20 @@
     DatabindingXLL(def, ref) :- DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefBindingVar,_capRefClass,capRefLayoutName)], HasInclude(def, include), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], include=[_attrIncludeLang,_attrIncludeFile,_attrIncludeElement,_attrIncludeBranches,$IncludeLayoutCap(capIncludeLayoutFile,_capIncludeIncludeLayout)], snake2pascal(capIncludeLayoutFile)=capRefLayoutName, capDefWidgetID=capRefWidgetID.
 }
 .init databindingincludeInstance = DatabindingInclude
-.output databindingincludeInstance.HasInclude
-.output databindingincludeInstance.DatabindingXLL
+.output databindingincludeInstance.HasInclude(IO=file, rfc4180=true)
+.output databindingincludeInstance.DatabindingXLL(IO=file, rfc4180=true)
 
 .comp Widget : LayoutMenu {
     .decl WidgetXLL(param0:URI, param1:URI)
     WidgetXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(_capDefLayoutFile,capDefWidgetID,_capDefElementTag)], WidgetResourceRef(ref), ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBranches,$WidgetResourceRefCap(_capRefJavaFile,capRefWidgetID)], LayoutXLL(layoutFile, layoutRef), layoutFile=[_attrLayoutFileLang,attrLayoutFileFile,_attrLayoutFileElement,_attrLayoutFileBranches,_caplayoutFile], layoutRef=[_attrLayoutRefLang,attrLayoutRefFile,_attrLayoutRefElement,_attrLayoutRefBranches,_caplayoutRef], attrLayoutRefFile=attrRefFile, ( attrLayoutFileFile=attrDefFile ; ends_with(attrDefFile, cat(capIncludeIncludeLayout, ".xml")), attrIncludeFile=attrLayoutFileFile, IncludeLayout(include), include=[_attrIncludeLang,attrIncludeFile,_attrIncludeElement,_attrIncludeBranches,$IncludeLayoutCap(_capIncludeLayoutFile,capIncludeIncludeLayout)] ), capDefWidgetID=capRefWidgetID.
 }
 .init widgetInstance = Widget
-.output widgetInstance.WidgetXLL
+.output widgetInstance.WidgetXLL(IO=file, rfc4180=true)
 
 .comp Databinding {
     .decl DatabindingXLL(param0:URI, param1:URI)
     DatabindingXLL(def, ref) :- WidgetDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBranches,$WidgetDefCap(capDefLayoutFile,capDefWidgetID,_capDefElementTag)], DatabindingRef(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBranches,$DatabindingRefCap(_capRefJavaFile,capRefWidgetID,_capRefBindingVar,_capRefClass,capRefLayoutName)], snake2pascal(capDefLayoutFile)=capRefLayoutName, snake2camel(capDefWidgetID)=capRefWidgetID.
 }
 .init databindingInstance = Databinding
-.output databindingInstance.DatabindingXLL
+.output databindingInstance.DatabindingXLL(IO=file, rfc4180=true)
 
