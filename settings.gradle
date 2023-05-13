@@ -1,5 +1,4 @@
 rootProject.name = 'Focused2'
-include 'models'
 include 'translator'
 include 'core'
 include 'tree-sitter'
