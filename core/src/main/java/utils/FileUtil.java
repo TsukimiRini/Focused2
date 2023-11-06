@@ -3,6 +3,8 @@ package utils;
 import model.Language;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -14,12 +16,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileUtil {
+  protected static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
+
   public static File createOrClearFile(String path) throws IOException {
     File file = new File(path);
     if (file.exists()) {
       file.delete();
     }
+    try{
     file.createNewFile();
+    }catch (Exception e){
+      e.printStackTrace();
+      logger.error("file not created: {}", path);
+    }
     return file;
   }
 
