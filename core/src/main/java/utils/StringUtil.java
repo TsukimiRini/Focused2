@@ -15,6 +15,6 @@ public class StringUtil {
   }
 
   public static String escapedForRegex(String str) {
-    return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|])", "\\\\${toEscape}");
+    return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|\\*])", "\\\\${toEscape}");
   }
 }
