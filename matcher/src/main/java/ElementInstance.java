@@ -49,7 +49,7 @@ public class ElementInstance implements Cloneable {
     if (!(obj instanceof ElementInstance)) return false;
     ElementInstance ele = (ElementInstance) obj;
     return filePath.equals(ele.filePath)
-        && element.toString().equals(ele.element.toString())
+        && (element == ele.element || element.toString().equals(ele.element.toString()))
         && capVal.toString().equals(ele.capVal.toString());
   }
 
@@ -72,7 +72,7 @@ public class ElementInstance implements Cloneable {
   public String toOutputString(URIPattern pattern) {
     StringBuilder builder = new StringBuilder("[");
     builder.append(lang.toString()).append(", ");
-    builder.append(filePath).append(", ");
+    builder.append(filePath == null ? "" : StringUtil.quoteStr(filePath)).append(", ");
     builder.append(element == null ? "" : StringUtil.quoteStr(element.toString())).append(", ");
 
     if (branches.isEmpty()) builder.append("$ZeroBranch, ");

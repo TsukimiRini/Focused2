@@ -5,6 +5,8 @@ import model.URI.URINode;
 import model.URI.URISegment;
 import model.config.ConfigLinkBlock;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.FileUtil;
 import utils.StringUtil;
 
@@ -27,6 +29,8 @@ public class DatabaseBuilder {
   public static Map<Language, TreeInfoConf> treeInfoConfs = new HashMap<>();
 
   public static Map<Language, URINode> uriTrees = new HashMap<>();
+
+  protected static Logger logger = LoggerFactory.getLogger(DatabaseBuilder.class);
 
   public static void main(String[] args) throws IOException {
     SharedStatus.initProjectInfo(framework, projectDir);
@@ -94,14 +98,16 @@ public class DatabaseBuilder {
       Set<ElementInstance> fileNodes =
           matchPatternLayer(new ElementInstance(lang), pattern.file, tree, MatchedType.FILE);
       SegmentPattern wildCardRoot = new SegmentPattern(SegmentType.NODE, "**");
-      wildCardRoot.child = pattern.file;
+      SegmentPattern wildCardEdge = new SegmentPattern(SegmentType.EDGE, "*");
+      wildCardRoot.child = wildCardEdge;
+      wildCardEdge.child = pattern.file;
       fileNodes.addAll(
           matchPatternLayer(new ElementInstance(lang), wildCardRoot, tree, MatchedType.FILE));
       if (pattern.elementRoot == null) return fileNodes;
       for (ElementInstance fileNode : fileNodes) {
         res.addAll(
             matchPatternLayer(fileNode, pattern.elementRoot, fileNode.file, MatchedType.ELEMENT));
-        wildCardRoot.child = pattern.elementRoot;
+        wildCardEdge.child = pattern.elementRoot;
         res.addAll(matchPatternLayer(fileNode, wildCardRoot, fileNode.file, MatchedType.ELEMENT));
       }
     } catch (Exception e) {
@@ -137,13 +143,14 @@ public class DatabaseBuilder {
 
     Set<ElementInstance> res = new HashSet<>();
     Pattern textPattern = getTextPattern(pattern, inst);
+    SegmentPattern curPattern = (SegmentPattern) (pattern.text.text.equals("**")? pattern.child.child: pattern);
 
     for (String childName : tree.children.keySet()) {
       Matcher matcher = textPattern.matcher(childName);
       if (matcher.find()) {
         ElementInstance newInstance = inst.clone();
         // fill in captures of new instance
-        for (String capName : pattern.text.captures) {
+        for (String capName : curPattern.text.captures) {
           if (!newInstance.capVal.containsKey(capName)) {
             newInstance.capVal.put(capName, matcher.group(capName));
           }
@@ -151,17 +158,17 @@ public class DatabaseBuilder {
         // iterate for child
         for (URINode child : tree.children.get(childName)) {
           // check type
-          if (!checkType(pattern.type, child.type)) continue;
+          if (!checkType(curPattern.type, child.type)) continue;
 
           // check attribute
-          ElementInstance childInst = checkAttr(pattern, child, newInstance);
+          ElementInstance childInst = checkAttr(curPattern, child, newInstance);
 
-          if (pattern.parent != null && pattern.parent.segType == SegmentType.EDGE) {
-            childInst = checkEdge((SegmentPattern) pattern.parent, child.edgeToParent, childInst);
+          if (curPattern.parent != null && curPattern.parent.segType == SegmentType.EDGE) {
+            childInst = checkEdge((SegmentPattern) curPattern.parent, child.edgeToParent, childInst);
           }
 
-          SegmentPattern nextNodePattern = (SegmentPattern) pattern.child;
-          if (pattern.child != null && pattern.child.segType == SegmentType.EDGE) {
+          SegmentPattern nextNodePattern = (SegmentPattern) curPattern.child;
+          if (curPattern.child != null && curPattern.child.segType == SegmentType.EDGE) {
             nextNodePattern = (SegmentPattern) nextNodePattern.child;
           }
 
@@ -169,11 +176,11 @@ public class DatabaseBuilder {
             // find all possible children
             Set<ElementInstance> childSet =
                 matchPatternLayer(
-                    childInst, pattern.child == null ? null : nextNodePattern, child, checkObject);
+                    childInst, curPattern.child == null ? null : nextNodePattern, child, checkObject);
 
             // check branch
             for (ElementInstance toCheck : childSet) {
-              Set<ElementInstance> checkedSet = checkBranches(pattern, child, toCheck);
+              Set<ElementInstance> checkedSet = checkBranches(curPattern, child, toCheck);
               if (checkedSet != null) {
                 res.addAll(checkedSet);
               }
@@ -195,9 +202,13 @@ public class DatabaseBuilder {
   }
 
   private static Pattern getTextPattern(SegmentPattern pattern, ElementInstance instance) {
+    if (pattern.text == null) {
+      logger.error("text pattern is null");
+      throw new IllegalStateException("text pattern is null");
+    }
     IdentifierPattern text = pattern.text;
     if ("**".equals(text.text)) {
-      return Pattern.compile(".*");
+      return getTextPattern((SegmentPattern) pattern.child.child, instance);
     } else {
       // TODO: same capture may happen
       String regex = replaceCapture(text, instance);

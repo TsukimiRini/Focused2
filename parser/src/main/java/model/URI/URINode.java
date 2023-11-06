@@ -30,7 +30,7 @@ public class URINode extends URISegment {
   }
 
   public Boolean isDir() {
-    return type.equals("FILE") || type.equals("DIRECTORY") || type.equals("ROOT");
+    return type.equals("DIRECTORY") || type.equals("ROOT");
   }
 
   public String getEdgeType(List<TreeInfoRule> edgeRules, URINode parent) {
