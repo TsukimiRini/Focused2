@@ -3,10 +3,7 @@ import model.URI.URINode;
 import model.URIPattern;
 import utils.StringUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ElementInstance implements Cloneable {
@@ -38,6 +35,15 @@ public class ElementInstance implements Cloneable {
   public void setFilePath(URINode file) {
     this.file = file;
     filePath = file.toString();
+  }
+
+  public boolean hasConflictWith(ElementInstance other){
+    Set<String> sharedKeys = new HashSet<>(capVal.keySet());
+    sharedKeys.retainAll(other.capVal.keySet());
+    for (String key : sharedKeys) {
+      if (!capVal.get(key).equals(other.capVal.get(key))) return true;
+    }
+    return false;
   }
 
   public void setElement(URINode ele) {

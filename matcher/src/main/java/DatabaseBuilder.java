@@ -103,16 +103,119 @@ public class DatabaseBuilder {
       wildCardEdge.child = pattern.file;
       fileNodes.addAll(
           matchPatternLayer(new ElementInstance(lang), wildCardRoot, tree, MatchedType.FILE));
+      //      SegmentPattern wildCardRoot = new SegmentPattern(SegmentType.NODE, "**");
+      //      SegmentPattern wildCardEdge = new SegmentPattern(SegmentType.EDGE, "*");
+      //      wildCardEdge.setParent(wildCardRoot);
+      //      pattern.file.setParent(wildCardEdge);
+      //      Set<ElementInstance> fileNodes =
+      //          matchPatternFromBottom(new ElementInstance(lang), wildCardRoot, tree,
+      // MatchedType.FILE);
       if (pattern.elementRoot == null) return fileNodes;
       for (ElementInstance fileNode : fileNodes) {
-        res.addAll(
-            matchPatternLayer(fileNode, pattern.elementRoot, fileNode.file, MatchedType.ELEMENT));
-        wildCardEdge.child = pattern.elementRoot;
-        res.addAll(matchPatternLayer(fileNode, wildCardRoot, fileNode.file, MatchedType.ELEMENT));
+        pattern.elementRoot.setParent(wildCardEdge);
+        res.addAll(matchPatternFromBottom(fileNode, wildCardRoot, fileNode.file));
+        //        wildCardEdge.child = pattern.elementRoot;
+        //        res.addAll(matchPatternFromBottom(fileNode, wildCardRoot, fileNode.file));
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
+    return res;
+  }
+
+  private static Set<ElementInstance> matchPatternFromBottom(
+      ElementInstance fileNode, SegmentPattern pattern, URINode tree)
+      throws CloneNotSupportedException {
+    return matchPatternFromBottom(fileNode, pattern, tree, MatchedType.ELEMENT);
+  }
+
+  private static Set<ElementInstance> matchPatternFromBottom(
+      ElementInstance fileNode, SegmentPattern pattern, URINode tree, MatchedType matchedType)
+      throws CloneNotSupportedException {
+    Set<ElementInstance> res = new HashSet<>();
+    SegmentPattern tail = (SegmentPattern) pattern.getTail();
+    Set<ElementInstance> filteredNodes = getNodesByNodePattern(tree, tail, fileNode, matchedType);
+    filteredNodes.forEach(
+        node -> {
+          try {
+            URINode curNode = matchedType == MatchedType.FILE ? node.file : node.element;
+            res.addAll(
+                matchPatternLayerReverse(
+                    node, (SegmentPattern) tail.parent.parent, curNode.getParent()));
+          } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+          }
+        });
+    return res;
+  }
+
+  private static Set<ElementInstance> matchPatternLayerReverse(
+      ElementInstance inst, SegmentPattern pattern, URINode tree)
+      throws CloneNotSupportedException {
+    if (pattern == null || pattern.text.text.equals("**") && pattern.parent == null) {
+      return Set.of(inst);
+    }
+    if (pattern.segType == SegmentType.EDGE) {
+      throw new IllegalArgumentException("the first segment of the pattern should be node pattern");
+    }
+
+    Set<ElementInstance> res = new HashSet<>();
+
+    if (tree == null) return res;
+    else if (pattern.segType == SegmentType.NODE && (tree.isDir() || tree.type.equals("FILE")))
+      return res;
+
+    // match text
+    SegmentPattern curPattern =
+        (SegmentPattern) (pattern.text.text.equals("**") ? pattern.parent.parent : pattern);
+    Pattern textPattern = getTextPattern(curPattern, inst);
+    Matcher matcher = textPattern.matcher(tree.getName());
+    if (matcher.matches()) {
+      ElementInstance newInst = inst.clone();
+      for (String capture : curPattern.text.captures) {
+        if (!newInst.capVal.containsKey(capture)) {
+          try {
+            newInst.addCapture(capture, matcher.group(capture));
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+      }
+
+      // match type and attr
+      if (!checkType(curPattern.type, tree.type)) newInst = null;
+      newInst = checkAttr(curPattern, tree, newInst);
+
+      // match edge
+      newInst = checkEdge((SegmentPattern) curPattern.parent, tree.edgeToParent, newInst);
+
+      // match branches
+      //      Set<ElementInstance> newInsts = new HashSet<>();
+      //      if (newInst != null && !curPattern.branches.isEmpty()) {
+      //        newInsts.addAll(checkBranchesFromRoot(curPattern, tree, newInst));
+      //      } else if (newInst != null) {
+      //        newInsts.add(newInst);
+      //      }
+
+      Set<ElementInstance> newInsts = checkBranches(curPattern, tree, newInst);
+      if (newInsts == null) newInsts = new HashSet<>();
+
+      newInsts.forEach(
+          each -> {
+            try {
+              res.addAll(
+                  matchPatternLayerReverse(
+                      each, (SegmentPattern) curPattern.parent.parent, tree.getParent()));
+            } catch (CloneNotSupportedException e) {
+              e.printStackTrace();
+            }
+          });
+    }
+
+    if (pattern.text.text.equals("**")) {
+      res.addAll(matchPatternLayerReverse(inst, pattern, tree.getParent()));
+    }
+
     return res;
   }
 
@@ -143,7 +246,8 @@ public class DatabaseBuilder {
 
     Set<ElementInstance> res = new HashSet<>();
     Pattern textPattern = getTextPattern(pattern, inst);
-    SegmentPattern curPattern = (SegmentPattern) (pattern.text.text.equals("**")? pattern.child.child: pattern);
+    SegmentPattern curPattern =
+        (SegmentPattern) (pattern.text.text.equals("**") ? pattern.child.child : pattern);
 
     for (String childName : tree.children.keySet()) {
       Matcher matcher = textPattern.matcher(childName);
@@ -164,7 +268,8 @@ public class DatabaseBuilder {
           ElementInstance childInst = checkAttr(curPattern, child, newInstance);
 
           if (curPattern.parent != null && curPattern.parent.segType == SegmentType.EDGE) {
-            childInst = checkEdge((SegmentPattern) curPattern.parent, child.edgeToParent, childInst);
+            childInst =
+                checkEdge((SegmentPattern) curPattern.parent, child.edgeToParent, childInst);
           }
 
           SegmentPattern nextNodePattern = (SegmentPattern) curPattern.child;
@@ -176,7 +281,10 @@ public class DatabaseBuilder {
             // find all possible children
             Set<ElementInstance> childSet =
                 matchPatternLayer(
-                    childInst, curPattern.child == null ? null : nextNodePattern, child, checkObject);
+                    childInst,
+                    curPattern.child == null ? null : nextNodePattern,
+                    child,
+                    checkObject);
 
             // check branch
             for (ElementInstance toCheck : childSet) {
@@ -198,6 +306,56 @@ public class DatabaseBuilder {
       }
     }
 
+    return res;
+  }
+
+  public static Set<ElementInstance> getNodesByNodePattern(
+      URINode tree, SegmentPattern pattern, ElementInstance inst)
+      throws CloneNotSupportedException {
+    return getNodesByNodePattern(tree, pattern, inst, MatchedType.ELEMENT);
+  }
+
+  public static Set<ElementInstance> getNodesByNodePattern(
+      URINode tree, SegmentPattern pattern, ElementInstance inst, MatchedType type)
+      throws CloneNotSupportedException {
+    if (type == MatchedType.FILE && !tree.isDir()) return new HashSet<>();
+
+    Set<ElementInstance> res = new HashSet<>();
+    if (pattern.text.text.equals("**")) {
+      throw new IllegalArgumentException("the first segment of the pattern should not be **");
+    }
+    Pattern textPattern = getTextPattern(pattern, inst);
+    for (String childName : tree.children.keySet()) {
+      Matcher matcher = textPattern.matcher(childName);
+      boolean matched = matcher.find();
+      // iterate for child
+      for (URINode child : tree.children.get(childName)) {
+        if (matched) {
+          ElementInstance newInstance = inst.clone();
+          // check type
+          if (!checkType(pattern.type, child.type)) continue;
+
+          // check attribute
+          ElementInstance childInst = checkAttr(pattern, child, newInstance);
+
+          if (pattern.parent != null && pattern.parent.segType == SegmentType.EDGE) {
+            childInst = checkEdge((SegmentPattern) pattern.parent, child.edgeToParent, childInst);
+          }
+
+          if (childInst != null) {
+            if (type == MatchedType.FILE) childInst.setFilePath(child);
+            else if (type == MatchedType.ELEMENT) childInst.element = child;
+            for (String capture : pattern.text.captures) {
+              if (!childInst.capVal.containsKey(capture)) {
+                childInst.addCapture(capture, matcher.group(capture));
+              }
+            }
+            res.add(childInst);
+          }
+        }
+        res.addAll(getNodesByNodePattern(child, pattern, inst, type));
+      }
+    }
     return res;
   }
 
@@ -241,7 +399,10 @@ public class DatabaseBuilder {
       SegmentPattern pattern, URISegment node, ElementInstance instance)
       throws CloneNotSupportedException {
     // should get new instance if updated
-    ElementInstance finalInst = instance;
+    if (instance == null) {
+      return null;
+    }
+    ElementInstance finalInst = instance.clone();
 
     // check attributes
     for (String attributeName : pattern.attributes.keySet()) {
@@ -255,9 +416,6 @@ public class DatabaseBuilder {
       // check captures in attr val
       for (String capName : attrVal.captures) {
         if (!instance.hasCapture(capName)) {
-          if (finalInst == instance) {
-            finalInst = instance.clone();
-          }
           finalInst.addCapture(capName, matcher.group(capName));
         }
       }
@@ -269,6 +427,9 @@ public class DatabaseBuilder {
   private static ElementInstance checkEdge(
       SegmentPattern pattern, URIEdge node, ElementInstance instance)
       throws CloneNotSupportedException {
+    if (instance == null) {
+      return null;
+    }
     if (checkType(pattern.text, node.type)) return checkAttr(pattern, node, instance);
     return null;
   }
@@ -276,6 +437,7 @@ public class DatabaseBuilder {
   private static Set<ElementInstance> checkBranches(
       SegmentPattern pattern, URINode node, ElementInstance instance)
       throws CloneNotSupportedException {
+    if (instance == null) return null;
     Set<ElementInstance> res = Set.of(instance);
     for (SegmentPattern branchPattern : pattern.branches) {
       Set<ElementInstance> curBranch = new HashSet<>();
@@ -284,6 +446,38 @@ public class DatabaseBuilder {
             matchPatternLayer(
                 iterateInst, (SegmentPattern) branchPattern.child, node, MatchedType.BRANCH));
         if (curBranch.isEmpty()) return null;
+      }
+      res = curBranch;
+    }
+    return res;
+  }
+
+  private static Set<ElementInstance> checkBranchesFromRoot(
+      SegmentPattern pattern, URINode node, ElementInstance instance)
+      throws CloneNotSupportedException {
+    Set<ElementInstance> res = Set.of(instance);
+    for (SegmentPattern branchPattern : pattern.branches) {
+      Set<ElementInstance> curBranch = new HashSet<>();
+      Set<ElementInstance> candidates =
+          getNodesByNodePattern(node, (SegmentPattern) branchPattern.getTail(), instance);
+      for (ElementInstance iterateInst : res) {
+        for (ElementInstance candidate : candidates) {
+          Set<ElementInstance> branches =
+              matchPatternLayerReverse(
+                  candidate, (SegmentPattern) branchPattern.getTail(), candidate.element);
+          branches.forEach(
+              b -> {
+                try {
+                  if (b.hasConflictWith(iterateInst)) return;
+                  ElementInstance newInst = iterateInst.clone();
+                  newInst.capVal.putAll(b.capVal);
+                  newInst.addBranch(b.element);
+                  curBranch.add(newInst);
+                } catch (CloneNotSupportedException e) {
+                  e.printStackTrace();
+                }
+              });
+        }
       }
       res = curBranch;
     }

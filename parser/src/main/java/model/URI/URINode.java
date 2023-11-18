@@ -18,9 +18,17 @@ public class URINode extends URISegment {
     this.type = nodeType;
   }
 
+  public String getName(){
+    return get("name");
+  }
+
+  public URINode getParent() {
+    return edgeToParent == null ? null : edgeToParent.from;
+  }
+
   public String toString() {
-    boolean isFilePath = isDir();
-    boolean noNeedToAppendParent = edgeToParent == null || !isFilePath && edgeToParent.from.isDir();
+    boolean isFilePath = isDir() || type.equals("FILE");
+    boolean noNeedToAppendParent = (edgeToParent == null || !isFilePath && edgeToParent.from.isDir());
     return (noNeedToAppendParent
             ? ""
             : (edgeToParent.from.toString()
