@@ -141,6 +141,9 @@ public class ConfigLink {
             .collect(Collectors.toSet());
     assert defStmts.size() > 0;
     List<String> stmtsList = new ArrayList<>(defStmts);
+    if (stmtsList.size() == 0){
+      return null;
+    }
     if (stmtsList.size() == 1) {
       return stmtsList.get(0);
     } else {
@@ -156,7 +159,7 @@ public class ConfigLink {
 
   private String getDefForEachVarAndType(
       String varName, List<String> layers, List<String> caps, URIPattern type) {
-    if ((layers == null || layers.isEmpty()) && (caps == null || caps.isEmpty())) return null;
+//    if ((layers == null || layers.isEmpty()) && (caps == null || caps.isEmpty())) return null;
     StringBuilder sb = new StringBuilder(varName);
     sb.append("=[");
     String[] layerList = {"lang", "file", "element", "branches"};

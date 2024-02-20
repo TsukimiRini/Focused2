@@ -56,6 +56,7 @@ public class ConfigLoader {
       if (curRule.params != null) {
         templates.put(label, curPattern);
       } else {
+        templates.put(label, curPattern);
         patterns.put(label, curPattern);
       }
     }

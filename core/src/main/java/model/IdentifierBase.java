@@ -7,7 +7,7 @@ public class IdentifierBase {
   protected static final Logger logger = LoggerFactory.getLogger(IdentifierBase.class);
   public String text;
 
-  public IdentifierBase(String text){
+  public IdentifierBase(String text) {
     this.text = text;
   }
 

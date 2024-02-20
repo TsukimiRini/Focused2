@@ -37,7 +37,7 @@ public class CSTTree implements Serializable {
   // init from tree
   public CSTTree(String filePath, String source, Tree tree) {
     this(filePath, source, null, tree.getRootNode().walk(), null);
-    System.out.println(tree.getRootNode().getNodeString());
+//    System.out.println(tree.getRootNode().getNodeString());
   }
 
   // init from cursor
