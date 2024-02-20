@@ -1,5 +1,7 @@
 package model;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +17,11 @@ public class SegmentBase<T extends IdentifierBase> {
   public Map<String, T> attributes = new HashMap<>();
   public SegmentBase<T> parent = null;
   public SegmentBase<T> child = null;
+
+  static {
+    BasicConfigurator.configure();
+    org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
+  }
 
   public SegmentBase(SegmentType segType) {
     this.segType = segType;

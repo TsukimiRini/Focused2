@@ -5,6 +5,8 @@ import model.URI.URINode;
 import model.URI.URISegment;
 import model.config.ConfigLinkBlock;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileUtil;
@@ -31,6 +33,11 @@ public class DatabaseBuilder {
   public static Map<Language, URINode> uriTrees = new HashMap<>();
 
   protected static Logger logger = LoggerFactory.getLogger(DatabaseBuilder.class);
+
+  static {
+    BasicConfigurator.configure();
+    org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
+  }
 
   public static void main(String[] args) throws IOException {
     SharedStatus.initProjectInfo(framework, projectDir);

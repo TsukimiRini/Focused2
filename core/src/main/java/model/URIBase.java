@@ -1,5 +1,7 @@
 package model;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,11 @@ public class URIBase<T extends SegmentBase> {
   public T elementRoot;
   public Map<String, List<T>> branches = new HashMap<>();
   public List<T> defaultBranches = new ArrayList<>();
+
+  static {
+    BasicConfigurator.configure();
+    org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
+  }
 
   public URIBase(String label) {
     this.label = label;
