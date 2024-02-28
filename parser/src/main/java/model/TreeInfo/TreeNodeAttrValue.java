@@ -111,11 +111,11 @@ public class TreeNodeAttrValue {
     return null;
   }
 
-  public Set<String> getVal(CSTTree curNode) {
+  public Set<String> getVal(CSTTree curNode, TreeInfoRule rule) {
     Set<String> res = new HashSet<>();
     switch (type) {
       case FUNCTION:
-        res.add(getFuncReturnVal(curNode));
+        res.add(getFuncReturnVal(curNode, rule));
         break;
       case LITERAL:
       case INTEGER:
@@ -140,7 +140,7 @@ public class TreeNodeAttrValue {
     return res;
   }
 
-  public String getFuncReturnVal(CSTTree curNode) {
+  public String getFuncReturnVal(CSTTree curNode, TreeInfoRule rule) {
     if (type != TreeNodeAttrValueType.FUNCTION) return null;
     String res = null;
     List<String> arg = null;
@@ -165,7 +165,11 @@ public class TreeNodeAttrValue {
         if (!(arg.size() == 1 && arg.get(0).equals("this"))) {
           throw new IllegalArgumentException("not supported yet");
         }
-        res = String.valueOf(curNode.parent.children.get(curNode.nodeType).size());
+        List<CSTTree> siblings =
+            curNode.parent.childrenSeq.stream()
+                .filter(x -> rule.childNodeType.contains(x.nodeType))
+                .collect(Collectors.toList());
+        res = String.valueOf(siblings.indexOf(curNode));
         break;
     }
     return res;

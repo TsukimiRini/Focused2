@@ -18,6 +18,7 @@ public class CSTTree implements Serializable {
   public String fieldName;
   public int startIdx, endIdx;
   public Map<String, List<CSTTree>> children; // key: type, value: CSTTrees
+  public List<CSTTree> childrenSeq;
   public Map<String, String> fields;
   public CSTTree parent;
 
@@ -31,6 +32,7 @@ public class CSTTree implements Serializable {
     this.endIdx = endIdx;
     this.parent = parent;
     children = new HashMap<>();
+    childrenSeq = new ArrayList<>();
     fields = new HashMap<>();
   }
 
@@ -51,6 +53,7 @@ public class CSTTree implements Serializable {
     this.endIdx = cursor.getCurrentNode().getEndByte();
     this.snippet = source.substring(startIdx, endIdx);
     this.children = new HashMap<>();
+    this.childrenSeq = new ArrayList<>();
     this.fields = new HashMap<>();
     this.parent = parent;
 
@@ -99,6 +102,7 @@ public class CSTTree implements Serializable {
       children.put(childType, new ArrayList<>());
     }
     children.get(childType).add(child);
+    childrenSeq.add(child);
 
     if (child.fieldName != null) {
       fields.put(child.fieldName, child.snippet);

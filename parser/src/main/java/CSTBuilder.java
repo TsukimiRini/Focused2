@@ -14,7 +14,7 @@ public class CSTBuilder {
   static {
     System.load(
         System.getProperty("user.home")
-            + "/Projects/tree-sitter/java-tree-sitter/libjava-tree-sitter.dylib");
+            + "/Projects/tree-sitter/java-tree-sitter/libjava-tree-sitter_.dylib");
   }
 
   public static Parser parser = new Parser();
@@ -42,6 +42,12 @@ public class CSTBuilder {
         break;
       case XML:
         parser.setLanguage(Languages.xml());
+        break;
+      case HTML:
+        parser.setLanguage(Languages.html());
+        break;
+      case CSS:
+        parser.setLanguage(Languages.css());
         break;
     }
     Map<String, CSTTree> cstTrees = new HashMap<>();

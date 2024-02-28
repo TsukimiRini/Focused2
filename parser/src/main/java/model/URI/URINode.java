@@ -18,7 +18,7 @@ public class URINode extends URISegment {
     this.type = nodeType;
   }
 
-  public String getName(){
+  public String getName() {
     return get("name");
   }
 
@@ -28,7 +28,8 @@ public class URINode extends URISegment {
 
   public String toString() {
     boolean isFilePath = isDir() || type.equals("FILE");
-    boolean noNeedToAppendParent = (edgeToParent == null || !isFilePath && edgeToParent.from.isDir());
+    boolean noNeedToAppendParent =
+        (edgeToParent == null || !isFilePath && edgeToParent.from.isDir());
     return (noNeedToAppendParent
             ? ""
             : (edgeToParent.from.toString()
@@ -41,26 +42,29 @@ public class URINode extends URISegment {
     return type.equals("DIRECTORY") || type.equals("ROOT");
   }
 
-  public String getEdgeType(List<TreeInfoRule> edgeRules, URINode parent) {
-    for (TreeInfoRule rule : edgeRules) {
-      if (rule.isMatchedEdgeRule(parent, this)) {
-        TreeNodeAttrValue typeVal = rule.get("type").get(0);
-        if (!typeVal.isLiteralType()) {
-          throw new IllegalArgumentException("invalid edge type");
-        }
-        return typeVal.valueOrFunc.iterator().next();
-      }
-    }
-    return "";
-  }
-
   public void setEdge(String type, URINode parent) {
     edgeToParent = new URIEdge(type, parent);
   }
 
-  public void analyzeAndSetEdge(List<TreeInfoRule> edgeRules, URINode parent) {
-    String type = getEdgeType(edgeRules, parent);
-    setEdge(type, parent);
+  public void analyzeAndSetEdge(CSTTree cstTree, List<TreeInfoRule> edgeRules, URINode parent) {
+    TreeInfoRule matched = null;
+    for (TreeInfoRule rule : edgeRules) {
+      if (rule.isMatchedEdgeRule(parent, this)) {
+        matched = rule;
+        break;
+      }
+    }
+    if (matched == null) {
+      setEdge("", parent);
+      return;
+    }
+
+    Pair<List<String>, Map<String, String>> attrs = getAttrVal(cstTree, matched);
+    setEdge(matched.get("type").get(0).valueOrFunc.iterator().next(), parent);
+    for (String key : attrs.getRight().keySet()) {
+      if (key.equals("type")) continue;
+      edgeToParent.put(key, attrs.getRight().get(key));
+    }
   }
 
   public void addCST(String filePath, CSTTree tree, TreeInfoConf conf) {
@@ -97,7 +101,11 @@ public class URINode extends URISegment {
       Pair<List<String>, Map<String, String>> attrs = getAttrVal(tree, matchedNodeRule);
       if (attrs.getLeft().size() == 1) {
         nextNode = new URINode(attrs.getLeft().get(0), curNodeType);
-        nextNode.analyzeAndSetEdge(conf.edgeRules, this);
+        nextNode.analyzeAndSetEdge(tree, conf.edgeRules, this);
+        if (attrs.getRight().containsKey("type")) {
+          nextNode.type = attrs.getRight().get("type");
+          attrs.getRight().remove("type");
+        }
         nextNode.putAll(attrs.getRight());
         nextNode.snippets = tree.snippet;
         addChild(nextNode);
@@ -105,8 +113,12 @@ public class URINode extends URISegment {
         String edgeType = null;
         for (String name : attrs.getLeft()) {
           URINode oneNode = new URINode(name, curNodeType);
-          if (edgeType == null) edgeType = oneNode.getEdgeType(conf.edgeRules, this);
-          oneNode.setEdge(edgeType, this);
+          if (edgeType == null) oneNode.analyzeAndSetEdge(tree, conf.edgeRules, this);
+          //          oneNode.setEdge(edgeType, this);
+          if (attrs.getRight().containsKey("type")) {
+            nextNode.type = attrs.getRight().get("type");
+            attrs.getRight().remove("type");
+          }
           oneNode.putAll(attrs.getRight());
           nextNode.snippets = tree.snippet;
           addChild(oneNode);
@@ -152,7 +164,7 @@ public class URINode extends URISegment {
     for (String attrKey : rule.keySet()) {
       List<TreeNodeAttrValue> attrValues = rule.get(attrKey);
       for (TreeNodeAttrValue attrVal : attrValues) {
-        List<String> tryToGetVal = new ArrayList<>(attrVal.getVal(tree));
+        List<String> tryToGetVal = new ArrayList<>(attrVal.getVal(tree, rule));
         if (!tryToGetVal.isEmpty()) {
           // TODO: remove temprate patch
           if (!attrVal.isListType()) {
@@ -165,9 +177,9 @@ public class URINode extends URISegment {
       }
     }
 
-    if (nameVals == null) {
-      throw new IllegalArgumentException("no name found");
-    }
+    //    if (nameVals == null) {
+    //      throw new IllegalArgumentException("no name found");
+    //    }
     return Pair.of(nameVals, attrMap);
   }
 

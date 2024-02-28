@@ -33,6 +33,10 @@ public class ProjectInfo {
         addLanguage(Language.XML);
         addLanguage(Language.SQL);
         break;
+      case "web":
+        addLanguage(Language.HTML);
+        addLanguage(Language.CSS);
+        break;
       default:
         addLanguage(Language.JAVA);
     }

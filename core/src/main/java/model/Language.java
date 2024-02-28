@@ -12,6 +12,7 @@ public enum Language {
   JSP(".jsp", "JSP"),
   FTL(".ftl", "FTL"),
   SQL(".sql", "SQL"),
+  CSS(".css", "CSS"),
   FILE(".file", "FILE"),
   ANY("*", "ANY"),
   OTHER("?", "?");
