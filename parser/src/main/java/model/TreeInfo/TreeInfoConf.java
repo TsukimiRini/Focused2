@@ -51,6 +51,9 @@ public class TreeInfoConf {
       }
     }
     if (curRule != null) {
+      if (curRule.ruleType == TreeInfoRuleType.NODE && !curRule.containsKey("name")) {
+        curRule.put("name", List.of(new TreeNodeAttrValue("this", curRule)));
+      }
       addToRuleSet(curRule.ruleType == TreeInfoRuleType.NODE ? nodeRules : edgeRules, curRule);
     }
   }
@@ -66,13 +69,32 @@ public class TreeInfoConf {
   }
 
   private void addToRuleSet(List<TreeInfoRule> ruleSet, TreeInfoRule rule) {
+    if (rule.ruleType == TreeInfoRuleType.NODE && !rule.containsKey("name")) {
+      rule.put("name", List.of(new TreeNodeAttrValue("this", rule)));
+    }
     ruleSet.add(rule);
   }
 
   private void addNodeVariable(String left, String right) {
     left = left.strip();
+    right = right.strip();
     if (left.length() <= 0) return;
     List<String> nodeTypes = new ArrayList<>();
+
+    if (right.contains("\"")) {
+      // extract all the quoted strings
+      int start = 0;
+      while (start < right.length()) {
+        start = right.indexOf("\"", start);
+        int end = right.indexOf("\"", start + 1);
+        if (end == -1) break;
+        nodeTypes.add(right.substring(start + 1, end));
+        start = end + 1;
+      }
+      nodeVariable.put(left, nodeTypes);
+      return;
+    }
+
     Arrays.asList(right.split("\\|"))
         .forEach(
             split -> {

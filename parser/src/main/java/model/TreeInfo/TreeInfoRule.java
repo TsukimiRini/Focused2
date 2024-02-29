@@ -79,6 +79,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     if (fieldNameForName != null) {
       return tree.getDescendantByField(fieldNameForName) != null;
     }
+    nodeTypesForName.remove("this");
     Set<String> ruleNodeTypes = new HashSet<>(nodeTypesForName);
     if (ruleNodeTypes.isEmpty()) return true;
     for (String neededNodeType : ruleNodeTypes) {

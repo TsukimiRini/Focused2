@@ -1,6 +1,7 @@
 _selector = class_selector | pseudo_class_selector | pseudo_element_selector | id_selector | attribute_selector | child_selector | descendant_selector | sibling_selector | adjacent_sibling_selector
 _value = plain_value | color_value | integer_value | float_value | string_value | binary_expression | parenthesized_value | call_expression
 _stmt = declaration | rule_set | at_rule | import_statement | media_statement | charset_statement | namespace_statement | keyframes_statement | supports_statement
+_op = "=" | "~=" | "^=" | "|=" | "*=" | "$="
 
 attribute_name
 
@@ -11,13 +12,42 @@ declaration:
 rule_set:
   name: selectors
 
-_selector:
-  name: class_name
-  type: {type}
+selectors
+
+#_selector:
+#  name: class_name
+#  type: {type}
+
+class_selector:
+  class_name: class_name
+pseudo_class_selector:
+  class_name: class_name
+pseudo_element_selector:
+  tag_name: tag_name
+id_selector:
+  id_name: id_name
+attribute_selector:
+  attrs: [attribute_name]
+  vals: [_value]
+  ops: [_op]
+attribute_selector/attribute_name:
+  type: "attrName"
+  idx: $idx(this)
+attribute_selector/_value:
+  type: "attrVal"
+  idx: $idx(this)
+attribute_selector/_op:
+  type: "attrOp"
+  idx: $idx(this)
+child_selector
+descendant_selector
+siblings_selector
+adjacent_sibling_selector
 
 _value
 
 arguments
+pseudo_class_arguments
 
 nesting_selector
 universal_selector
@@ -49,9 +79,12 @@ call_expression/arguments._value:
   idx: $idx(this)
 
 */_stmt:
-  type: stmt
+  type: "stmt"
   idx: $idx(this)
 
 rule_set/_selector:
-  type: select
+  type: "select"
+  idx: $idx(this)
+_selector/_selector:
+  type: "subselect"
   idx: $idx(this)
