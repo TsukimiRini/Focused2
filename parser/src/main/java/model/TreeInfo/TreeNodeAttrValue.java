@@ -36,6 +36,8 @@ public class TreeNodeAttrValue {
       type = TreeNodeAttrValueType.FIELD_NAME;
     } else if (isInteger(source)) {
       type = TreeNodeAttrValueType.INTEGER;
+    } else if (source.contains("[") && source.contains("]")) {
+      type = TreeNodeAttrValueType.INDEXED_CST_NODE_TYPE;
     } else {
       type = TreeNodeAttrValueType.CST_NODE_TYPE;
     }
@@ -57,6 +59,7 @@ public class TreeNodeAttrValue {
         valueOrFunc.add(source);
         break;
       case CST_NODE_TYPE:
+      case INDEXED_CST_NODE_TYPE:
         setValueByVar(source, rule);
         break;
     }
@@ -106,6 +109,7 @@ public class TreeNodeAttrValue {
       case LITERAL:
       case INTEGER:
       case CST_NODE_TYPE:
+      case INDEXED_CST_NODE_TYPE:
         return valueOrFunc.toString();
     }
     return null;
@@ -131,6 +135,16 @@ public class TreeNodeAttrValue {
                         : curNode.getDescendantsByType(value).stream()
                             .map(descendant -> descendant.snippet)
                             .collect(Collectors.toList())));
+        break;
+      case INDEXED_CST_NODE_TYPE:
+        String indexed_str = valueOrFunc.iterator().next();
+        String node_type = indexed_str.substring(0, indexed_str.indexOf("["));
+        int index =
+            Integer.parseInt(
+                indexed_str.substring(indexed_str.indexOf("[") + 1, indexed_str.indexOf("]")));
+        if (curNode.getDescendantsByType(node_type).size() <= index) break;
+        String indexed_snippet = curNode.getDescendantsByType(node_type).get(index).snippet;
+        if (indexed_snippet != null) res.add(indexed_snippet);
         break;
       case FIELD_NAME:
         String descendantSnippet = curNode.getDescendantByField(valueOrFunc.iterator().next());

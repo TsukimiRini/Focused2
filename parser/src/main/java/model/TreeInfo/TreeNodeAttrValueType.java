@@ -6,5 +6,6 @@ public enum TreeNodeAttrValueType {
   CST_NODE_TYPE,
   FUNCTION,
   LIST_OF_TYPE,
-  FIELD_NAME
+  FIELD_NAME,
+  INDEXED_CST_NODE_TYPE,
 }

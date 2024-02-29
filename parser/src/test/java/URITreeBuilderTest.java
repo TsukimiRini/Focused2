@@ -67,4 +67,24 @@ public class URITreeBuilderTest {
       fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
     System.out.println(fileTree.type);
   }
+
+  @Test
+  public void testCSS() throws UnsupportedEncodingException {
+    SharedStatus.initProjectInfo(
+            "web", System.getProperty("user.home") + "/coding/xll/static-web/latex-css"
+    );
+    Map<String, CSTTree> cstTrees =
+            CSTBuilder.buildCST(
+                    Language.CSS,
+                    List.of(
+                            System.getProperty("user.home")
+                                    + "/coding/xll/static-web/latex-css/style.css"));
+    TreeInfoConf conf =
+            new TreeInfoConf(System.getProperty("user.dir") + "/src/main/resources/css.tree");
+    URITreeBuilder builder = new URITreeBuilder(conf);
+    URINode fileTree = builder.buildFromCST(cstTrees);
+    while (!fileTree.type.equals("FILE"))
+      fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
+    System.out.println(fileTree.type);
+  }
 }

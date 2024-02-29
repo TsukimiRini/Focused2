@@ -133,6 +133,11 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     valGroup.add(attrValue);
     if (isName) {
       switch (attrValue.type) {
+        case INDEXED_CST_NODE_TYPE:
+          for (String indexed : attrValue.valueOrFunc) {
+            nodeTypesForName.add(indexed.substring(0, indexed.indexOf("[")));
+          }
+          break;
         case CST_NODE_TYPE:
         case LIST_OF_TYPE:
           nodeTypesForName.addAll(attrValue.valueOrFunc);
