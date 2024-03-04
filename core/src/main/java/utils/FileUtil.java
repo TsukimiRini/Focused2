@@ -31,7 +31,10 @@ public class FileUtil {
       file.delete();
     }
     try{
-    file.createNewFile();
+      if (!file.getParentFile().exists()){
+        file.getParentFile().mkdirs();
+      }
+      file.createNewFile();
     }catch (Exception e){
       e.printStackTrace();
       logger.error("file not created: {}", path);
