@@ -282,21 +282,23 @@ public class DatabaseBuilder {
             nextNodePattern = (SegmentPattern) nextNodePattern.child;
           }
 
-          if (childInst != null) {
-            // find all possible children
-            Set<ElementInstance> childSet =
-                matchPatternLayer(
-                    childInst,
-                    curPattern.child == null ? null : nextNodePattern,
-                    child,
-                    checkObject);
+          if (childInst == null) continue;
 
-            // check branch
-            for (ElementInstance toCheck : childSet) {
-              Set<ElementInstance> checkedSet = checkBranches(curPattern, child, toCheck);
-              if (checkedSet != null) {
-                res.addAll(checkedSet);
-              }
+          // find all possible children
+          Set<ElementInstance> childSet =
+              matchPatternLayer(
+                  childInst, curPattern.child == null ? null : nextNodePattern, child, checkObject);
+
+          if (checkObject == MatchedType.FILE || checkObject == MatchedType.BRANCH) {
+            res.addAll(childSet);
+            continue;
+          }
+
+          // check branch
+          for (ElementInstance toCheck : childSet) {
+            Set<ElementInstance> checkedSet = checkBranches(curPattern, child, toCheck);
+            if (checkedSet != null) {
+              res.addAll(checkedSet);
             }
           }
         }
