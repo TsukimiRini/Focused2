@@ -146,9 +146,7 @@ public class DatabaseBuilder {
         node -> {
           try {
             URINode curNode = matchedType == MatchedType.FILE ? node.file : node.element;
-            res.addAll(
-                matchPatternLayerReverse(
-                    node, (SegmentPattern) tail.parent.parent, curNode.getParent()));
+            res.addAll(matchPatternLayerReverse(node, tail, curNode));
           } catch (CloneNotSupportedException e) {
             e.printStackTrace();
           }
