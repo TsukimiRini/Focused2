@@ -340,7 +340,10 @@ public class DatabaseBuilder {
         if (matched) {
           ElementInstance newInstance = inst.clone();
           // check type
-          if (!checkType(pattern.type, child.type)) continue;
+          if (!checkType(pattern.type, child.type)) {
+            res.addAll(getNodesByNodePattern(child, pattern, inst, type));
+            continue;
+          }
 
           // check attribute
           ElementInstance childInst = checkAttr(pattern, child, newInstance);
