@@ -15,6 +15,13 @@ public class StringUtil {
   }
 
   public static String escapedForRegex(String str) {
-    return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|\\*])", "\\\\${toEscape}");
+    return escapedForRegex(str, true);
+  }
+  public static String escapedForRegex(String str, Boolean includeStar) {
+    if (includeStar) {
+      return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|\\*])", "\\\\${toEscape}");
+    }else {
+      return str.replaceAll("(?<toEscape>[$+.\\[\\]()?\\\\^{}|])", "\\\\${toEscape}");
+    }
   }
 }

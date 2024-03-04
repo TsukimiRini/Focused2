@@ -387,7 +387,7 @@ public class DatabaseBuilder {
   }
 
   private static String replaceCapture(IdentifierPattern text, ElementInstance instance) {
-    String regex = StringUtil.escapedForRegex(text.text);
+    String regex = StringUtil.escapedForRegex(text.text, false);
     regex = regex.replaceAll("(?<!\\\\)\\*", ".+");
     for (String capName : text.captures) {
       // TODO: corner case -- when capVal contains variable enclosed by brackets with the same name
