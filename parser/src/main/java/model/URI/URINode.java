@@ -14,6 +14,8 @@ public class URINode extends URISegment {
   public String snippets;
 
   public URINode(String nodeName, String nodeType) {
+    // compress space
+    nodeName = nodeName.replaceAll("\\s+", " ");
     put("name", nodeName);
     this.type = nodeType;
   }
