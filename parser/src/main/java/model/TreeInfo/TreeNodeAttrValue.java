@@ -143,6 +143,9 @@ public class TreeNodeAttrValue {
             Integer.parseInt(
                 indexed_str.substring(indexed_str.indexOf("[") + 1, indexed_str.indexOf("]")));
         if (curNode.getDescendantsByType(node_type).size() <= index) break;
+        if (index < 0) {
+          index = curNode.getDescendantsByType(node_type).size() + index;
+        }
         String indexed_snippet = curNode.getDescendantsByType(node_type).get(index).snippet;
         if (indexed_snippet != null) res.add(indexed_snippet);
         break;
