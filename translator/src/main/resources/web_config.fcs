@@ -1,0 +1,150 @@
+[Elements]
+    CSSNestingSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: *::nesting_selector
+    CSSUniversalSelector:
+        lang: CSS
+        file: *.css
+        element: *::universal_selector
+
+    CSSClassSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::class_selector[class_name=(className)]
+    CSSNotLeafClassSelector: CSSClassSelector
+        branches:
+            - ~subselect[idx=0]~/(left)
+            - ~subselect[idx=1]~/(right)
+
+    CSSPseudoClassSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::pseudo_class_selector[class_name=(className)]
+    CSSNotLeafPseudoClassSelector: CSSPseudoClassSelector
+        branches:
+            - ~subselect[idx=0]~/(left)
+            - ~subselect[idx=1]~/(right)
+
+    CSSPseudoElementSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::pseudo_element_selector[tag_name=(tagName)]
+    CSSNotLeafPseudoElementSelector: CSSPseudoElementSelector
+        branches:
+            - ~subselect[idx=0]~/(left)
+            - ~subselect[idx=1]~/(right)
+
+    CSSIDSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::id_selector[id_name=(idName)]
+    CSSNotLeafIDSelector: CSSIDSelector
+        branches:
+            - ~subselect[idx=0]~/(left)
+            - ~subselect[idx=1]~/(right)
+
+    CSSAttributeSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::attribute_selector[attrs=(attrNameList), ops=(opList), vals=(valueList)]
+    CSSNotLeafAttributeSelector: CSSAttributeSelector
+        branches:
+            - ~subselect~/*
+
+    CSSChildSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::child_selector
+        branches:
+            - ~subselect[idx=0]~/(parentSelector)
+            - ~subselect[idx=1]~/(childSelector)
+
+    CSSDescendantSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::descendant_selector
+        branches:
+            - ~subselect[idx=0]~/(ancestorSelector)
+            - ~subselect[idx=1]~/(childSelector)
+
+    CSSSiblingSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::sibling_selector
+        branches:
+            - ~subselect[idx=0]~/(siblingSelector1)
+            - ~subselect[idx=1]~/(siblingSelector2)
+
+    CSSAdjacentSiblingSelector:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::adjacent_sibling_selector
+        branches:
+            - ~subselect[idx=0]~/(siblingSelector1)
+            - ~subselect[idx=1]~/(siblingSelector2)
+
+    HTMLTemplate:
+        lang: HTML
+        file: (htmlFile).html
+
+    HTMLElement: HTMLTemplate
+        element: (tag)::element
+
+    HTMLElementWithClass: HTMLElement
+        branches:
+            - ~attr~/class::attribute//(class)::attribute_value
+
+    HTMLParentChild: HTMLElement
+        branches:
+            - ~child~/(childTag)::element
+
+[Links]
+    Test {
+    public:
+        isChildHTMLEle(parent, child):
+            & HTMLElement(parent)
+            & HTMLElement(child)
+            & HTMLParentChild(relation)
+            & match(relation.element, parent)
+            & match(relation.branches[0], child)
+        anySelector(sel):
+            | CSSNestingSelector(sel)
+            | CSSUniversalSelector(sel)
+            | CSSClassSelector(sel)
+            | CSSPseudoClassSelector(sel)
+            | CSSPseudoElementSelector(sel)
+            | CSSIDSelector(sel)
+            | CSSAttributeSelector(sel)
+            | CSSChildSelector(sel)
+            | CSSDescendantSelector(sel)
+            | CSSSiblingSelector(sel)
+            | CSSAdjacentSiblingSelector(sel)
+        getNotLeafSelector(ele):
+            &   | CSSNotLeafClassSelector(sel)
+                | CSSNotLeafPseudoClassSelector(sel)
+                | CSSNotLeafPseudoElementSelector(sel)
+                | CSSNotLeafIDSelector(sel)
+                | CSSNotLeafAttributeSelector(sel)
+                | CSSChildSelector(sel)
+                | CSSDescendantSelector(sel)
+                | CSSSiblingSelector(sel)
+                | CSSAdjacentSiblingSelector(sel)
+            & match(sel.element, ele)
+        getSelFromBranch(sel, branch):
+            & anySelector(sel)
+            & match(sel.element, branch)
+        selectorToHTML(sel, element):
+            |   & CSSClassSelector(sel)
+                & !getNotLeafSelector(sel.element)
+                & HTMLElementWithClass(element)
+                & match(sel[className], element[class])
+            |   & CSSChildSelector(sel)
+                & HTMLElement(element)
+                & getSelFromBranch(sel_br1, sel.branches[1])
+                & SelectorToHTML(sel_br1, element)
+                & HTMLElement(parent_element)
+                & isChildHTMLEle(parent_element, element)
+                & getSelFromBranch(sel_br0, sel.branches[0])
+                & SelectorToHTML(sel_br0, parent_element)
+    }

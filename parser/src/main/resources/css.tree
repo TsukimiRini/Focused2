@@ -1,4 +1,5 @@
 _selector = class_selector | pseudo_class_selector | pseudo_element_selector | id_selector | attribute_selector | child_selector | descendant_selector | sibling_selector | adjacent_sibling_selector
+_selector_and_attr = _selector | attribute_name
 _value = plain_value | color_value | integer_value | float_value | string_value | binary_expression | parenthesized_value | call_expression
 _stmt = declaration | rule_set | at_rule | import_statement | media_statement | charset_statement | namespace_statement | keyframes_statement | supports_statement
 _op = "=" | "~=" | "^=" | "|=" | "*=" | "$="
@@ -7,7 +8,7 @@ attribute_name
 
 declaration:
   name: attribute_name[0]
-  value: _value | attribute_value[1]
+  value: _value | attribute_value
 
 rule_set:
   name: selectors
@@ -19,13 +20,13 @@ selectors
 #  type: {type}
 
 class_selector:
-  class_name: class_name
+  class_name: attribute_name[-1]
 pseudo_class_selector:
-  class_name: class_name
+  class_name: attribute_name[-1]
 pseudo_element_selector:
-  tag_name: tag_name
+  tag_name: attribute_name[-1]
 id_selector:
-  id_name: id_name
+  id_name: attribute_name[-1]
 attribute_selector:
   attrs: [attribute_name]
   vals: [_value]
@@ -51,25 +52,23 @@ pseudo_class_arguments
 
 nesting_selector
 universal_selector
-tag_name
-string_value
 
 important
 
 at_rule:
   name: at_keyword
-import_statement:
-  name: "import"
-media_statement:
-  name: "media"
-charset_statement:
-  name: "charset"
-namespace_statement:
-  name: "namespace"
-keyframes_statement:
-  name: "keyframes"
-supports_statement:
-  name: "supports"
+#import_statement:
+#  name: "import"
+#media_statement:
+#  name: "media"
+#charset_statement:
+#  name: "charset"
+#namespace_statement:
+#  name: "namespace"
+#keyframes_statement:
+#  name: "keyframes"
+#supports_statement:
+#  name: "supports"
 
 call_expression:
   name: attribute_name
@@ -85,6 +84,6 @@ call_expression/arguments._value:
 rule_set/_selector:
   type: "select"
   idx: $idx(this)
-_selector/_selector:
+_selector/_selector_and_attr:
   type: "subselect"
   idx: $idx(this)

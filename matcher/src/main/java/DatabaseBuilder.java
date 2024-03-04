@@ -19,14 +19,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseBuilder {
-  public static final String framework = "android";
-  public static final String projectName = "CloudReader";
+  public static final String framework = "web";
+  public static final String projectName = "latex-css";
   public static final String projectDir =
-      System.getProperty("user.home") + "/coding/xll/android/" + projectName;
+      System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
   //  public static final String projectDir =
   //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
   public static final String outputDir =
-      System.getProperty("user.home") + "/coding/dlData/android/" + projectName + "/inputs";
+      System.getProperty("user.home")
+          + "/coding/dlData/"
+          + framework
+          + "/"
+          + projectName
+          + "/inputs";
 
   public static Map<Language, TreeInfoConf> treeInfoConfs = new HashMap<>();
 
@@ -91,6 +96,18 @@ public class DatabaseBuilder {
               lang,
               new TreeInfoConf(
                   System.getProperty("user.dir") + "/parser/src/main/resources/xml.tree"));
+          break;
+        case HTML:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/html.tree"));
+          break;
+        case CSS:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/css.tree"));
           break;
         default:
           throw new IllegalArgumentException("language not supported");

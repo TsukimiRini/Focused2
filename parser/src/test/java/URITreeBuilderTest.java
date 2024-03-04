@@ -78,7 +78,7 @@ public class URITreeBuilderTest {
                     Language.CSS,
                     List.of(
                             System.getProperty("user.home")
-                                    + "/coding/xll/static-web/latex-css/style.css"));
+                                    + "/coding/xll/web/latex-css/style.css"));
     TreeInfoConf conf =
             new TreeInfoConf(System.getProperty("user.dir") + "/src/main/resources/css.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
