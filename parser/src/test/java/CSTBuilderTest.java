@@ -16,10 +16,26 @@ public class CSTBuilderTest {
   }
 
   @Test
+  public void testCSTBuilderNG() throws UnsupportedEncodingException {
+    SharedStatus.initProjectInfo(
+            "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
+    Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
+    System.out.println(cstTrees);
+  }
+
+  @Test
   public void testWebCST() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "web", System.getProperty("user.home") + "/coding/xll/static-web/latex-css");
+            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilder.buildCST();
+    System.out.println(cstTrees);
+  }
+
+  @Test
+  public void testWebNG() throws UnsupportedEncodingException {
+    SharedStatus.initProjectInfo(
+            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css");
+    Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
     System.out.println(cstTrees);
   }
 }

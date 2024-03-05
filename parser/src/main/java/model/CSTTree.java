@@ -3,12 +3,10 @@ package model;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.Tree;
 import ai.serenade.treesitter.TreeCursor;
+import org.treesitter.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CSTTree implements Serializable {
@@ -39,7 +37,10 @@ public class CSTTree implements Serializable {
   // init from tree
   public CSTTree(String filePath, String source, Tree tree) {
     this(filePath, source, null, tree.getRootNode().walk(), null);
-//    System.out.println(tree.getRootNode().getNodeString());
+  }
+
+  public CSTTree(String filePath, String source, TSTree tree, TSLanguage language) {
+    this(filePath, source, null, tree.getRootNode(), null, language);
   }
 
   // init from cursor
@@ -64,6 +65,48 @@ public class CSTTree implements Serializable {
         cur = cursor.getCurrentNode();
         addChild(new CSTTree(filePath, source, this, cur.walk(), cursor.getCurrentFieldName()));
       }
+    }
+  }
+
+  private int coorToIdx(TSPoint point, String source) {
+    int row = point.getRow(), col = point.getColumn();
+    int idx = 0;
+    String[] lines = source.split("\n");
+    for (int i = 0; i < row; i++) {
+      idx += (lines[i] + "\n").getBytes().length;
+    }
+    idx += col;
+    return idx;
+  }
+
+  public CSTTree(
+      String filePath,
+      String source,
+      CSTTree parent,
+      TSNode cur,
+      String fieldName,
+      TSLanguage language) {
+    if (cur == null) return;
+    this.filePath = filePath;
+    this.nodeType = removePreUnderscore(cur.getType());
+    this.fieldName = fieldName;
+    this.startIdx = coorToIdx(cur.getStartPoint(), source);
+    this.endIdx = coorToIdx(cur.getEndPoint(), source);
+    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
+    this.snippet = new String(bytes);
+    this.children = new HashMap<>();
+    this.childrenSeq = new ArrayList<>();
+    this.fields = new HashMap<>();
+    this.parent = parent;
+
+    for (int idx = 0; idx < cur.getChildCount(); idx++) {
+      TSNode namedNode = cur.getChild(idx);
+      String childFieldName = cur.getFieldNameForChild(idx);
+      if ((childFieldName == null || childFieldName.equals("")) && !namedNode.isNamed()) {
+        continue;
+      }
+
+      addChild(new CSTTree(filePath, source, this, namedNode, fieldName, language));
     }
   }
 
