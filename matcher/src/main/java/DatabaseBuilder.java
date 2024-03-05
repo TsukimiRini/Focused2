@@ -49,7 +49,9 @@ public class DatabaseBuilder {
     mapConfs();
 
     // get cst
-    Map<Language, Map<String, CSTTree>> cstForLangs = CSTBuilder.buildCST();
+    Map<Language, Map<String, CSTTree>> cstForLangs = null;
+    if (framework.equals("web")) cstForLangs = CSTBuilderNG.buildCST();
+    else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast
     for (Language lang : cstForLangs.keySet()) {

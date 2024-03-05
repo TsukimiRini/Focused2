@@ -5,7 +5,6 @@ fragment:
 
 element:
   name: start_tag.tag_name | self_closing_tag.tag_name
-  type: {type}
 
 script_element:
   name: "script"
@@ -16,9 +15,10 @@ style_element:
   type: "element"
 
 attribute:
-  name: name
+  name: attribute_name
 
 attribute_value
+quoted_attribute_value
 
 _abs_element/attribute:
   type: "attr"
