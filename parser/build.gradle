@@ -14,6 +14,12 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     implementation project(":tree-sitter")
+    implementation 'io.github.bonede:tree-sitter-html:0.19.0'
+    implementation 'io.github.bonede:tree-sitter-css:0.20.0'
+    implementation 'io.github.bonede:tree-sitter-java:0.20.2'
+    implementation 'io.github.bonede:tree-sitter-python:0.20.4'
+    implementation files('libs/tree-sitter-xml-0.17.3.jar')
+//    implementation files('libs/tree-sitter-python-0.20.4.jar')
 }
 
 test {

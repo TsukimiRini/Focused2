@@ -30,6 +30,7 @@ subprojects{
         implementation 'org.jgrapht:jgrapht-io:1.5.0'
         implementation 'commons-io:commons-io:2.8.0'
         implementation 'org.apache.commons:commons-lang3:3.14.0'
+        implementation 'io.github.bonede:tree-sitter:0.21.0'
     }
 
     test {
