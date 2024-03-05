@@ -90,6 +90,10 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
   }
 
   public boolean isMatchedLabelType(String nodeType) {
+    if (label.startsWith("_")) {
+      return conf.nodeVariable.containsKey(label)
+          && conf.nodeVariable.get(label).contains(nodeType);
+    }
     return nodeType.matches(getRegexPatternFromSymbol(label));
   }
 
