@@ -14,7 +14,7 @@ rule_set:
   name: selectors
 
 selectors
-
+attribute_name
 #_selector:
 #  name: class_name
 #  type: {type}
@@ -24,7 +24,7 @@ class_selector:
 pseudo_class_selector:
   class_name: class_name
 pseudo_element_selector:
-  tag_name: tag_name
+  tag_name: tag_name[-1]
 id_selector:
   id_name: id_name
 attribute_selector:
