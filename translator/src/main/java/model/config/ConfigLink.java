@@ -14,6 +14,7 @@ public class ConfigLink {
   public ConfigPredicate decl;
   public List<ConfigPredicate> conditions = new ArrayList<>();
   public Map<String, Set<String>> varTypes = new HashMap<>();
+  public ConfigLinkBlock block = null;
 
   public ConfigLink(String declPredicate, List<String> paras) {
     decl = new ConfigPredicate(declPredicate, paras);
@@ -80,11 +81,10 @@ public class ConfigLink {
       }
       sb.append(predicate);
       if (predicate.params.size() > 0) {
-        for (ConfigPredicate param : predicate.params) {
-          if (!haveDefined.contains(param)) {
-            addDefForEachVar(sb, param.toString(), variableToLayer, variableToCap, patterns);
+        for (int idx = 0; idx < predicate.params.size(); idx++) {
+          ConfigPredicate param = predicate.params.get(idx);
+          if (addDefForEachVar(sb, idx, variableToLayer, variableToCap, patterns, predicate))
             haveDefined.add(param);
-          }
         }
       }
     }
@@ -131,6 +131,39 @@ public class ConfigLink {
         getDefForEachVar(
             varName, variableToLayer.get(varName), variableToCap.get(varName), patternsForTypes);
     sb.append(", ").append(defStmt);
+  }
+
+  private boolean addDefForEachVar(
+      StringBuilder sb,
+      int paramIndex,
+      Map<String, List<String>> variableToLayer,
+      Map<String, List<String>> variableToCap,
+      Map<String, URIPattern> patterns,
+      ConfigPredicate predicate) {
+    String predicateName = predicate.predicateName;
+    ConfigPredicate param = predicate.params.get(paramIndex);
+    String varName = param.toString();
+    Set<String> typesForVar = varTypes.get(varName);
+    if (typesForVar == null || typesForVar.isEmpty()) return false;
+
+    if (typesForVar.contains(predicateName)) {
+      List<URIPattern> patternsForTypes = Collections.singletonList(patterns.get(predicateName));
+      String defStmt =
+          getDefForEachVar(
+              varName, variableToLayer.get(varName), variableToCap.get(varName), patternsForTypes);
+      sb.append(", ").append(defStmt);
+    } else {
+      List<URIPattern> patternsForTypes = new ArrayList<>();
+      ConfigLink decl = block.predicateDecls.get(predicateName).get(0);
+      String declVarName = decl.decl.params.get(paramIndex).toString();
+      Set<String> declPossibleTypes = decl.varTypes.get(declVarName);
+      declPossibleTypes.forEach(s -> patternsForTypes.add(patterns.get(s)));
+      String defStmt =
+          getDefForEachVar(
+              varName, variableToLayer.get(varName), variableToCap.get(varName), patternsForTypes);
+      sb.append(", ").append(defStmt);
+    }
+    return true;
   }
 
   private String getDefForEachVar(

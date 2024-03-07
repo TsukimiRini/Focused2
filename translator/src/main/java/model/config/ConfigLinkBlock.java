@@ -27,6 +27,7 @@ public class ConfigLinkBlock {
       predicateTypes.put(predicateName, isPublic ? PredicateType.PUBLIC : PredicateType.PRIVATE);
     }
     predicateDecls.get(predicateName).add(link);
+    link.block = this;
   }
 
   public void getParaTypes(List<String> elementPredicates) {
