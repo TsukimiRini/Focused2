@@ -67,9 +67,13 @@ public class ConfigPredicate {
             layers.put(layerOrCap.getLeft(), new ArrayList<>());
           layers.get(layerOrCap.getLeft()).add(layerOrCap.getRight().getRight());
           param.predicateName =
-              "attr"
-                  + capitalize(layerOrCap.getLeft())
-                  + capitalize(layerOrCap.getRight().getRight());
+              layerOrCap.getRight().getRight().startsWith("branches")
+                  ? capitalize(layerOrCap.getLeft())
+                      + "_"
+                      + capitalize(layerOrCap.getRight().getRight()).replace("[", "").replace("]", "")
+                  : "attr"
+                      + capitalize(layerOrCap.getLeft())
+                      + capitalize(layerOrCap.getRight().getRight());
         }
       } else {
         param.replaceLayerAndCaps(layers, caps);

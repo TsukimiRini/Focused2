@@ -4,6 +4,7 @@ import model.URIPattern;
 import model.enums.LogicRelationType;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.abs;
@@ -172,10 +173,39 @@ public class ConfigLink {
     }
     for (int i = 0; i < layerList.length; i++) {
       if (i != 0) sb.append(",");
-      if (!trimmedLayers.contains(layerList[i])) {
-        sb.append("_");
+      if (layerList[i].equals("branches")) {
+        if (type.branches.isEmpty() && type.defaultBranches.isEmpty()) {
+          sb.append("_attr").append(capitalize(varName)).append("Br");
+          continue;
+        }
+        sb.append("$").append(type.label).append("Br(");
+        List<Integer> branchReferences = new ArrayList<>();
+        if (layers != null) {
+          for (String layer : layers) {
+            if (layer.startsWith("branches")) {
+              branchReferences.add(Integer.parseInt(layer.substring(9, layer.length() - 1)));
+            }
+          }
+        }
+        AtomicInteger branchCnt = new AtomicInteger();
+        type.branches.forEach((key, value) -> branchCnt.addAndGet(value.size()));
+        int branchSize = branchCnt.get() + type.defaultBranches.size();
+        Collections.sort(branchReferences);
+        for (int j = 0; j < branchSize; j++) {
+          if (j != 0) sb.append(",");
+          if (branchReferences.contains(j)) {
+            sb.append(capitalize(varName)).append("_Branches").append(j);
+          } else {
+            sb.append("_").append(capitalize(varName)).append("_Branches").append(j);
+          }
+        }
+        sb.append(")");
+      } else {
+        if (!trimmedLayers.contains(layerList[i])) {
+          sb.append("_");
+        }
+        sb.append("attr").append(capitalize(varName)).append(capitalize(layerList[i]));
       }
-      sb.append("attr").append(capitalize(varName)).append(capitalize(layerList[i]));
     }
     if (caps == null || caps.isEmpty()) {
       sb.append(",_cap").append(varName);
