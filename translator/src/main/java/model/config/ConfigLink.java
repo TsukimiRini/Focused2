@@ -141,7 +141,7 @@ public class ConfigLink {
             .collect(Collectors.toSet());
     assert defStmts.size() > 0;
     List<String> stmtsList = new ArrayList<>(defStmts);
-    if (stmtsList.size() == 0){
+    if (stmtsList.size() == 0) {
       return null;
     }
     if (stmtsList.size() == 1) {
@@ -159,13 +159,20 @@ public class ConfigLink {
 
   private String getDefForEachVarAndType(
       String varName, List<String> layers, List<String> caps, URIPattern type) {
-//    if ((layers == null || layers.isEmpty()) && (caps == null || caps.isEmpty())) return null;
+    //    if ((layers == null || layers.isEmpty()) && (caps == null || caps.isEmpty())) return null;
     StringBuilder sb = new StringBuilder(varName);
     sb.append("=[");
     String[] layerList = {"lang", "file", "element", "branches"};
+    List<String> trimmedLayers = new ArrayList<>();
+    if (layers != null) {
+      for (String layer : layers) {
+        String layerTrimmed = layer.replaceAll("\\[.*]", "");
+        trimmedLayers.add(layerTrimmed);
+      }
+    }
     for (int i = 0; i < layerList.length; i++) {
       if (i != 0) sb.append(",");
-      if (layers == null || !layers.contains(layerList[i])) {
+      if (!trimmedLayers.contains(layerList[i])) {
         sb.append("_");
       }
       sb.append("attr").append(capitalize(varName)).append(capitalize(layerList[i]));

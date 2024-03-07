@@ -81,7 +81,7 @@ public class Focused2Souffle {
   public static ADT generateBranchType(List<URIPattern> patterns) {
     ADT adt = new ADT("Branch", "ZeroBranch");
     for (URIPattern pattern : patterns) {
-      if (!pattern.branches.isEmpty()) {
+      if (!pattern.branches.isEmpty() || !pattern.defaultBranches.isEmpty()) {
         List<Pair<String, String>> branches = new ArrayList<>();
         AtomicInteger branchCnt = new AtomicInteger();
         pattern.branches.forEach((key, value) -> branchCnt.addAndGet(value.size()));
