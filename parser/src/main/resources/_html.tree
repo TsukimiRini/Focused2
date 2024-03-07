@@ -1,0 +1,29 @@
+_abs_element = element | script_element | style_element
+
+fragment:
+  name: "document"
+
+element:
+  name: start_tag.tag_name | self_closing_tag.tag_name
+  type: {type}
+
+script_element:
+  name: "script"
+  type: "element"
+
+style_element:
+  name: "style"
+  type: "element"
+
+attribute:
+  name: name
+
+attribute_value
+
+_abs_element/attribute:
+  type: "attr"
+  idx: $idx(this)
+
+_abs_element/_abs_element:
+  type: "child"
+  idx: $idx(this)
