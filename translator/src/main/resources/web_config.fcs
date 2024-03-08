@@ -15,7 +15,6 @@
     CSSNotLeafClassSelector: CSSClassSelector
         branches:
             - ~subselect[idx=0]~/(left)
-            - ~subselect[idx=1]~/(right)
 
     CSSPseudoClassSelector:
         lang: CSS
@@ -24,7 +23,6 @@
     CSSNotLeafPseudoClassSelector: CSSPseudoClassSelector
         branches:
             - ~subselect[idx=0]~/(left)
-            - ~subselect[idx=1]~/(right)
 
     CSSPseudoElementSelector:
         lang: CSS
@@ -33,7 +31,6 @@
     CSSNotLeafPseudoElementSelector: CSSPseudoElementSelector
         branches:
             - ~subselect[idx=0]~/(left)
-            - ~subselect[idx=1]~/(right)
 
     CSSIDSelector:
         lang: CSS
@@ -42,7 +39,6 @@
     CSSNotLeafIDSelector: CSSIDSelector
         branches:
             - ~subselect[idx=0]~/(left)
-            - ~subselect[idx=1]~/(right)
 
     CSSAttributeSelector:
         lang: CSS
@@ -50,7 +46,7 @@
         element: (identifier)::attribute_selector[attrs=(attrNameList), ops=(opList), vals=(valueList)]
     CSSNotLeafAttributeSelector: CSSAttributeSelector
         branches:
-            - ~subselect~/*
+            - ~subselect[idx=0]~/(left)
 
     CSSChildSelector:
         lang: CSS
@@ -106,8 +102,8 @@
             & HTMLElement(parent)
             & HTMLElement(child)
             & HTMLParentChild(relation)
-            & match(relation.element, parent)
-            & match(relation.branches[0], child)
+            & match(relation.element, parent.element)
+            & match(relation.branches[0], child.element)
         anySelector(sel):
             | CSSNestingSelector(sel)
             | CSSUniversalSelector(sel)
@@ -120,7 +116,7 @@
             | CSSDescendantSelector(sel)
             | CSSSiblingSelector(sel)
             | CSSAdjacentSiblingSelector(sel)
-        getNotLeafSelector(ele):
+        notLeafSelector(ele):
             &   | CSSNotLeafClassSelector(sel)
                 | CSSNotLeafPseudoClassSelector(sel)
                 | CSSNotLeafPseudoElementSelector(sel)
@@ -136,15 +132,17 @@
             & match(sel.element, branch)
         selectorToHTML(sel, element):
             |   & CSSClassSelector(sel)
-                & !getNotLeafSelector(sel.element)
-                & HTMLElementWithClass(element)
-                & match(sel[className], element[class])
+                & HTMLElement(element)
+                & !notLeafSelector(sel.element)
+                & HTMLElementWithClass(curElement)
+                & match(sel[className], curElement[class])
+                & match(element.element, curElement.element)
             |   & CSSChildSelector(sel)
                 & HTMLElement(element)
                 & getSelFromBranch(sel_br1, sel.branches[1])
-                & SelectorToHTML(sel_br1, element)
+                & selectorToHTML(sel_br1, element)
                 & HTMLElement(parent_element)
                 & isChildHTMLEle(parent_element, element)
                 & getSelFromBranch(sel_br0, sel.branches[0])
-                & SelectorToHTML(sel_br0, parent_element)
+                & selectorToHTML(sel_br0, parent_element)
     }
