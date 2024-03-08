@@ -474,6 +474,7 @@ public class DatabaseBuilder {
         curBranch.addAll(
             matchPatternLayer(
                 iterateInst, (SegmentPattern) branchPattern.child, node, MatchedType.BRANCH));
+        curBranch.removeIf(b -> b.branches.contains(b.element));
         if (curBranch.isEmpty()) return null;
       }
       res = curBranch;
