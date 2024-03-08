@@ -207,17 +207,17 @@ public class ConfigLink {
     for (int i = 0; i < layerList.length; i++) {
       if (i != 0) sb.append(",");
       if (layerList[i].equals("branches")) {
-        if (type.branches.isEmpty() && type.defaultBranches.isEmpty()) {
+        if (type.branches.isEmpty() && type.defaultBranches.isEmpty()
+            || layers == null
+            || !trimmedLayers.contains("branches")) {
           sb.append("_attr").append(capitalize(varName)).append("Br");
           continue;
         }
         sb.append("$").append(type.label).append("Br(");
         List<Integer> branchReferences = new ArrayList<>();
-        if (layers != null) {
-          for (String layer : layers) {
-            if (layer.startsWith("branches")) {
-              branchReferences.add(Integer.parseInt(layer.substring(9, layer.length() - 1)));
-            }
+        for (String layer : layers) {
+          if (layer.startsWith("branches")) {
+            branchReferences.add(Integer.parseInt(layer.substring(9, layer.length() - 1)));
           }
         }
         AtomicInteger branchCnt = new AtomicInteger();
@@ -240,7 +240,7 @@ public class ConfigLink {
         sb.append("attr").append(capitalize(varName)).append(capitalize(layerList[i]));
       }
     }
-    if (caps == null || caps.isEmpty()) {
+    if (caps == null || caps.isEmpty() || type.captures.isEmpty()) {
       sb.append(",_cap").append(varName);
     } else {
       sb.append(",$").append(type.label).append("Cap(");
