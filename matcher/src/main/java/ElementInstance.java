@@ -54,8 +54,11 @@ public class ElementInstance implements Cloneable {
   public boolean equals(Object obj) {
     if (!(obj instanceof ElementInstance)) return false;
     ElementInstance ele = (ElementInstance) obj;
+    String branchStr = branches.stream().map(URINode::toString).collect(Collectors.joining(","));
+    String eleBranchStr = ele.branches.stream().map(URINode::toString).collect(Collectors.joining(","));
     return filePath.equals(ele.filePath)
         && (element == ele.element || element.toString().equals(ele.element.toString()))
+        && branchStr.equals(eleBranchStr)
         && capVal.toString().equals(ele.capVal.toString());
   }
 
