@@ -104,25 +104,33 @@
         branches:
             - ~child~/(childTag)::element
 
+    HTMLDescendant: HTMLElement
+        branches:
+            - /**/~child~/(descendantTag)::element
+
+    HTMLSibling:
+        lang: HTML
+        file: (htmlFile).html
+        element: (parentTag)::element#parent/~child~/(tag)::element
+        branches:
+            - @parent/~child~/(siblingTag)::element
+
 [Links]
     Test {
     public:
+        relationParentChildHTML(parent, child):
+            & HTMLParentChild(relation)
+            & match(relation.element, parent)
+            & match(relation.branches[0], child)
         isChildHTMLEle(parent, child):
             & HTMLElement(parent)
             & HTMLElement(child)
-            & HTMLParentChild(relation)
-            & match(relation.element, parent.element)
-            & match(relation.branches[0], child.element)
+            & relationParentChildHTML(parent.element, child.element)
         isDescendantHTMLEle(ancestor, descendant):
             | isChildHTMLEle(ancestor, descendant)
-            |   & HTMLElement(ancestor)
-                & HTMLElement(descendant)
-                & HTMLElement(parent)
-                & isChildHTMLEle(parent, descendant)
-                & isDescendantHTMLEle(ancestor, parent)
+            |   & isChildHTMLEle(ancestor, middle)
+                & isDescendantHTMLEle(middle, descendant)
         isSiblingHTMLEle(sibling1, sibling2):
-            & HTMLElement(sibling1)
-            & HTMLElement(sibling2)
             & isChildHTMLEle(parent, sibling1)
             & isChildHTMLEle(parent, sibling2)
         anySelector(sel):
@@ -185,26 +193,20 @@
                 & getSelFromBranch(sel_br, sel.branches[0])
                 & selectorToHTML(sel_br, element)
             |   & CSSChildSelector(sel)
-                & HTMLElement(element)
                 & getSelFromBranch(sel_br1, sel.branches[1])
                 & selectorToHTML(sel_br1, element)
-                & HTMLElement(parent_element)
                 & isChildHTMLEle(parent_element, element)
                 & getSelFromBranch(sel_br0, sel.branches[0])
                 & selectorToHTML(sel_br0, parent_element)
             |   & CSSDescendantSelector(sel)
-                & HTMLElement(element)
                 & getSelFromBranch(sel_br1, sel.branches[1])
                 & selectorToHTML(sel_br1, element)
-                & HTMLElement(ancestor_element)
                 & isDescendantHTMLEle(ancestor_element, element)
                 & getSelFromBranch(sel_br0, sel.branches[0])
                 & selectorToHTML(sel_br0, ancestor_element)
             |   & CSSSiblingSelector(sel)
-                & HTMLElement(element)
                 & getSelFromBranch(cur_br, sel.branches[1])
                 & selectorToHTML(cur_br, element)
-                & HTMLElement(sibling_element)
                 & isSiblingHTMLEle(sibling_element, element)
                 & getSelFromBranch(sibling_br, sel.branches[0])
                 & selectorToHTML(sibling_br, sibling_element1)
