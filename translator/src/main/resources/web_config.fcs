@@ -1,4 +1,8 @@
 [Elements]
+    CSSSelectors:
+        lang: CSS
+        file: (cssFile).css
+        element: (identifier)::selectors//(sel)
     CSSNestingSelector:
         lang: CSS
         file: (cssFile).css
@@ -102,18 +106,7 @@
 
     HTMLParentChild: HTMLElement
         branches:
-            - ~child~/(childTag)::element
-
-    HTMLDescendant: HTMLElement
-        branches:
-            - /**/~child~/(descendantTag)::element
-
-    HTMLSibling:
-        lang: HTML
-        file: (htmlFile).html
-        element: (parentTag)::element#parent/~child~/(tag)::element
-        branches:
-            - @parent/~child~/(siblingTag)::element
+            - ~child[idx=(childIdx)]~/(childTag)::element
 
 [Links]
     Test {
@@ -145,6 +138,7 @@
             | CSSDescendantSelector(sel)
             | CSSSiblingSelector(sel)
             | CSSAdjacentSiblingSelector(sel)
+            | CSSTagSelector(sel)
         notLeafSelector(ele):
             &   | CSSNotLeafClassSelector(sel)
                 | CSSNotLeafPseudoClassSelector(sel)
@@ -172,7 +166,8 @@
                 & HTMLElementWithClass(classElement)
                 & match(sel[className], classElement[class])
                 & match(element.element, classElement.element)
-            |   & CSSNotLeafClassSelector(sel)
+            |   & CSSClassSelector(sel)
+                & notLeafSelector(sel.element)
                 & HTMLElement(element)
                 & HTMLElementWithClass(classElement)
                 & match(sel[className], classElement[class])
@@ -185,7 +180,8 @@
                 & HTMLElementWithID(idElement)
                 & match(sel[idName], idElement[id])
                 & match(element.element, idElement.element)
-            |   & CSSNotLeafIDSelector(sel)
+            |   & CSSIDSelector(sel)
+                & notLeafSelector(sel.element)
                 & HTMLElement(element)
                 & HTMLElementWithID(idElement)
                 & match(sel[idName], idElement[id])
@@ -210,4 +206,8 @@
                 & isSiblingHTMLEle(sibling_element, element)
                 & getSelFromBranch(sibling_br, sel.branches[0])
                 & selectorToHTML(sibling_br, sibling_element1)
+        rootSelectorToHTML(sel, element):
+            & CSSSelectors(sel)
+            & selectorToHTML(sel_sub, element)
+            & match(sel.element, sel_sub.element)
     }
