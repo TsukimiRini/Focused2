@@ -1,0 +1,124 @@
+.type Capture = ZeroCap {}
+              | CSSNotLeafAttributeSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, opList: symbol, valueList: symbol, attrNameList: symbol}
+              | CSSNotLeafPseudoClassSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, className: symbol}
+              | CSSNestingSelectorCap {cssFile: symbol}
+              | CSSAttributeSelectorCap {identifier: symbol, cssFile: symbol, opList: symbol, valueList: symbol, attrNameList: symbol}
+              | HTMLElementWithClassCap {htmlFile: symbol, tag: symbol, class: symbol}
+              | CSSPseudoElementSelectorCap {identifier: symbol, cssFile: symbol, tagName: symbol}
+              | CSSNotLeafIDSelectorCap {identifier: symbol, cssFile: symbol, idName: symbol, left: symbol}
+              | HTMLTemplateCap {htmlFile: symbol}
+              | CSSSiblingSelectorCap {identifier: symbol, cssFile: symbol, siblingSelector2: symbol, siblingSelector1: symbol}
+              | CSSSelectorsCap {identifier: symbol, cssFile: symbol, sel: symbol}
+              | HTMLParentChildCap {childTag: symbol, htmlFile: symbol, tag: symbol}
+              | CSSChildSelectorCap {childSelector: symbol, identifier: symbol, cssFile: symbol, parentSelector: symbol}
+              | CSSNotLeafPseudoElementSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, tagName: symbol}
+              | CSSIDSelectorCap {identifier: symbol, cssFile: symbol, idName: symbol}
+              | CSSPseudoClassSelectorCap {identifier: symbol, cssFile: symbol, className: symbol}
+              | CSSNotLeafClassSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, className: symbol}
+              | CSSTagSelectorCap {identifier: symbol, cssFile: symbol}
+              | CSSClassSelectorCap {identifier: symbol, cssFile: symbol, className: symbol}
+              | CSSDescendantSelectorCap {childSelector: symbol, ancestorSelector: symbol, identifier: symbol, cssFile: symbol}
+              | HTMLElementWithIDCap {htmlFile: symbol, id: symbol, tag: symbol}
+              | CSSAdjacentSiblingSelectorCap {identifier: symbol, cssFile: symbol, siblingSelector2: symbol, siblingSelector1: symbol}
+              | HTMLElementCap {htmlFile: symbol, tag: symbol}
+
+.type Branch = ZeroBranch {}
+             | CSSSiblingSelectorBr {_0: symbol, _1: symbol}
+             | CSSNotLeafPseudoElementSelectorBr {_0: symbol}
+             | HTMLElementWithIDBr {_0: symbol}
+             | CSSDescendantSelectorBr {_0: symbol, _1: symbol}
+             | CSSNotLeafPseudoClassSelectorBr {_0: symbol}
+             | HTMLParentChildBr {_0: symbol}
+             | CSSNotLeafIDSelectorBr {_0: symbol}
+             | CSSChildSelectorBr {_0: symbol, _1: symbol}
+             | CSSNotLeafAttributeSelectorBr {_0: symbol}
+             | CSSAdjacentSiblingSelectorBr {_0: symbol, _1: symbol}
+             | HTMLElementWithClassBr {_0: symbol}
+             | CSSNotLeafClassSelectorBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl CSSNestingSelector(uri:URI)
+.decl CSSNotLeafIDSelector(uri:URI)
+.decl CSSAttributeSelector(uri:URI)
+.decl HTMLElement(uri:URI)
+.decl CSSUniversalSelector(uri:URI)
+.decl CSSChildSelector(uri:URI)
+.decl CSSClassSelector(uri:URI)
+.decl CSSSelectors(uri:URI)
+.decl CSSPseudoClassSelector(uri:URI)
+.decl CSSTagSelector(uri:URI)
+.decl CSSDescendantSelector(uri:URI)
+.decl HTMLElementWithID(uri:URI)
+.decl CSSNotLeafPseudoElementSelector(uri:URI)
+.decl CSSIDSelector(uri:URI)
+.decl HTMLElementWithClass(uri:URI)
+.decl CSSPseudoElementSelector(uri:URI)
+.decl CSSAdjacentSiblingSelector(uri:URI)
+.decl CSSSiblingSelector(uri:URI)
+.decl HTMLParentChild(uri:URI)
+.decl HTMLTemplate(uri:URI)
+.decl CSSNotLeafAttributeSelector(uri:URI)
+.decl CSSNotLeafClassSelector(uri:URI)
+.decl CSSNotLeafPseudoClassSelector(uri:URI)
+.input CSSNestingSelector
+.input CSSNotLeafIDSelector
+.input CSSAttributeSelector
+.input HTMLElement
+.input CSSUniversalSelector
+.input CSSChildSelector
+.input CSSClassSelector
+.input CSSSelectors
+.input CSSPseudoClassSelector
+.input CSSTagSelector
+.input CSSDescendantSelector
+.input HTMLElementWithID
+.input CSSNotLeafPseudoElementSelector
+.input CSSIDSelector
+.input HTMLElementWithClass
+.input CSSPseudoElementSelector
+.input CSSAdjacentSiblingSelector
+.input CSSSiblingSelector
+.input HTMLParentChild
+.input HTMLTemplate
+.input CSSNotLeafAttributeSelector
+.input CSSNotLeafClassSelector
+.input CSSNotLeafPseudoClassSelector
+
+.comp Test {
+    .decl notLeafSelector(param0:symbol)
+    .decl rootSelectorToHTML(param0:URI, param1:URI)
+    .decl selectorToHTML(param0:URI, param1:URI)
+    .decl anySelector(param0:URI)
+    .decl relationParentChildHTML(param0:symbol, param1:symbol)
+    .decl isChildHTMLEle(param0:URI, param1:URI)
+    .decl isDescendantHTMLEle(param0:URI, param1:URI)
+    .decl getSelFromBranch(param0:URI, param1:symbol)
+    .decl isSiblingHTMLEle(param0:URI, param1:URI)
+    notLeafSelector(ele) :- ( CSSNotLeafClassSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSNotLeafPseudoClassSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSNotLeafPseudoElementSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSNotLeafIDSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSNotLeafAttributeSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSChildSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSDescendantSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSSiblingSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ; CSSAdjacentSiblingSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel] ), attrSelElement=ele.
+    rootSelectorToHTML(sel, element) :- CSSSelectors(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel], selectorToHTML(sel_sub, element), sel_sub=[_attrSel_subLang,_attrSel_subFile,attrSel_subElement,_attrSel_subBr,_capsel_sub], element=[_attrElementLang,_attrElementFile,_attrElementElement,_attrElementBr,_capelement], attrSelElement=attrSel_subElement.
+    selectorToHTML(sel, element) :- ( CSSUniversalSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel], HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)] ; CSSTagSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,$CSSTagSelectorCap(capSelIdentifier,_capSelCssFile)], HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], capSelIdentifier=capElementTag ; CSSClassSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,$CSSClassSelectorCap(capSelIdentifier,_capSelCssFile,capSelClassName)], HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], !notLeafSelector(attrSelElement), HTMLElementWithClass(classElement), classElement=[_attrClassElementLang,_attrClassElementFile,attrClassElementElement,_attrClassElementBr,$HTMLElementWithClassCap(_capClassElementHtmlFile,_capClassElementTag,capClassElementClass)], capSelClassName=capClassElementClass, attrElementElement=attrClassElementElement ; CSSClassSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,$CSSClassSelectorCap(capSelIdentifier,_capSelCssFile,capSelClassName)], notLeafSelector(attrSelElement), HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], HTMLElementWithClass(classElement), classElement=[_attrClassElementLang,_attrClassElementFile,attrClassElementElement,_attrClassElementBr,$HTMLElementWithClassCap(_capClassElementHtmlFile,_capClassElementTag,capClassElementClass)], capSelClassName=capClassElementClass, attrElementElement=attrClassElementElement, getSelFromBranch(sel_br, Sel_Branches0), sel_br=[_attrSel_brLang,_attrSel_brFile,_attrSel_brElement,_attrSel_brBr,_capsel_br], selectorToHTML(sel_br, element), sel_br=[_attrSel_brLang,_attrSel_brFile,_attrSel_brElement,_attrSel_brBr,_capsel_br], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)] ; CSSIDSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,$CSSIDSelectorCap(capSelIdentifier,_capSelCssFile,capSelIdName)], HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], !notLeafSelector(attrSelElement), HTMLElementWithID(idElement), idElement=[_attrIdElementLang,_attrIdElementFile,attrIdElementElement,_attrIdElementBr,$HTMLElementWithIDCap(_capIdElementHtmlFile,capIdElementId,_capIdElementTag)], capSelIdName=capIdElementId, attrElementElement=attrIdElementElement ; CSSIDSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,$CSSIDSelectorCap(capSelIdentifier,_capSelCssFile,capSelIdName)], notLeafSelector(attrSelElement), HTMLElement(element), element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], HTMLElementWithID(idElement), idElement=[_attrIdElementLang,_attrIdElementFile,attrIdElementElement,_attrIdElementBr,$HTMLElementWithIDCap(_capIdElementHtmlFile,capIdElementId,_capIdElementTag)], capSelIdName=capIdElementId, attrElementElement=attrIdElementElement, getSelFromBranch(sel_br, Sel_Branches0), sel_br=[_attrSel_brLang,_attrSel_brFile,_attrSel_brElement,_attrSel_brBr,_capsel_br], selectorToHTML(sel_br, element), sel_br=[_attrSel_brLang,_attrSel_brFile,_attrSel_brElement,_attrSel_brBr,_capsel_br], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)] ; CSSChildSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,$CSSChildSelectorBr(Sel_Branches0,Sel_Branches1),$CSSChildSelectorCap(_capSelChildSelector,capSelIdentifier,_capSelCssFile,_capSelParentSelector)], getSelFromBranch(sel_br1, Sel_Branches1), sel_br1=[_attrSel_br1Lang,_attrSel_br1File,_attrSel_br1Element,_attrSel_br1Br,_capsel_br1], selectorToHTML(sel_br1, element), sel_br1=[_attrSel_br1Lang,_attrSel_br1File,_attrSel_br1Element,_attrSel_br1Br,_capsel_br1], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], isChildHTMLEle(parent_element, element), parent_element=[_attrParent_elementLang,_attrParent_elementFile,_attrParent_elementElement,_attrParent_elementBr,_capparent_element], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], getSelFromBranch(sel_br0, Sel_Branches0), sel_br0=[_attrSel_br0Lang,_attrSel_br0File,_attrSel_br0Element,_attrSel_br0Br,_capsel_br0], selectorToHTML(sel_br0, parent_element), sel_br0=[_attrSel_br0Lang,_attrSel_br0File,_attrSel_br0Element,_attrSel_br0Br,_capsel_br0], parent_element=[_attrParent_elementLang,_attrParent_elementFile,_attrParent_elementElement,_attrParent_elementBr,_capparent_element] ; CSSDescendantSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,$CSSDescendantSelectorBr(Sel_Branches0,Sel_Branches1),$CSSDescendantSelectorCap(_capSelChildSelector,_capSelAncestorSelector,capSelIdentifier,_capSelCssFile)], getSelFromBranch(sel_br1, Sel_Branches1), sel_br1=[_attrSel_br1Lang,_attrSel_br1File,_attrSel_br1Element,_attrSel_br1Br,_capsel_br1], selectorToHTML(sel_br1, element), sel_br1=[_attrSel_br1Lang,_attrSel_br1File,_attrSel_br1Element,_attrSel_br1Br,_capsel_br1], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], isDescendantHTMLEle(ancestor_element, element), ancestor_element=[_attrAncestor_elementLang,_attrAncestor_elementFile,_attrAncestor_elementElement,_attrAncestor_elementBr,_capancestor_element], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], getSelFromBranch(sel_br0, Sel_Branches0), sel_br0=[_attrSel_br0Lang,_attrSel_br0File,_attrSel_br0Element,_attrSel_br0Br,_capsel_br0], selectorToHTML(sel_br0, ancestor_element), sel_br0=[_attrSel_br0Lang,_attrSel_br0File,_attrSel_br0Element,_attrSel_br0Br,_capsel_br0], ancestor_element=[_attrAncestor_elementLang,_attrAncestor_elementFile,_attrAncestor_elementElement,_attrAncestor_elementBr,_capancestor_element] ; CSSSiblingSelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,$CSSSiblingSelectorBr(Sel_Branches0,Sel_Branches1),$CSSSiblingSelectorCap(capSelIdentifier,_capSelCssFile,_capSelSiblingSelector2,_capSelSiblingSelector1)], getSelFromBranch(cur_br, Sel_Branches1), cur_br=[_attrCur_brLang,_attrCur_brFile,_attrCur_brElement,_attrCur_brBr,_capcur_br], selectorToHTML(cur_br, element), cur_br=[_attrCur_brLang,_attrCur_brFile,_attrCur_brElement,_attrCur_brBr,_capcur_br], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], isSiblingHTMLEle(sibling_element, element), sibling_element=[_attrSibling_elementLang,_attrSibling_elementFile,_attrSibling_elementElement,_attrSibling_elementBr,_capsibling_element], element=[_attrElementLang,_attrElementFile,attrElementElement,_attrElementBr,$HTMLElementCap(_capElementHtmlFile,capElementTag)], getSelFromBranch(sibling_br, Sel_Branches0), sibling_br=[_attrSibling_brLang,_attrSibling_brFile,_attrSibling_brElement,_attrSibling_brBr,_capsibling_br], selectorToHTML(sibling_br, sibling_element1), sibling_br=[_attrSibling_brLang,_attrSibling_brFile,_attrSibling_brElement,_attrSibling_brBr,_capsibling_br] ).
+    anySelector(sel) :- ( CSSNestingSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSUniversalSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSClassSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSPseudoClassSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSPseudoElementSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSIDSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSAttributeSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSChildSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSDescendantSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSSiblingSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSAdjacentSiblingSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ; CSSTagSelector(sel), sel=[_attrSelLang,_attrSelFile,_attrSelElement,_attrSelBr,_capsel] ).
+    relationParentChildHTML(parent, child) :- HTMLParentChild(relation), relation=[_attrRelationLang,_attrRelationFile,attrRelationElement,$HTMLParentChildBr(Relation_Branches0),_caprelation], attrRelationElement=parent, Relation_Branches0=child.
+    isChildHTMLEle(parent, child) :- HTMLElement(parent), parent=[_attrParentLang,_attrParentFile,attrParentElement,_attrParentBr,_capparent], HTMLElement(child), child=[_attrChildLang,_attrChildFile,attrChildElement,_attrChildBr,_capchild], relationParentChildHTML(attrParentElement, attrChildElement).
+    isDescendantHTMLEle(ancestor, descendant) :- ( isChildHTMLEle(ancestor, descendant), ancestor=[_attrAncestorLang,_attrAncestorFile,_attrAncestorElement,_attrAncestorBr,_capancestor], descendant=[_attrDescendantLang,_attrDescendantFile,_attrDescendantElement,_attrDescendantBr,_capdescendant] ; isChildHTMLEle(ancestor, middle), ancestor=[_attrAncestorLang,_attrAncestorFile,_attrAncestorElement,_attrAncestorBr,_capancestor], middle=[_attrMiddleLang,_attrMiddleFile,_attrMiddleElement,_attrMiddleBr,_capmiddle], isDescendantHTMLEle(middle, descendant), middle=[_attrMiddleLang,_attrMiddleFile,_attrMiddleElement,_attrMiddleBr,_capmiddle], descendant=[_attrDescendantLang,_attrDescendantFile,_attrDescendantElement,_attrDescendantBr,_capdescendant] ).
+    getSelFromBranch(sel, branch) :- anySelector(sel), sel=[_attrSelLang,_attrSelFile,attrSelElement,_attrSelBr,_capsel], attrSelElement=branch.
+    isSiblingHTMLEle(sibling1, sibling2) :- isChildHTMLEle(parent, sibling1), parent=[_attrParentLang,_attrParentFile,_attrParentElement,_attrParentBr,_capparent], sibling1=[_attrSibling1Lang,_attrSibling1File,_attrSibling1Element,_attrSibling1Br,_capsibling1], isChildHTMLEle(parent, sibling2), parent=[_attrParentLang,_attrParentFile,_attrParentElement,_attrParentBr,_capparent], sibling2=[_attrSibling2Lang,_attrSibling2File,_attrSibling2Element,_attrSibling2Br,_capsibling2].
+}
+.init testInstance = Test
+.output testInstance.notLeafSelector(IO=file, rfc4180=true)
+.output testInstance.rootSelectorToHTML(IO=file, rfc4180=true)
+.output testInstance.selectorToHTML(IO=file, rfc4180=true)
+.output testInstance.anySelector(IO=file, rfc4180=true)
+.output testInstance.relationParentChildHTML(IO=file, rfc4180=true)
+.output testInstance.isChildHTMLEle(IO=file, rfc4180=true)
+.output testInstance.isDescendantHTMLEle(IO=file, rfc4180=true)
+.output testInstance.getSelFromBranch(IO=file, rfc4180=true)
+.output testInstance.isSiblingHTMLEle(IO=file, rfc4180=true)
+

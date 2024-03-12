@@ -106,7 +106,7 @@
 
     HTMLParentChild: HTMLElement
         branches:
-            - ~child[idx=(childIdx)]~/(childTag)::element
+            - ~child~/(childTag)::element
 
 [Links]
     Test {
