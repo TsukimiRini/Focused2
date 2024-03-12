@@ -47,6 +47,16 @@ public class ConfigLinkBlock {
     }
   }
 
+  public ConfigLink findDeclsByPredicateName(String predicateName) {
+    if (predicateDecls.containsKey(predicateName) && !predicateDecls.get(predicateName).isEmpty())
+      return predicateDecls.get(predicateName).get(0);
+    for (ConfigLinkBlock block : baseBlocks) {
+      ConfigLink link = block.findDeclsByPredicateName(predicateName);
+      if (link != null) return link;
+    }
+    return null;
+  }
+
   // TODO: refer para types completely
   private void getParaTypesFromDeclStmt(
       List<String> elementPredicates,

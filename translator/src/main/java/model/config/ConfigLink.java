@@ -154,7 +154,7 @@ public class ConfigLink {
       sb.append(", ").append(defStmt);
     } else {
       List<URIPattern> patternsForTypes = new ArrayList<>();
-      ConfigLink decl = block.predicateDecls.get(predicateName).get(0);
+      ConfigLink decl = block.findDeclsByPredicateName(predicateName);
       String declVarName = decl.decl.params.get(paramIndex).toString();
       Set<String> declPossibleTypes = decl.varTypes.get(declVarName);
       declPossibleTypes.forEach(s -> patternsForTypes.add(patterns.get(s)));
