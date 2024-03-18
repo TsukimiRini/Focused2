@@ -79,6 +79,11 @@ public class CSTTree implements Serializable {
     return idx;
   }
 
+  private int byteIndexToCharIndex(int byteIndex, String source) {
+    byte[] bytes = Arrays.copyOfRange(source.getBytes(), 0, byteIndex);
+    return new String(bytes).length();
+  }
+
   public CSTTree(
       String filePath,
       String source,
@@ -90,10 +95,11 @@ public class CSTTree implements Serializable {
     this.filePath = filePath;
     this.nodeType = removePreUnderscore(cur.getType());
     this.fieldName = fieldName;
-    this.startIdx = coorToIdx(cur.getStartPoint(), source);
-    this.endIdx = coorToIdx(cur.getEndPoint(), source);
-    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
-    this.snippet = new String(bytes);
+    this.startIdx = byteIndexToCharIndex(coorToIdx(cur.getStartPoint(), source), source);
+    this.endIdx = byteIndexToCharIndex(coorToIdx(cur.getEndPoint(), source), source);
+//    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
+//    this.snippet = new String(bytes);
+    this.snippet = source.substring(startIdx, endIdx);
     this.children = new HashMap<>();
     this.childrenSeq = new ArrayList<>();
     this.fields = new HashMap<>();
@@ -102,9 +108,9 @@ public class CSTTree implements Serializable {
     for (int idx = 0; idx < cur.getChildCount(); idx++) {
       TSNode namedNode = cur.getChild(idx);
       String childFieldName = cur.getFieldNameForChild(idx);
-      if ((childFieldName == null || childFieldName.equals("")) && !namedNode.isNamed()) {
-        continue;
-      }
+//      if ((childFieldName == null || childFieldName.equals("")) && !namedNode.isNamed()) {
+//        continue;
+//      }
 
       addChild(new CSTTree(filePath, source, this, namedNode, fieldName, language));
     }

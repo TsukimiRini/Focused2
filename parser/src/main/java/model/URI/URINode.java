@@ -109,6 +109,7 @@ public class URINode extends URISegment {
           attrs.getRight().remove("type");
         }
         nextNode.putAll(attrs.getRight());
+        nextNode.put("range", tree.startIdx + "-" + tree.endIdx);
         nextNode.snippets = tree.snippet;
         addChild(nextNode);
       } else {
