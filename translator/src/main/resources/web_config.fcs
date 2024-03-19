@@ -2,7 +2,7 @@
     CSSSelectors:
         lang: CSS
         file: (cssFile).css
-        element: (identifier)::selectors//(sel)
+        element: (identifier)::selectors[range=(selRange)]//(sel)
     CSSNestingSelector:
         lang: CSS
         file: (cssFile).css
@@ -94,7 +94,7 @@
         file: (htmlFile).html
 
     HTMLElement: HTMLTemplate
-        element: (tag)::element
+        element: (tag)::element[range=(eleRange)]
 
     HTMLElementWithClass: HTMLElement
         branches:
@@ -206,8 +206,10 @@
                 & isSiblingHTMLEle(sibling_element, element)
                 & getSelFromBranch(sibling_br, sel.branches[0])
                 & selectorToHTML(sibling_br, sibling_element1)
-        rootSelectorToHTML(sel, element):
+        rootSelectorToHTML(eleRange, selRange):
             & CSSSelectors(sel)
             & selectorToHTML(sel_sub, element)
             & match(sel.element, sel_sub.element)
+            & match(selRange, sel[selRange])
+            & match(eleRange, element[eleRange])
     }
