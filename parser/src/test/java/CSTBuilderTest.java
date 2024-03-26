@@ -38,4 +38,14 @@ public class CSTBuilderTest {
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
     System.out.println(cstTrees);
   }
+
+  @Test
+  public void testCPython() throws UnsupportedEncodingException {
+//    SharedStatus.initProjectInfo(
+//            "cpython", System.getProperty("user.home") + "/Projects/ffi-navigator/tests/dgl");
+    SharedStatus.initProjectInfo(
+            "cpython", System.getProperty("user.home") + "/coding/xll/cpython/python-ldap");
+    Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
+    System.out.println(cstTrees);
+  }
 }

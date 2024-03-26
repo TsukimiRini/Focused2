@@ -6,6 +6,7 @@ public enum Language {
   C(".c", "C"),
   CPP(".cpp", "CPP"),
   HPP(".h", "HPP"),
+  Python(".py", "Python"),
   JAVA(".java", "JAVA"),
   XML(".xml", "XML"),
   HTML(".html", "HTML"),

@@ -37,6 +37,11 @@ public class ProjectInfo {
         addLanguage(Language.HTML);
         addLanguage(Language.CSS);
         break;
+      case "cpython":
+        addLanguage(Language.Python);
+        addLanguage(Language.C);
+        addLanguage(Language.CPP);
+        addLanguage(Language.HPP);
       default:
         addLanguage(Language.JAVA);
     }

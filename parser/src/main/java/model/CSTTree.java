@@ -39,8 +39,14 @@ public class CSTTree implements Serializable {
     this(filePath, source, null, tree.getRootNode().walk(), null);
   }
 
-  public CSTTree(String filePath, String source, TSTree tree, TSLanguage language) {
-    this(filePath, source, null, tree.getRootNode(), null, language);
+  public CSTTree(
+      String filePath,
+      String source,
+      String[] splitted,
+      int[] sourceLen,
+      TSTree tree,
+      TSLanguage language) {
+    this(filePath, source, splitted, sourceLen, null, tree.getRootNode(), null, language);
   }
 
   // init from cursor
@@ -71,11 +77,14 @@ public class CSTTree implements Serializable {
   private int coorToIdx(TSPoint point, String source) {
     int row = point.getRow(), col = point.getColumn();
     int idx = 0;
-    String[] lines = source.split("\n");
-    for (int i = 0; i < row; i++) {
-      idx += (lines[i] + "\n").getBytes().length;
-    }
-    idx += col;
+    String[] lines = source.split("\n", -1);
+    //    for (int i = 0; i < row; i++) {
+    //      idx += (lines[i] + "\n").length();
+    //    }
+    idx =
+        Arrays.stream(Arrays.copyOfRange(lines, 0, row)).map(String::length).reduce(0, Integer::sum)
+            + row;
+    idx += new String(Arrays.copyOfRange(lines[row].getBytes(), 0, col)).length();
     return idx;
   }
 
@@ -87,6 +96,8 @@ public class CSTTree implements Serializable {
   public CSTTree(
       String filePath,
       String source,
+      String[] splitted,
+      int[] sourceLen,
       CSTTree parent,
       TSNode cur,
       String fieldName,
@@ -95,10 +106,21 @@ public class CSTTree implements Serializable {
     this.filePath = filePath;
     this.nodeType = removePreUnderscore(cur.getType());
     this.fieldName = fieldName;
-    this.startIdx = byteIndexToCharIndex(coorToIdx(cur.getStartPoint(), source), source);
-    this.endIdx = byteIndexToCharIndex(coorToIdx(cur.getEndPoint(), source), source);
-//    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
-//    this.snippet = new String(bytes);
+    int startRow = cur.getStartPoint().getRow(), startCol = cur.getStartPoint().getColumn();
+    int endRow = cur.getEndPoint().getRow(), endCol = cur.getEndPoint().getColumn();
+    this.startIdx =
+        startRow == 0
+            ? 0
+            : sourceLen[startRow - 1]
+                + new String(Arrays.copyOfRange(splitted[startRow].getBytes(), 0, startCol))
+                    .length();
+    this.endIdx =
+        endRow == 0
+            ? 0
+            : sourceLen[endRow - 1]
+                + new String(Arrays.copyOfRange(splitted[endRow].getBytes(), 0, endCol)).length();
+    //    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
+    //    this.snippet = new String(bytes);
     this.snippet = source.substring(startIdx, endIdx);
     this.children = new HashMap<>();
     this.childrenSeq = new ArrayList<>();
@@ -107,12 +129,12 @@ public class CSTTree implements Serializable {
 
     for (int idx = 0; idx < cur.getChildCount(); idx++) {
       TSNode namedNode = cur.getChild(idx);
-      String childFieldName = cur.getFieldNameForChild(idx);
-//      if ((childFieldName == null || childFieldName.equals("")) && !namedNode.isNamed()) {
-//        continue;
-//      }
+//      String childFieldName = cur.getFieldNameForChild(idx);
+      //      if ((childFieldName == null || childFieldName.equals("")) && !namedNode.isNamed()) {
+      //        continue;
+      //      }
 
-      addChild(new CSTTree(filePath, source, this, namedNode, fieldName, language));
+      addChild(new CSTTree(filePath, source, splitted, sourceLen, this, namedNode, fieldName, language));
     }
   }
 

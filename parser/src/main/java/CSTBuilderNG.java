@@ -2,6 +2,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import me.tongfei.progressbar.ProgressBar;
 import model.CSTTree;
 import model.Language;
 import model.SharedStatus;
@@ -42,12 +44,30 @@ public class CSTBuilderNG {
       case CSS:
         tsLanguage = new TreeSitterCss();
         break;
+      case C:
+      case CPP:
+      case HPP:
+        tsLanguage = new TreeSitterCpp();
+        break;
+      case Python:
+        tsLanguage = new TreeSitterPython();
+        break;
     }
     parser.setLanguage(tsLanguage);
     Map<String, CSTTree> cstTrees = new HashMap<>();
-    for (String file : files) {
+    for (String file : ProgressBar.wrap(files, "Building " + tsLanguage.toString() + " CST")) {
       String source = FileUtil.readFileToString(file);
-      CSTTree tree = new CSTTree(file, source, parser.parseString(null, source), tsLanguage);
+
+      String[] splitted = source.split("\n", -1);
+      int[] lineLenSum = new int[splitted.length];
+      for (int i = 0; i < splitted.length; i++) {
+        lineLenSum[i] = (splitted[i]+"\n").length();
+        if (i > 0) {
+          lineLenSum[i] += lineLenSum[i - 1];
+        }
+      }
+
+      CSTTree tree = new CSTTree(file, source, splitted, lineLenSum, parser.parseString(null, source), tsLanguage);
       cstTrees.put(file, tree);
     }
     return cstTrees;
