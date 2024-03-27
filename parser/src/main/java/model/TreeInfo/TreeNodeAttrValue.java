@@ -184,7 +184,7 @@ public class TreeNodeAttrValue {
         }
         List<CSTTree> siblings =
             curNode.parent.childrenSeq.stream()
-                .filter(x -> rule.childNodeType.contains(x.nodeType))
+                .filter(x -> rule.isMatchedTypePatterns(x.nodeType, rule.childNodeType))
                 .collect(Collectors.toList());
         res = String.valueOf(siblings.indexOf(curNode));
         break;
