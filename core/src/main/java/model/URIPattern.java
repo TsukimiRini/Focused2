@@ -53,7 +53,10 @@ public class URIPattern extends URIBase<SegmentPattern> {
 
     template.branches.forEach(
         (anchor, branch) ->
-            this.addAnchoredBranch(anchor, template.replacePlaceholder(branch.toString(), values)));
+            branch.forEach(
+                br ->
+                    this.addAnchoredBranch(
+                        anchor, template.replacePlaceholder(br.toString(), values))));
 
     template.defaultBranches.forEach(
         branch -> this.addDefaultBranch(template.replacePlaceholder(branch.toString(), values)));
