@@ -50,7 +50,7 @@ public class DatabaseBuilder {
 
     // get cst
     Map<Language, Map<String, CSTTree>> cstForLangs = null;
-    if (framework.equals("web")) cstForLangs = CSTBuilderNG.buildCST();
+    if (framework.equals("web") || framework.equals("cpython")) cstForLangs = CSTBuilderNG.buildCST();
     else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast
@@ -70,10 +70,20 @@ public class DatabaseBuilder {
       Set<ElementInstance> instances;
       Language patternLang = Language.ANY;
       if (pattern.lang != null) {
-        patternLang = Language.valueOfLabel("." + pattern.lang.toLowerCase());
+        patternLang = Language.valueOfLabel(pattern.lang);
       }
-      if (patternLang != Language.ANY)
-        instances = getInstancesFromSingleTree(patternLang, pattern, uriTrees.get(patternLang));
+      if (patternLang != Language.ANY) {
+        List<Language> targetLangs = new ArrayList<>();
+        if (patternLang == Language.CLike) {
+          targetLangs = Arrays.asList(Language.C, Language.CPP, Language.HPP, Language.CC, Language.H);
+        } else {
+          targetLangs.add(patternLang);
+        }
+        instances = new HashSet<>();
+        for (Language lang : targetLangs) {
+          instances.addAll(getInstancesFromSingleTree(lang, pattern, uriTrees.get(lang)));
+        }
+      }
       else {
         instances = new HashSet<>();
         uriTrees.forEach(
@@ -110,6 +120,23 @@ public class DatabaseBuilder {
               lang,
               new TreeInfoConf(
                   System.getProperty("user.dir") + "/parser/src/main/resources/css.tree"));
+          break;
+        case CLike:
+        case C:
+        case H:
+        case CC:
+        case CPP:
+        case HPP:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/cpp.tree"));
+          break;
+        case Python:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/python.tree"));
           break;
         default:
           throw new IllegalArgumentException("language not supported");
