@@ -1,0 +1,104 @@
+_declarator = array_declarator | attributed_declarator | destructor_name | function_declarator | identifier | operator_name | parenthesized_declarator | pointer_declarator | qualified_identifier | reference_declarator | structured_binding_declarator | template_function
+_type_specifier = struct_specifier | union_specifier | enum_specifier | class_specifier | sized_type_specifier | primitive_type | template_type | dependent_type | placeholder_type_specifier | decltype | qualified_identifier | type_identifier
+_expression = alignof_expression | assignment_expression | binary_expression | call_expression | cast_expression | char_literal | co_await_expression | compound_literal_expression | concatenated_string | conditional_expression | delete_expression | false | field_expression | fold_expression | generic_expression | gnu_asm_expression | identifier | lambda_expression | new_expression | null | number_literal | offsetof_expression | parameter_pack_expansion | parenthesized_expression | pointer_expression | qualified_identifier | raw_string_literal | requires_clause | requires_expression | sizeof_expression | string_literal | subscript_expression | template_function | this | true | unary_expression | update_expression | user_defined_literal
+
+
+init_declarator:
+    name: {declarator}
+init_declarator/_expression:
+    type: "value"
+init_declarator/argument_list:
+    type: "value"
+init_declarator/initializer_list:
+    type: "value"
+
+new_expression:
+    name: "new"
+    var_type: {type}
+new_declarator
+
+
+function_definition:
+    name: _declarator._declarator.identifier | _declarator.identifier
+    return_type: {type}
+
+function_declarator:
+    name: {declarator}
+    parameter_cnt: $cnt(parameter_list.parameter_declaration)
+
+parameter_declaration:
+    name: {declarator}
+    var_type: {type}
+
+parameter_list:
+    name: "(...)"
+
+parameter_list/parameter_declaration:
+    type: "arg"
+    idx: $idx(this)
+
+type_declaration:
+    name: {declarator}
+    decl_type: {type}
+
+declaration:
+    name: init_declarator._declarator.identifier | init_declarator.identifier | _declarator.identifier
+    decl_type: {type}
+
+alias_declaration:
+    name: {name}
+    decl_type: {type}
+
+assignment_expression:
+    name: {left}
+    operator: {operator}
+
+assignment_expression/_expression:
+    type: "operand"
+    idx: $idx(this)
+
+call_expression:
+    name: {function}
+
+field_declaration:
+    name: {declarator}
+    decl_type: {type}
+
+
+argument_list:
+    name: "(...)"
+_arg = _expression | compound_statement | initializer_list | preproc_defined
+argument_list/_arg:
+    type: "arg"
+    idx: $idx(this)
+initializer_list:
+    name: "{...}"
+_initializer_item = _expression | initializer_list | initializer_pair
+initializer_list/_initializer_item:
+    type: "arg"
+    idx: $idx(this)
+dependent_name
+dependent_type
+preproc_include:
+    name: "include"
+
+_include_path = call_expression | identifier | string_literal | system_lib_string
+preprcoc_include/_include_path:
+    type: "path"
+
+preproc_ifdef:
+    name: "ifdef"
+
+preproc_function_def:
+    name: {name}
+preproc_params:
+    name: "(...)"
+preproc_params/identifier:
+    type: "arg"
+    idx: $idx(this)
+preproc_arg
+
+_declarator
+_expression
+_type_specifier
+# template?

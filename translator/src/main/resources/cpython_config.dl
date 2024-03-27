@@ -1,0 +1,124 @@
+.type Capture = ZeroCap {}
+              | CMacroDefCallPyAPIStrObjCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | PythonModuleRefAttrCap {modName: symbol}
+              | CFuncDefCallPyAPIStringConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CMacroDefCallPyAPIStringConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CFuncDefCallPyAPIIntConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CFuncDefCallPyAPIObjRefCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | PythonModuleFieldAttrCap {modName: symbol, attrName: symbol}
+              | CMacroDefCallPyAPIStrObjRefCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CPyModuleAddObjRefCap {attrName: symbol}
+              | CCallFuncCap {paramIdx: symbol, func: symbol, attrName: symbol}
+              | PythonModuleFieldDotCap {modName: symbol, attrName: symbol}
+              | CMacroDefCallPyAPIObjCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CPyModuleAddIntConstCap {attrName: symbol}
+              | CPyModuleCreateCap {pymodule: symbol, modName: symbol}
+              | CCallFuncVarParamCap {paramIdx: symbol, func: symbol, attrName: symbol}
+              | CMacroDefCallPyAPIStrIntConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CPyModuleAddStringConstCap {attrName: symbol}
+              | CPyModuleAddObjCap {attrName: symbol}
+              | CPyFuncCreateCap {func: symbol, attrName: symbol}
+              | CMacroDefCallPyAPIObjRefCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | PythonModuleRefDotCap {modName: symbol}
+              | CFuncDefCallPyAPIObjCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CMacroDefCallPyAPIStrStringConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+              | CMacroDefCallPyAPIIntConstCap {paramIdx: symbol, varParam: symbol, func: symbol}
+
+.type Branch = ZeroBranch {}
+             | PythonModuleFieldAttrBr {_0: symbol}
+             | CMacroDefCallPyAPIStrIntConstBr {_0: symbol}
+             | CMacroDefCallPyAPIObjRefBr {_0: symbol}
+             | CFuncDefCallPyAPIIntConstBr {_0: symbol}
+             | CMacroDefCallPyAPIObjBr {_0: symbol}
+             | CMacroDefCallPyAPIIntConstBr {_0: symbol}
+             | PythonModuleFieldDotBr {_0: symbol}
+             | CMacroDefCallPyAPIStrStringConstBr {_0: symbol}
+             | CMacroDefCallPyAPIStrObjRefBr {_0: symbol}
+             | CFuncDefCallPyAPIObjRefBr {_0: symbol}
+             | CFuncDefCallPyAPIStringConstBr {_0: symbol}
+             | CMacroDefCallPyAPIStringConstBr {_0: symbol}
+             | CFuncDefCallPyAPIObjBr {_0: symbol}
+             | CMacroDefCallPyAPIStrObjBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl CMacroDefCallPyAPIStrIntConst(uri:URI)
+.decl CMacroDefCallPyAPIStrObjRef(uri:URI)
+.decl PythonModuleRefAttr(uri:URI)
+.decl CMacroDefCallPyAPIIntConst(uri:URI)
+.decl CPyModuleCreate(uri:URI)
+.decl CFuncDefCallPyAPIObj(uri:URI)
+.decl CPyModuleAddObj(uri:URI)
+.decl CFuncDefCallPyAPIStringConst(uri:URI)
+.decl CMacroDefCallPyAPIStrObj(uri:URI)
+.decl PythonModuleFieldAttr(uri:URI)
+.decl CCallFuncVarParam(uri:URI)
+.decl CMacroDefCallPyAPIObjRef(uri:URI)
+.decl PythonModuleFieldDot(uri:URI)
+.decl CMacroDefCallPyAPIObj(uri:URI)
+.decl CCallFunc(uri:URI)
+.decl CPyModuleAddIntConst(uri:URI)
+.decl CPyModuleAddObjRef(uri:URI)
+.decl CPyModuleAddStringConst(uri:URI)
+.decl CPyFuncCreate(uri:URI)
+.decl CMacroDefCallPyAPIStrStringConst(uri:URI)
+.decl CFuncDefCallPyAPIObjRef(uri:URI)
+.decl PythonModuleRefDot(uri:URI)
+.decl CMacroDefCallPyAPIStringConst(uri:URI)
+.decl CFuncDefCallPyAPIIntConst(uri:URI)
+.input CMacroDefCallPyAPIStrIntConst
+.input CMacroDefCallPyAPIStrObjRef
+.input PythonModuleRefAttr
+.input CMacroDefCallPyAPIIntConst
+.input CPyModuleCreate
+.input CFuncDefCallPyAPIObj
+.input CPyModuleAddObj
+.input CFuncDefCallPyAPIStringConst
+.input CMacroDefCallPyAPIStrObj
+.input PythonModuleFieldAttr
+.input CCallFuncVarParam
+.input CMacroDefCallPyAPIObjRef
+.input PythonModuleFieldDot
+.input CMacroDefCallPyAPIObj
+.input CCallFunc
+.input CPyModuleAddIntConst
+.input CPyModuleAddObjRef
+.input CPyModuleAddStringConst
+.input CPyFuncCreate
+.input CMacroDefCallPyAPIStrStringConst
+.input CFuncDefCallPyAPIObjRef
+.input PythonModuleRefDot
+.input CMacroDefCallPyAPIStringConst
+.input CFuncDefCallPyAPIIntConst
+
+.comp Native {
+    .decl PyModuleAttrLink(param0:URI, param1:URI)
+    .decl ModName(param0:symbol)
+    .decl PyModuleLink(param0:URI, param1:URI)
+    .decl CFuncToCreateModuleAttrStr(param0:URI)
+    .decl CModuleAttrEle(param0:URI)
+    .decl CCallFuncToCreateModuleAttr(param0:URI)
+    .decl CFuncToCreateModuleAttr(param0:URI)
+    PyModuleAttrLink(cdef, pyref) :- ( CModuleAttrEle(cdef), ( cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleAddObjRefCap(capCdefAttrName)]; cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleAddIntConstCap(capCdefAttrName)]; cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleAddObjCap(capCdefAttrName)]; cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleAddStringConstCap(capCdefAttrName)]; cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyFuncCreateCap(_capCdefFunc,capCdefAttrName)] ) ; CCallFuncToCreateModuleAttr(cdef), ( cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CCallFuncVarParamCap(_capCdefParamIdx,_capCdefFunc,capCdefAttrName)]; cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CCallFuncCap(_capCdefParamIdx,_capCdefFunc,capCdefAttrName)] ) ), ( PythonModuleFieldDot(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldDotCap(capPyrefModName,capPyrefAttrName)] ; PythonModuleFieldAttr(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldAttrCap(capPyrefModName,capPyrefAttrName)] ), capCdefAttrName=capPyrefAttrName, ModName(capPyrefModName).
+    ModName(modName) :- CPyModuleCreate(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleCreateCap(_capCdefPymodule,capCdefModName)], modName=capCdefModName.
+    PyModuleLink(cdef, pyref) :- CPyModuleCreate(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CPyModuleCreateCap(_capCdefPymodule,capCdefModName)], ( PythonModuleRefDot(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleRefDotCap(capPyrefModName)] ; PythonModuleRefAttr(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleRefAttrCap(capPyrefModName)] ), capCdefModName=capPyrefModName.
+    CFuncToCreateModuleAttrStr(ele) :- ( CMacroDefCallPyAPIStrIntConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIStrStringConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIStrObj(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIStrObjRef(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ).
+    CModuleAttrEle(ele) :- ( CPyModuleAddIntConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CPyModuleAddStringConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CPyModuleAddObj(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CPyModuleAddObjRef(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CPyFuncCreate(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ).
+    CCallFuncToCreateModuleAttr(ele) :- ( CCallFunc(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,$CCallFuncCap(capEleParamIdx,capEleFunc,_capEleAttrName)], CFuncToCreateModuleAttr(defEle), ( defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIObjCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CFuncDefCallPyAPIStringConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CFuncDefCallPyAPIIntConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIObjRefCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIStringConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIIntConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CFuncDefCallPyAPIObjRefCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CFuncDefCallPyAPIObjCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)] ), capEleFunc=capDefEleFunc, capEleParamIdx=capDefEleParamIdx ; CCallFuncVarParam(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,$CCallFuncVarParamCap(capEleParamIdx,capEleFunc,_capEleAttrName)], CFuncToCreateModuleAttrStr(defEle), ( defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIStrStringConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIStrObjCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIStrIntConstCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)]; defEle=[_attrDefEleLang,_attrDefEleFile,_attrDefEleElement,_attrDefEleBr,$CMacroDefCallPyAPIStrObjRefCap(capDefEleParamIdx,_capDefEleVarParam,capDefEleFunc)] ), capEleFunc=capDefEleFunc, capEleParamIdx=capDefEleParamIdx ).
+    CFuncToCreateModuleAttr(ele) :- ( CFuncDefCallPyAPIIntConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CFuncDefCallPyAPIStringConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CFuncDefCallPyAPIObj(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CFuncDefCallPyAPIObjRef(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIIntConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIStringConst(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIObj(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ; CMacroDefCallPyAPIObjRef(ele), ele=[_attrEleLang,_attrEleFile,_attrEleElement,_attrEleBr,_capele] ).
+}
+.init nativeInstance = Native
+.output nativeInstance.PyModuleAttrLink(IO=file, rfc4180=true)
+.output nativeInstance.ModName(IO=file, rfc4180=true)
+.output nativeInstance.PyModuleLink(IO=file, rfc4180=true)
+.output nativeInstance.CFuncToCreateModuleAttrStr(IO=file, rfc4180=true)
+.output nativeInstance.CModuleAttrEle(IO=file, rfc4180=true)
+.output nativeInstance.CCallFuncToCreateModuleAttr(IO=file, rfc4180=true)
+.output nativeInstance.CFuncToCreateModuleAttr(IO=file, rfc4180=true)
+
