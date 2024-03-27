@@ -1,6 +1,8 @@
 package models;
 
 import com.google.common.collect.Multiset;
+import com.opencsv.exceptions.CsvException;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -36,5 +38,5 @@ public abstract class Baseline {
   public void run(Map<String, List<String>> categorizedFiles) {}
 
   // validate and output results
-  public void validate(String resPath) {}
+  public void validate(String resPath) throws CsvException {}
 }

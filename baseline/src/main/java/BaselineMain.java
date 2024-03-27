@@ -30,7 +30,11 @@ public class BaselineMain {
 
     baseline.run(categorizedFiles);
     if (ourResults != null && !ourResults.isEmpty()) {
-      baseline.validate(ourResults);
+      try {
+        baseline.validate(ourResults);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 }
