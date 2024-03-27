@@ -425,7 +425,7 @@ public class DatabaseBuilder {
       return getTextPattern((SegmentPattern) pattern.child.child, instance);
     } else {
       // TODO: same capture may happen
-      String regex = replaceCapture(text, instance);
+      String regex = replaceCaptureAndRemoveEscape(text, instance);
       try {
         return Pattern.compile("^" + regex + "$");
       } catch (Exception e) {
@@ -435,7 +435,7 @@ public class DatabaseBuilder {
     return null;
   }
 
-  private static String replaceCapture(IdentifierPattern text, ElementInstance instance) {
+  private static String replaceCaptureAndRemoveEscape(IdentifierPattern text, ElementInstance instance) {
     String regex = StringUtil.escapedForRegex(text.text, false);
     regex = regex.replaceAll("(?<!\\\\)\\*", ".+");
     for (String capName : text.captures) {
@@ -447,6 +447,8 @@ public class DatabaseBuilder {
         regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", replaceVal);
       } else regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", "(?<" + capName + ">.+)");
     }
+
+    regex = regex.replaceAll("\\\\\\\\([\\(\\)*])", "$1");
 
     return regex;
   }
@@ -464,7 +466,7 @@ public class DatabaseBuilder {
     for (String attributeName : pattern.attributes.keySet()) {
       if (!node.containsKey(attributeName)) return null;
       IdentifierPattern attrVal = pattern.attributes.get(attributeName);
-      String regex = replaceCapture(attrVal, instance);
+      String regex = replaceCaptureAndRemoveEscape(attrVal, instance);
       Pattern regexPattern = Pattern.compile(regex);
       Matcher matcher = regexPattern.matcher(node.get(attributeName));
       if (!matcher.find()) return null;

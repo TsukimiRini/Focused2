@@ -18,7 +18,7 @@ public class MatcherUtils {
           String.format(
               "(?<name>\\w+)(?:\\<(?<params>(?:\\w+|\"%s+\"|`%s+`)(?:,\\s*(?:\\w+|\"%s+\"|`%s+`)\\s*)?)\\>)?",
               quotePattern, singleQuotePattern, quotePattern, singleQuotePattern));
-  private static final String escapedPattern = "(?:[^\\\\\\[\\]:=,#/]|\\\\[\\\\\\[\\]:=,#/])";
+  private static final String escapedPattern = "(?:[^\\\\\\[\\]:#/]|\\\\[\\\\\\[\\]\\(\\):#/])";
   private static final String attrPattern =
       String.format("(?<key>\\w+)=(?<val>%s+)", escapedPattern);
   private static final Pattern uriPattern = Pattern.compile("(?<seg>.*?)(?:((?<!\\\\)/)|$)");
