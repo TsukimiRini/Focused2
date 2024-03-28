@@ -277,6 +277,7 @@ public class DatabaseBuilder {
       ElementInstance newInstance = inst.clone();
       switch (checkObject) {
         case FILE:
+          if (tree.isDir()) return new HashSet<>();
           newInstance.setFilePath(tree);
           break;
         case ELEMENT:
