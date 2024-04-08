@@ -8,6 +8,7 @@ import model.CSTTree;
 import model.Language;
 import model.SharedStatus;
 import org.treesitter.*;
+import org.treesitter.TreeSitterRust;
 import utils.FileUtil;
 
 public class CSTBuilderNG {
@@ -52,11 +53,15 @@ public class CSTBuilderNG {
       case Python:
         tsLanguage = new TreeSitterPython();
         break;
+      case Rust:
+        tsLanguage = new TreeSitterRust();
+        break;
     }
     parser.setLanguage(tsLanguage);
     Map<String, CSTTree> cstTrees = new HashMap<>();
     for (String file : ProgressBar.wrap(files, "Building " + tsLanguage.toString() + " CST")) {
       String source = FileUtil.readFileToString(file);
+      System.out.println("source: \n" + source);
 
       String[] splitted = source.split("\n", -1);
       int[] lineLenSum = new int[splitted.length];

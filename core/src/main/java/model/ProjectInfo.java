@@ -42,6 +42,9 @@ public class ProjectInfo {
         addLanguage(Language.C);
         addLanguage(Language.CPP);
         addLanguage(Language.HPP);
+      case "rust":
+        addLanguage(Language.Rust);
+        break;
       default:
         addLanguage(Language.JAVA);
     }
