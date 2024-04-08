@@ -19,6 +19,7 @@ dependencies {
     implementation 'io.github.bonede:tree-sitter-java:0.20.2'
     implementation 'io.github.bonede:tree-sitter-cpp:0.20.3'
     implementation 'io.github.bonede:tree-sitter-python:0.20.4'
+    implementation 'io.github.bonede:tree-sitter-rust:0.20.4'
     implementation 'me.tongfei:progressbar:0.10.0'
     implementation files('libs/tree-sitter-xml-0.17.3.jar')
 //    implementation files('libs/tree-sitter-python-0.20.4.jar')
