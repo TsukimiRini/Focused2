@@ -3,24 +3,30 @@ function_item:
     name: {name}                             
     type: {type}
     # use `type` as index, convert it to a "raw-string"
-    visibility_modifier: visibility_modifier 
-    function_modifier: function_modifier     
+    vsibility: visibility_modifier   
+    function_modifiers: function_modifiers
+    return_type: {return_type}
 
-    # not sure whether useful or not
-    # type_parameters_cnt: $cnt({type_parameters})
-    # parameters_cnt: $cnt({parameters})
+type_parameters
+
+type_identifier
+lifetime
+
+parameters:
+    name: "parameters"
+    parameter_cnt: $cnt(parameter)
 
 where_clause:
+    name: "where_clause"
     where_predicate_cnt: $cnt(where_predicate)
 
 where_predicate:
+    name: "where_predicate"
     type: {type}
-    left: {left} 
+    type_para: {left}
 
 trait_bounds:
-    bounds: type |  higher_ranked_trait_bound | lifetime | removed_trait_bound
+    name: "trait_bounds"
 
 block:
-    name: {name}
-    type: {type}
-    expression: declaration_statement | expression | expression_statement | label
+    name: "block"
