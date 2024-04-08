@@ -1,0 +1,32 @@
+function_item:
+    # use `field` as index, convert it to a "raw-string"
+    name: {name}                             
+    type: {type}
+    # use `type` as index, convert it to a "raw-string"
+    vsibility: visibility_modifier   
+    function_modifiers: function_modifiers
+    return_type: {return_type}
+
+type_parameters
+
+type_identifier
+lifetime
+
+parameters:
+    name: "parameters"
+    parameter_cnt: $cnt(parameter)
+
+where_clause:
+    name: "where_clause"
+    where_predicate_cnt: $cnt(where_predicate)
+
+where_predicate:
+    name: "where_predicate"
+    type: {type}
+    type_para: {left}
+
+trait_bounds:
+    name: "trait_bounds"
+
+block:
+    name: "block"

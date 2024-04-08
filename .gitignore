@@ -42,3 +42,6 @@ gradle.properties
 
 # MacOS file system
 *.DS_Store
+
+# ignore all bin directories in the project
+bin/

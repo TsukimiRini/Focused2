@@ -1,4 +1,6 @@
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+
 import models.Baseline;
 import org.jgrapht.alg.util.Pair;
 
@@ -30,9 +32,12 @@ public class GroundTruth extends Baseline {
             + ".csv";
   }
 
-  private List<Pair<String, String>> readInRangeGroundTruth() throws IOException {
+  private List<Pair<String, String>> readInRangeGroundTruth() throws IOException, CsvException {
     Reader reader = Files.newBufferedReader(Path.of(gt_path));
     CSVReader csvReader = new CSVReader(reader);
+    // List<String[]> records = csvReader.readAll();
+    // 错误: 未报告的异常错误CsvException; 必须对其进行捕获或声明以便抛出
+    // csvReader.readAll();
     List<String[]> records = csvReader.readAll();
     List<Pair<String, String>> res = new ArrayList<>();
     for (String[] record : records) {
@@ -69,7 +74,7 @@ public class GroundTruth extends Baseline {
       }
       System.out.println("Acc: " + (double) correct / ours.size() + "\n");
       System.out.println("Recall: " + (double) correct / gt.size() + "\n");
-    } catch (IOException e) {
+    } catch (IOException | CsvException e) {
       e.printStackTrace();
     }
   }

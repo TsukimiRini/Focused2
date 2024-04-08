@@ -18,6 +18,7 @@ public enum Language {
   SQL(".sql", "SQL"),
   CSS(".css", "CSS"),
   FILE(".file", "FILE"),
+  Rust(".rs", "Rust"),
   ANY("*", "ANY"),
   OTHER("?", "?");
 

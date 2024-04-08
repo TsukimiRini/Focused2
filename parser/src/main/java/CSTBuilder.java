@@ -12,9 +12,12 @@ import java.util.Map;
 
 public class CSTBuilder {
   static {
+    // System.load(
+    //     System.getProperty("user.home")
+    //         + "/home/code/projects/tree-sitter-java/tree-sitter-java.dylib");
     System.load(
         System.getProperty("user.home")
-            + "/Projects/tree-sitter/java-tree-sitter/libjava-tree-sitter_.dylib");
+            + "/home/code/projects/tree-sitter-rust/tree-sitter-rust.dylib");
   }
 
   public static Parser parser = new Parser();
@@ -49,6 +52,11 @@ public class CSTBuilder {
       case CSS:
         parser.setLanguage(Languages.css());
         break;
+      case Rust:
+        parser.setLanguage(Languages.rust());
+        break;
+      default:
+        throw new UnsupportedEncodingException("Unsupported language: " + language);
     }
     Map<String, CSTTree> cstTrees = new HashMap<>();
     for (String file : files) {

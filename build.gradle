@@ -24,13 +24,15 @@ subprojects{
         implementation 'org.atteo.classindex:classindex:3.10'
         implementation 'org.slf4j:slf4j-log4j12:2.0.0-alpha2'
 
-        implementation('org.jgrapht:jgrapht-core:1.5.0') {
-            force = true
-        }
+        implementation('org.jgrapht:jgrapht-core:1.5.0')
         implementation 'org.jgrapht:jgrapht-io:1.5.0'
         implementation 'commons-io:commons-io:2.8.0'
         implementation 'org.apache.commons:commons-lang3:3.14.0'
         implementation 'io.github.bonede:tree-sitter:0.21.0'
+
+        implementation 'com.google.guava:guava:31.0.1-jre'
+        implementation 'net.sourceforge.javacsv:javacsv:2.0'
+        implementation 'com.opencsv:opencsv:5.5.1'
     }
 
     test {

@@ -6,8 +6,12 @@ import model.URI.URINode;
 import org.junit.jupiter.api.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
+
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 public class URITreeBuilderTest {
   @Test
@@ -86,5 +90,28 @@ public class URITreeBuilderTest {
     while (!fileTree.type.equals("FILE"))
       fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
     System.out.println(fileTree.type);
+  }
+
+  @Test
+  public void testRust() throws UnsupportedEncodingException, FileNotFoundException {
+    // Redirect System.out to a file
+    PrintStream out = new PrintStream(new FileOutputStream("1.txt"));
+    System.setOut(out);
+
+    SharedStatus.initProjectInfo(
+            "rust", System.getProperty("user.home") + "/home/code/projects/playground"
+    );
+    Map<String, CSTTree> cstTrees =
+            CSTBuilderNG.buildCST(
+                    Language.Rust,
+                    List.of(
+                            System.getProperty("user.home")
+                                    + "/home/code/projects/playground/src/main.rs"));
+    TreeInfoConf conf =
+            new TreeInfoConf(System.getProperty("user.dir") + "/src/main/resources/rust.tree");
+    URITreeBuilder builder = new URITreeBuilder(conf);
+    URINode fileTree = builder.buildFromCST(cstTrees);
+    StringBuilder sb = URINode.renderURINode(fileTree);
+    System.out.println(sb.toString());
   }
 }
