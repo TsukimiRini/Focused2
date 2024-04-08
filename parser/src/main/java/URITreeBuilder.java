@@ -15,7 +15,7 @@ public class URITreeBuilder {
   public URINode buildFromCST(Map<String, CSTTree> tree) {
     URINode uriTree = new URINode("", "ROOT");
     // redundant file path
-    tree.forEach((filePath, curTree) -> uriTree.addCST("", curTree, conf));
+    tree.forEach((filePath, curTree) -> uriTree.addCST(FileUtil.getRelativePath(filePath), curTree, conf));
     return uriTree;
   }
 }

@@ -99,7 +99,7 @@ public class URITreeBuilderTest {
     System.setOut(out);
 
     SharedStatus.initProjectInfo(
-            "rust", System.getProperty("user.home") + "/home/projects/playground"
+            "rust", System.getProperty("user.home") + "/home/code/projects/playground"
     );
     Map<String, CSTTree> cstTrees =
             CSTBuilderNG.buildCST(
