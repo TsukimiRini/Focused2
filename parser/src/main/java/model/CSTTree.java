@@ -134,7 +134,7 @@ public class CSTTree implements Serializable {
       //        continue;
       //      }
 
-      addChild(new CSTTree(filePath, source, splitted, sourceLen, this, namedNode, fieldName, language));
+      addChild(new CSTTree(filePath, source, splitted, sourceLen, this, namedNode, cur.getFieldNameForChild(idx), language));
     }
   }
 

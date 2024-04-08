@@ -1,0 +1,78 @@
+_simple_pattern = class_pattern | splat_pattern | union_pattern | list_pattern | tuple_pattern | dict_pattern | string | concatenated_string | true | false | none | integer | float | complex_pattern | dotted_name | "_"
+_primary_expression = attribute | await | binary_operator | call | concatenated_string | dictionary | dictionary_comprehension | ellipsis | false | float | generator_expression | identifier | integer | list | list_comprehension | list_splat | none | parenthesized_expression | set | set_comprehension | string | subscript | true | tuple | unary_operator
+
+string
+string_content
+string/string_content:
+    type: "content"
+concatenated_string
+
+identifier
+dotted_name
+dotted_name/identifier:
+    type: "part"
+    idx: $idx(this)
+
+import_statement
+future_import_statement
+import_from_statement
+return_statement
+#global_statement
+type_alias_statement
+relative_import
+wildcard_import
+aliased_import:
+    name: dotted_name
+    alias: alias
+
+#with_statement
+function_definition:
+    name: identifier
+    args: parameters
+class_definition:
+    name: identifier
+decorated_definition
+#expression
+
+list_splat
+dictionary_splat
+parenthesized_expression
+keyword_argument:
+    name: {name}
+    value: {value}
+
+keyword_pattern:
+    name: identifier
+    pattern: _simple_pattern
+typed_parameter
+default_parameter
+typed_default_parameter
+list_splat_pattern
+tuple_pattern
+keyword_separator
+positional_separator
+dictionary_splat_pattern
+
+attribute:
+    name: {attribute}
+    object: {object}
+attribute/_primary_expression:
+    type: "part"
+    idx: $idx(this)
+
+#lambda
+assignment:
+    left: {left}
+    right: {right}
+augmented_assignment:
+    left: {left}
+    right: {right}
+    op: {operator}
+
+call:
+    name: {function}
+call/argument_list.*:
+    type: "arg"
+    idx: $idx(this)
+
+type

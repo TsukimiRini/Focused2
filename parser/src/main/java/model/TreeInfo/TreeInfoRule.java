@@ -107,7 +107,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     return childNodeType.get(0).split("\\.").length;
   }
 
-  private boolean isMatchedChildNode(URINode parentNode, URINode childNode) {
+  public boolean isMatchedChildNode(URINode parentNode, URINode childNode) {
     if (ruleType != TreeInfoRuleType.EDGE) return false;
     int childDepth = getChildEdgeDepth();
     StringBuilder sb = new StringBuilder(childNode.type);
@@ -119,7 +119,7 @@ public class TreeInfoRule extends HashMap<String, List<TreeNodeAttrValue>> {
     return isMatchedTypePatterns(sb.toString(), childNodeType);
   }
 
-  private boolean isMatchedTypePatterns(String node, List<String> nodeTypes) {
+  public boolean isMatchedTypePatterns(String node, List<String> nodeTypes) {
     for (String patternString : nodeTypes) {
       if (node.matches(getRegexPatternFromSymbol(patternString))) {
         return true;

@@ -45,9 +45,12 @@ public class CSTBuilderNG {
       case CSS:
         tsLanguage = new TreeSitterCss();
         break;
+      case CLike:
       case C:
+      case CC:
       case CPP:
       case HPP:
+      case H:
         tsLanguage = new TreeSitterCpp();
         break;
       case Python:

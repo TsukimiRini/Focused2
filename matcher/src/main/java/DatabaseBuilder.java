@@ -50,7 +50,7 @@ public class DatabaseBuilder {
 
     // get cst
     Map<Language, Map<String, CSTTree>> cstForLangs = null;
-    if (framework.equals("web")) cstForLangs = CSTBuilderNG.buildCST();
+    if (framework.equals("web") || framework.equals("cpython")) cstForLangs = CSTBuilderNG.buildCST();
     else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast
@@ -70,10 +70,20 @@ public class DatabaseBuilder {
       Set<ElementInstance> instances;
       Language patternLang = Language.ANY;
       if (pattern.lang != null) {
-        patternLang = Language.valueOfLabel("." + pattern.lang.toLowerCase());
+        patternLang = Language.valueOfLabel(pattern.lang);
       }
-      if (patternLang != Language.ANY)
-        instances = getInstancesFromSingleTree(patternLang, pattern, uriTrees.get(patternLang));
+      if (patternLang != Language.ANY) {
+        List<Language> targetLangs = new ArrayList<>();
+        if (patternLang == Language.CLike) {
+          targetLangs = Arrays.asList(Language.C, Language.CPP, Language.HPP, Language.CC, Language.H);
+        } else {
+          targetLangs.add(patternLang);
+        }
+        instances = new HashSet<>();
+        for (Language lang : targetLangs) {
+          instances.addAll(getInstancesFromSingleTree(lang, pattern, uriTrees.get(lang)));
+        }
+      }
       else {
         instances = new HashSet<>();
         uriTrees.forEach(
@@ -110,6 +120,23 @@ public class DatabaseBuilder {
               lang,
               new TreeInfoConf(
                   System.getProperty("user.dir") + "/parser/src/main/resources/css.tree"));
+          break;
+        case CLike:
+        case C:
+        case H:
+        case CC:
+        case CPP:
+        case HPP:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/cpp.tree"));
+          break;
+        case Python:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/python.tree"));
           break;
         default:
           throw new IllegalArgumentException("language not supported");
@@ -250,6 +277,7 @@ public class DatabaseBuilder {
       ElementInstance newInstance = inst.clone();
       switch (checkObject) {
         case FILE:
+          if (tree.isDir()) return new HashSet<>();
           newInstance.setFilePath(tree);
           break;
         case ELEMENT:
@@ -398,7 +426,7 @@ public class DatabaseBuilder {
       return getTextPattern((SegmentPattern) pattern.child.child, instance);
     } else {
       // TODO: same capture may happen
-      String regex = replaceCapture(text, instance);
+      String regex = replaceCaptureAndRemoveEscape(text, instance);
       try {
         return Pattern.compile("^" + regex + "$");
       } catch (Exception e) {
@@ -408,7 +436,7 @@ public class DatabaseBuilder {
     return null;
   }
 
-  private static String replaceCapture(IdentifierPattern text, ElementInstance instance) {
+  private static String replaceCaptureAndRemoveEscape(IdentifierPattern text, ElementInstance instance) {
     String regex = StringUtil.escapedForRegex(text.text, false);
     regex = regex.replaceAll("(?<!\\\\)\\*", ".+");
     for (String capName : text.captures) {
@@ -420,6 +448,8 @@ public class DatabaseBuilder {
         regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", replaceVal);
       } else regex = regex.replaceAll("\\\\\\(" + capName + "\\\\\\)", "(?<" + capName + ">.+)");
     }
+
+    regex = regex.replaceAll("\\\\\\\\([\\(\\)*])", "$1");
 
     return regex;
   }
@@ -437,7 +467,7 @@ public class DatabaseBuilder {
     for (String attributeName : pattern.attributes.keySet()) {
       if (!node.containsKey(attributeName)) return null;
       IdentifierPattern attrVal = pattern.attributes.get(attributeName);
-      String regex = replaceCapture(attrVal, instance);
+      String regex = replaceCaptureAndRemoveEscape(attrVal, instance);
       Pattern regexPattern = Pattern.compile(regex);
       Matcher matcher = regexPattern.matcher(node.get(attributeName));
       if (!matcher.find()) return null;

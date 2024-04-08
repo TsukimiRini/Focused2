@@ -1,0 +1,127 @@
+[Elements]
+    CPyModuleCreate:
+        lang: CLike
+        file: *
+        element: (pymodule)::declaration[decl_type=PyModuleDef]//**/~arg[idx=1]~/"(modName)"::string_literal
+
+    CPyModuleAdd<api>:
+        lang: CLike
+        file: *
+        element: <api>::call_expression#func//**/~arg[idx=1]~/"(attrName)"::string_literal
+
+    CPyModuleAddIntConst: CPyModuleAdd<"PyModule_AddIntConstant">
+    CPyModuleAddStringConst: CPyModuleAdd<"PyModule_AddStringConstant">
+    CPyModuleAddObj: CPyModuleAdd<"PyModule_AddObject">
+    CPyModuleAddObjRef: CPyModuleAdd<"PyModule_AddObjectRef">
+
+    CPyFuncCreate:
+        lang: CLike
+        file: *
+        element: (func)::declaration[decl_type=PyMethodDef]//**/~arg[idx=0]~/"(attrName)"::string_literal
+
+    CCallFunc:
+        lang: CLike
+        file: *
+        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/"(attrName)"::string_literal
+    CCallFuncVarParam:
+        lang: CLike
+        file: *
+        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/(attrName)::identifier
+    CFuncDefCallPyAPI<api>:
+        lang: CLike
+        file: *
+        element: (func)::function_definition#def//**//<api>::call_expression//**/~arg[idx=1]~/(varParam)::identifier
+        branches:
+            - @def//**//(func)::function_declarator//*::param_list/~arg[idx=(paramIdx)]~/(varParam)[var_type=string]
+    CMacroDefCallPyAPI<api>:
+        lang: CLike
+        file: *
+        element: (func)::preproc_function_def#def//*<api>\(*, (varParam), *\)*::preproc_arg
+        branches:
+            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier
+    CMacroDefCallPyAPIStr<api>:
+        lang: CLike
+        file: *
+        element: (func)::preproc_function_def#def//*<api>\(*, \#(varParam), *\)*::preproc_arg
+        branches:
+            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier
+
+    CFuncDefCallPyAPIIntConst: CFuncDefCallPyAPI<"PyModule_AddIntConstant">
+    CFuncDefCallPyAPIStringConst: CFuncDefCallPyAPI<"PyModule_AddStringConstant">
+    CFuncDefCallPyAPIObj: CFuncDefCallPyAPI<"PyModule_AddObject">
+    CFuncDefCallPyAPIObjRef: CFuncDefCallPyAPI<"PyModule_AddObjectRef">
+
+    CMacroDefCallPyAPIIntConst: CMacroDefCallPyAPI<"PyModule_AddIntConstant">
+    CMacroDefCallPyAPIStringConst: CMacroDefCallPyAPI<"PyModule_AddStringConstant">
+    CMacroDefCallPyAPIObj: CMacroDefCallPyAPI<"PyModule_AddObject">
+    CMacroDefCallPyAPIObjRef: CMacroDefCallPyAPI<"PyModule_AddObjectRef">
+
+    CMacroDefCallPyAPIStrIntConst: CMacroDefCallPyAPIStr<"PyModule_AddIntConstant">
+    CMacroDefCallPyAPIStrStringConst: CMacroDefCallPyAPIStr<"PyModule_AddStringConstant">
+    CMacroDefCallPyAPIStrObj: CMacroDefCallPyAPIStr<"PyModule_AddObject">
+    CMacroDefCallPyAPIStrObjRef: CMacroDefCallPyAPIStr<"PyModule_AddObjectRef">
+
+
+    PythonModuleRefDot:
+        lang: Python
+        file: *.py
+        element: *::dotted_name#dotted/~part[idx=0]~/(modName)
+    PythonModuleFieldDot: PythonModuleRefDot
+        branches:
+            - @dotted/~part[idx=1]~/(attrName)
+    PythonModuleRefAttr:
+        lang: Python
+        file: *.py
+        element: *::attribute#attr/~part[idx=0]~/(modName)
+    PythonModuleFieldAttr: PythonModuleRefAttr
+        branches:
+            - @attr/~part[idx=1]~/(attrName)
+[Links]
+    Native {
+    public:
+        CFuncToCreateModuleAttr(ele):
+            | CFuncDefCallPyAPIIntConst(ele)
+            | CFuncDefCallPyAPIStringConst(ele)
+            | CFuncDefCallPyAPIObj(ele)
+            | CFuncDefCallPyAPIObjRef(ele)
+            | CMacroDefCallPyAPIIntConst(ele)
+            | CMacroDefCallPyAPIStringConst(ele)
+            | CMacroDefCallPyAPIObj(ele)
+            | CMacroDefCallPyAPIObjRef(ele)
+        CFuncToCreateModuleAttrStr(ele):
+            | CMacroDefCallPyAPIStrIntConst(ele)
+            | CMacroDefCallPyAPIStrStringConst(ele)
+            | CMacroDefCallPyAPIStrObj(ele)
+            | CMacroDefCallPyAPIStrObjRef(ele)
+        CCallFuncToCreateModuleAttr(ele):
+            |   & CCallFunc(ele)
+                & CFuncToCreateModuleAttr(defEle)
+                & match(ele[func], defEle[func])
+                & match(ele[paramIdx], defEle[paramIdx])
+            |   & CCallFuncVarParam(ele)
+                & CFuncToCreateModuleAttrStr(defEle)
+                & match(ele[func], defEle[func])
+                & match(ele[paramIdx], defEle[paramIdx])
+        CModuleAttrEle(ele):
+            | CPyModuleAddIntConst(ele)
+            | CPyModuleAddStringConst(ele)
+            | CPyModuleAddObj(ele)
+            | CPyModuleAddObjRef(ele)
+            | CPyFuncCreate(ele)
+        ModName(modName):
+            & CPyModuleCreate(cdef)
+            & match(modName, cdef[modName])
+    public:
+        PyModuleLink(cdef, pyref):
+            & CPyModuleCreate(cdef)
+            &   | PythonModuleRefDot(pyref)
+                | PythonModuleRefAttr(pyref)
+            & match(cdef[modName], pyref[modName])
+        PyModuleAttrLink(cdef, pyref):
+            &   | CModuleAttrEle(cdef)
+                | CCallFuncToCreateModuleAttr(cdef)
+            &   | PythonModuleFieldDot(pyref)
+                | PythonModuleFieldAttr(pyref)
+            & match(cdef[attrName], pyref[attrName])
+            & ModName(pyref[modName])
+    }
