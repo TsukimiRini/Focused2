@@ -7,6 +7,7 @@ import model.TreeInfo.TreeNodeAttrValue;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class URINode extends URISegment {
   public URIEdge edgeToParent;
@@ -38,6 +39,20 @@ public class URINode extends URISegment {
                 + (isFilePath ? "//" : "/" + edgeToParent.toString() + "/")))
         + get("name")
         + (isFilePath ? "" : ("::" + (type == null ? "NONE" : type) + getAttrStr()));
+  }
+
+  public String getAttrStr() {
+    StringBuilder attributeStr = new StringBuilder("{");
+    for (String key : this.keySet()) {
+      if (key.equals("range") || key.equals("name")) continue;
+      attributeStr
+          .append(attributeStr.length() == 1 ? "" : ",")
+          .append(key)
+          .append(":")
+          .append("\"" + get(key) + "\"");
+    }
+    attributeStr.append("}");
+    return attributeStr.toString();
   }
 
   public Boolean isDir() {
@@ -192,5 +207,54 @@ public class URINode extends URISegment {
       children.put(nodeName, new ArrayList<>());
     }
     children.get(nodeName).add(child);
+  }
+
+  public static StringBuilder renderURINode(URINode node) {
+    return renderURINode(node, 0, new StringBuilder(), false, new ArrayList<>());
+  }
+
+  private static StringBuilder renderURINode(URINode node, int level, StringBuilder sb, boolean isLast,
+      List<Boolean> hierarchyTree) {
+    // the toString method is already overridden in URINode
+    String attrs = node.getAttrStr();
+    indent(sb, level, isLast, hierarchyTree)
+        .append(node.getName())
+        .append("::")
+        .append(node.type)
+        .append("->")
+        .append(attrs)
+        .append("\n");
+
+    if (node.children != null) {
+      List<URINode> allChildren = node.children.values().stream().flatMap(List::stream).collect(Collectors.toList());
+      for (int i = 0; i < allChildren.size(); i++) {
+        boolean last = (i + 1) == allChildren.size();
+
+        hierarchyTree.add(!last);
+        renderURINode(allChildren.get(i), level + 1, sb, last, hierarchyTree);
+
+        hierarchyTree.remove(hierarchyTree.size() - 1);
+      }
+    }
+    return sb;
+  }
+
+  private static StringBuilder indent(StringBuilder sb, int level, boolean isLast, List<Boolean> hierarchyTree) {
+    String indentContent = "\u2502   ";
+    for (int i = 0; i < hierarchyTree.size() - 1; ++i) {
+      if (hierarchyTree.get(i)) {
+        sb.append(indentContent);
+      } else {
+        sb.append("    "); // otherwise print empty space
+      }
+    }
+
+    if (level > 0) {
+      sb.append(isLast
+          ? "\u2514\u2500\u2500"
+          : "\u251c\u2500\u2500").append(" ");
+    }
+
+    return sb;
   }
 }

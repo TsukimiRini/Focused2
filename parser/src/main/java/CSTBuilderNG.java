@@ -64,7 +64,6 @@ public class CSTBuilderNG {
     Map<String, CSTTree> cstTrees = new HashMap<>();
     for (String file : ProgressBar.wrap(files, "Building " + tsLanguage.toString() + " CST")) {
       String source = FileUtil.readFileToString(file);
-      System.out.println("source: \n" + source);
 
       String[] splitted = source.split("\n", -1);
       int[] lineLenSum = new int[splitted.length];

@@ -92,7 +92,6 @@ public class URITreeBuilderTest {
     System.out.println(fileTree.type);
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testRust() throws UnsupportedEncodingException, FileNotFoundException {
     // Redirect System.out to a file
@@ -112,9 +111,7 @@ public class URITreeBuilderTest {
             new TreeInfoConf(System.getProperty("user.dir") + "/src/main/resources/rust.tree");
     URITreeBuilder builder = new URITreeBuilder(conf);
     URINode fileTree = builder.buildFromCST(cstTrees);
-    while (true) {
-      System.out.println(fileTree.type);
-      fileTree = ((List<URINode>) fileTree.children.values().toArray()[0]).get(0);
-    }
+    StringBuilder sb = URINode.renderURINode(fileTree);
+    System.out.println(sb.toString());
   }
 }
