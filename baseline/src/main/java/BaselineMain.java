@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public class BaselineMain {
-  public static String framework = "android";
-  public static String projectName = "CloudReader";
+  public static String framework = "cpython";
+  public static String projectName = "pytorch";
   public static String projectDir =
       System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
   public static String outputDir =
@@ -22,7 +22,7 @@ public class BaselineMain {
           + "/outputs/AggregatedInfo.csv";
 
   public static void main(String[] args) {
-    Baseline baseline = new TextBased(framework, projectName, projectDir, outputDir);
+    Baseline baseline = new GroundTruth(framework, projectName, projectDir, outputDir);
     SharedStatus.initProjectInfo(framework, projectDir);
     Map<String, List<String>> categorizedFiles =
         FileUtil.listFilePathsInLanguages(
