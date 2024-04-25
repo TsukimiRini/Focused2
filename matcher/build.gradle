@@ -15,6 +15,7 @@ dependencies {
 
     implementation project(":parser")
     implementation project(":translator")
+    implementation 'me.tongfei:progressbar:0.10.0'
 }
 
 test {

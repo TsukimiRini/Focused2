@@ -61,4 +61,10 @@ public class SegmentBase<T extends IdentifierBase> {
     }
     return cur;
   }
+
+  public Boolean isLeafType() {
+    if (type == null) return false;
+    if (type.toString().equals("identifier") || type.toString().endsWith("literal")) return true;
+    return false;
+  }
 }
