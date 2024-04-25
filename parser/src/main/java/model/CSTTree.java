@@ -122,6 +122,9 @@ public class CSTTree implements Serializable {
     //    byte[] bytes = Arrays.copyOfRange(source.getBytes(), startIdx, endIdx);
     //    this.snippet = new String(bytes);
     this.snippet = source.substring(startIdx, endIdx);
+    this.endIdx = this.startIdx + this.snippet.strip().length();
+    this.snippet = this.snippet.strip();
+
     this.children = new HashMap<>();
     this.childrenSeq = new ArrayList<>();
     this.fields = new HashMap<>();
