@@ -189,4 +189,15 @@ public class CSTTree implements Serializable {
     }
     return type;
   }
+
+  public List<CSTTree> findNode(String snippet){
+    List<CSTTree> res = new ArrayList<>();
+    if(this.snippet.contains(snippet)){
+      res.add(this);
+    }
+    for(CSTTree child: childrenSeq){
+      res.addAll(child.findNode(snippet));
+    }
+    return res;
+  }
 }

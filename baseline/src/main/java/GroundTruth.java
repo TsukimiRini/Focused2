@@ -34,18 +34,36 @@ public class GroundTruth extends Baseline {
         this.file = this.file.substring(1);
       }
       String[] parts = range.split("-");
-      this.start = Integer.parseInt(parts[0]);
-      this.end = Integer.parseInt(parts[1]);
+      try {
+        this.start = Integer.parseInt(parts[0]);
+        this.end = Integer.parseInt(parts[1]);
+      } catch (Exception e) {
+        System.out.println("Error: " + file + " " + range);
+        this.start = -1;
+        this.end = -1;
+      }
     }
 
     public boolean equals(Object obj) {
+      if (framework.equals("web")) {
+        return file.equals(((Location) obj).file)
+            && start == ((Location) obj).start
+            && end == ((Location) obj).end;
+      }
       if (obj instanceof Location) {
         Location loc = (Location) obj;
-        return file.equals(loc.file) && (start <= loc.start && end >= loc.end || loc.start <= start && loc.end >= end);
+        return file.equals(loc.file)
+            && (start <= loc.start && end >= loc.end || loc.start <= start && loc.end >= end);
       }
       return false;
     }
+
+    @Override
+    public String toString() {
+      return file + " " + start + "-" + end;
+    }
   }
+
   public String gt_path =
       System.getProperty("user.home")
           + "/coding/xll-gt/"
@@ -81,7 +99,6 @@ public class GroundTruth extends Baseline {
     List<Pair<Location, Location>> res = new ArrayList<>();
     BufferedReader reader = Files.newBufferedReader(Path.of(resPath));
     CSVReader csvReader = new CSVReader(reader);
-    csvReader.readNext();
     List<String[]> records = csvReader.readAll();
     for (String[] record : records) {
       res.add(new Pair<>(new Location(record[0], record[1]), new Location(record[2], record[3])));
@@ -100,7 +117,7 @@ public class GroundTruth extends Baseline {
       for (Pair<Location, Location> pair : ours) {
         if (gt.contains(pair)) {
           correct++;
-        }else {
+        } else {
           fp.add(pair);
         }
       }
@@ -109,6 +126,9 @@ public class GroundTruth extends Baseline {
           fn.add(pair);
         }
       }
+      System.out.println("TP: " + correct + "\n");
+      System.out.println("FP: " + fp.size() + "\n");
+      System.out.println("FN: " + fn.size() + "\n");
       System.out.println("Acc: " + (double) correct / ours.size() + "\n");
       System.out.println("Recall: " + (double) correct / gt.size() + "\n");
     } catch (IOException e) {

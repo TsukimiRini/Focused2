@@ -10,7 +10,7 @@ public class BaselineMain {
   public static String framework = "cpython";
   public static String projectName = "pytorch";
   public static String projectDir =
-      System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
+      System.getProperty("user.home") + "/coding/xll-gt/" + framework + "/projects/" + projectName;
   public static String outputDir =
       System.getProperty("user.dir") + "/baseline/src/main/resources/text_based_output";
   public static String ourResults =

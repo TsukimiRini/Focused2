@@ -3,6 +3,7 @@ package model;
 import utils.FileUtil;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ProjectInfo {
@@ -18,6 +19,14 @@ public class ProjectInfo {
             + "/translator/src/main/resources/"
             + framework
             + "_config.fcs";
+    String projectName = projectDir.substring(projectDir.lastIndexOf("/") + 1);
+    if (List.of("mxnet", "dgl", "tvm").contains(projectName)) {
+      configPath =
+          System.getProperty("user.dir")
+              + "/translator/src/main/resources/"
+              + projectName
+              + "_config.fcs";
+    }
     switch (framework) {
       case "android":
         addLanguage(Language.JAVA);
