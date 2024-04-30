@@ -69,9 +69,12 @@ augmented_assignment:
     right: {right}
     op: {operator}
 
+
+argument_list:
+    name: "(...)"
 call:
     name: {function}
-call/argument_list.*:
+argument_list/*:
     type: "arg"
     idx: $idx(this)
 
