@@ -61,17 +61,23 @@
     CMacroDefCallPyAPIStrObj: CMacroDefCallPyAPIStr<"PyModule_AddObject">
     CMacroDefCallPyAPIStrObjRef: CMacroDefCallPyAPIStr<"PyModule_AddObjectRef">
 
-    PybindDef:
+    PybindDefT<api>:
         lang: CLike
         file: *
-        element: *.def::call_expression//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(eleRange)]
+        element: *.<api>::call_expression//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(eleRange)]
 
-    PybindSubDef:
+    PybindSubDefT<api>:
         lang: CLike
         file: *
-        element: *.def::call_expression#def//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(attrRange)]
+        element: *.<api>::call_expression#def//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(attrRange)]
         branches:
-            - @def//**//py\:\:class_*::call_expression//*::argument_list/~arg[idx=1]~/"(submodule)"::string_literal[range=(modRange)]
+            - @def//**//py\:\:*_*::call_expression//*::argument_list/~arg[idx=1]~/"(submodule)"::string_literal[range=(modRange)]
+
+    PybindDefSimple: PybindDefT<"def">
+    PybindSubDefSimple: PybindSubDefT<"def">
+
+    PybindDefOther: PybindDefT<"def*">
+    PybindSubDefOther: PybindSubDefT<"def*">
 
 
     PythonModuleRefDot:
@@ -170,7 +176,16 @@
                 |   & !contains(".",fullname)
                     & match(name, fullname)
         SplitModName(name):
-            & SplitModNameEle(cdef, name)
+            | SplitModNameEle(cdef, name)
+            | match(name, "_ti_core")
+            | match(name, "ti_python_core")
+
+        PybindDef(def):
+            | PybindDefSimple(def)
+            | PybindDefOther(def)
+        PybindSubDef(subdef):
+            | PybindSubDefSimple(subdef)
+            | PybindSubDefOther(subdef)
     public:
         PyModuleLink(cdef, pyref, defRange, refRange):
             & SplitModNameEle(cdef, mod)
@@ -211,7 +226,7 @@
             &   | PythonModuleFieldDot(pyref)
                 | PythonModuleFieldAttr(pyref)
             & match(cdef[attrName], pyref[attrName])
-            & match(cdef[submodule], snake2pascal(pyref[modName]))
+            & match(snake2pascal(cdef[submodule]), snake2pascal(pyref[modName]))
             & match(defRange, cdef[attrRange])
             & match(refRange, pyref[attrRange])
         AggregatedInfo(defFile, defRange, refFile, refRange):

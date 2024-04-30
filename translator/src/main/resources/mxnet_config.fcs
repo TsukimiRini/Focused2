@@ -1,0 +1,53 @@
+[Elements]
+    CFuncDef:
+        lang: CLike
+        file: *
+        element: MX(var)::function_definition[range=(eleRange)]
+
+    CInitDef:
+        lang: CLike
+        file: *
+        element: MX(var)::init_declarator[range=(eleRange)]
+
+    CTypeDef:
+        lang: CLike
+        file: *
+        element: MX(var)::type_declaration[range=(eleRange)]
+
+    CDecl:
+        lang: CLike
+        file: *
+        element: MX(var)::declaration[range=(eleRange)]
+
+    PythonModuleRefDot:
+        lang: Python
+        file: *.py
+        element: *::dotted_name#dotted/~part[idx=0]~/_LIB
+    PythonModuleFieldDot: PythonModuleRefDot
+        branches:
+            - @dotted/~part[idx=1]~/MX(var)[range=(eleRange)]
+    PythonModuleRefAttr:
+        lang: Python
+        file: *.py
+        element: *::attribute#attr/~part[idx=0]~/_LIB
+    PythonModuleFieldAttr: PythonModuleRefAttr
+        branches:
+            - @attr/~part[idx=1]~/MX(var)[range=(eleRange)]
+[Links]
+    Native {
+    public:
+        MXNETLinks(def, ref, defRange, refRange):
+            &   | CFuncDef(def)
+                | CInitDef(def)
+                | CTypeDef(def)
+                | CDecl(def)
+            &   | PythonModuleFieldDot(ref)
+                | PythonModuleFieldAttr(ref)
+            & match(def[var], ref[var])
+            & match(defRange, def[eleRange])
+            & match(refRange, ref[eleRange])
+        AggregatedInfo(defFile, defRange, refFile, refRange):
+            & MXNETLinks(def, ref, defRange, refRange)
+            & match(defFile, def.file)
+            & match(refFile, ref.file)
+    }

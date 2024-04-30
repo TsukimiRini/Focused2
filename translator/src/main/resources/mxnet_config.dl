@@ -1,0 +1,47 @@
+.type Capture = ZeroCap {}
+              | PythonModuleFieldDotCap {var: symbol, eleRange: symbol}
+              | CDeclCap {var: symbol, eleRange: symbol}
+              | CTypeDefCap {var: symbol, eleRange: symbol}
+              | PythonModuleFieldAttrCap {var: symbol, eleRange: symbol}
+              | CInitDefCap {var: symbol, eleRange: symbol}
+              | CFuncDefCap {var: symbol, eleRange: symbol}
+
+.type Branch = ZeroBranch {}
+             | PythonModuleFieldAttrBr {_0: symbol}
+             | PythonModuleFieldDotBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl PythonModuleRefAttr(uri:URI)
+.decl PythonModuleFieldDot(uri:URI)
+.decl CTypeDef(uri:URI)
+.decl CFuncDef(uri:URI)
+.decl CInitDef(uri:URI)
+.decl PythonModuleFieldAttr(uri:URI)
+.decl CDecl(uri:URI)
+.decl PythonModuleRefDot(uri:URI)
+.input PythonModuleRefAttr
+.input PythonModuleFieldDot
+.input CTypeDef
+.input CFuncDef
+.input CInitDef
+.input PythonModuleFieldAttr
+.input CDecl
+.input PythonModuleRefDot
+
+.comp Native {
+    .decl MXNETLinks(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl AggregatedInfo(param0:symbol, param1:symbol, param2:symbol, param3:symbol)
+    MXNETLinks(def, ref, defRange, refRange) :- ( CFuncDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBr,$CFuncDefCap(capDefVar,capDefEleRange)] ; CInitDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBr,$CInitDefCap(capDefVar,capDefEleRange)] ; CTypeDef(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBr,$CTypeDefCap(capDefVar,capDefEleRange)] ; CDecl(def), def=[_attrDefLang,_attrDefFile,_attrDefElement,_attrDefBr,$CDeclCap(capDefVar,capDefEleRange)] ), ( PythonModuleFieldDot(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBr,$PythonModuleFieldDotCap(capRefVar,capRefEleRange)] ; PythonModuleFieldAttr(ref), ref=[_attrRefLang,_attrRefFile,_attrRefElement,_attrRefBr,$PythonModuleFieldAttrCap(capRefVar,capRefEleRange)] ), capDefVar=capRefVar, defRange=capDefEleRange, refRange=capRefEleRange.
+    AggregatedInfo(defFile, defRange, refFile, refRange) :- MXNETLinks(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref], defFile=attrDefFile, refFile=attrRefFile.
+}
+.init nativeInstance = Native
+.output nativeInstance.MXNETLinks(IO=file, rfc4180=true)
+.output nativeInstance.AggregatedInfo(IO=file, rfc4180=true)
+
