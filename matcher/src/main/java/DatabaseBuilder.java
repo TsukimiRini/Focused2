@@ -1,4 +1,3 @@
-import me.tongfei.progressbar.ProgressBar;
 import model.*;
 import model.TreeInfo.TreeInfoConf;
 import model.URI.URIEdge;
@@ -23,9 +22,7 @@ public class DatabaseBuilder {
   public static final String framework = "Rust";
   public static final String projectName = "CVE-2020-35906";
   public static final String projectDir =
-      System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
-  //  public static final String projectDir =
-  //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
+      System.getProperty("user.home") + "/home/code/projects/rust-playground/" + projectName;
   public static final String outputDir =
       System.getProperty("user.home")
           + "/home/code/projects/focused-inoutput/"
@@ -62,7 +59,7 @@ public class DatabaseBuilder {
 
     // get cst
     Map<Language, Map<String, CSTTree>> cstForLangs = null;
-    if (framework.equals("web") || framework.equals("cpython")) cstForLangs = CSTBuilderNG.buildCST();
+    if (framework.equals("web") || framework.equals("cpython") || framework.equals("Rust")) cstForLangs = CSTBuilderNG.buildCST();
     else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast
@@ -93,8 +90,7 @@ public class DatabaseBuilder {
       if (patternLang != Language.ANY) {
         List<Language> targetLangs = new ArrayList<>();
         if (patternLang == Language.CLike) {
-          targetLangs =
-              Arrays.asList(Language.C, Language.CPP, Language.HPP, Language.CC, Language.H);
+          targetLangs = Arrays.asList(Language.C, Language.CPP, Language.HPP, Language.CC, Language.H);
         } else {
           targetLangs.add(patternLang);
         }
@@ -102,7 +98,8 @@ public class DatabaseBuilder {
         for (Language lang : targetLangs) {
           instances.addAll(getInstancesFromSingleTree(lang, pattern, uriTrees.get(lang)));
         }
-      } else {
+      }
+      else {
         instances = new HashSet<>();
         uriTrees.forEach(
             (lang, tree) -> instances.addAll(getInstancesFromSingleTree(lang, pattern, tree)));
@@ -188,9 +185,7 @@ public class DatabaseBuilder {
       //          matchPatternFromBottom(new ElementInstance(lang), wildCardRoot, tree,
       // MatchedType.FILE);
       if (pattern.elementRoot == null) return fileNodes;
-      for (ElementInstance fileNode :
-          ProgressBar.wrap(
-              fileNodes, "Matching pattern " + pattern.label + " in " + lang.toString())) {
+      for (ElementInstance fileNode : fileNodes) {
         pattern.elementRoot.setParent(wildCardEdge);
         res.addAll(matchPatternFromBottom(fileNode, wildCardRoot, fileNode.file));
         //        wildCardEdge.child = pattern.elementRoot;
@@ -213,8 +208,7 @@ public class DatabaseBuilder {
       throws CloneNotSupportedException {
     Set<ElementInstance> res = new HashSet<>();
     SegmentPattern tail = (SegmentPattern) pattern.getTail();
-    Set<ElementInstance> filteredNodes = new HashSet<>();
-    getNodesByNodePattern(tree, tail, fileNode, matchedType, filteredNodes);
+    Set<ElementInstance> filteredNodes = getNodesByNodePattern(tree, tail, fileNode, matchedType);
     filteredNodes.forEach(
         node -> {
           try {
@@ -393,66 +387,54 @@ public class DatabaseBuilder {
   public static Set<ElementInstance> getNodesByNodePattern(
       URINode tree, SegmentPattern pattern, ElementInstance inst)
       throws CloneNotSupportedException {
-    Set<ElementInstance> res = new HashSet<>();
-    getNodesByNodePattern(tree, pattern, inst, MatchedType.ELEMENT, res);
-    return res;
+    return getNodesByNodePattern(tree, pattern, inst, MatchedType.ELEMENT);
   }
 
-  public static Boolean getNodesByNodePattern(
-      URINode tree,
-      SegmentPattern pattern,
-      ElementInstance inst,
-      MatchedType type,
-      Set<ElementInstance> res)
+  public static Set<ElementInstance> getNodesByNodePattern(
+      URINode tree, SegmentPattern pattern, ElementInstance inst, MatchedType type)
       throws CloneNotSupportedException {
-    if (type == MatchedType.FILE && !tree.isDir()) return true;
+    if (type == MatchedType.FILE && !tree.isDir()) return new HashSet<>();
 
-    //    Set<ElementInstance> res = new HashSet<>();
+    Set<ElementInstance> res = new HashSet<>();
     if (pattern.text.text.equals("**")) {
       throw new IllegalArgumentException("the first segment of the pattern should not be **");
     }
     Pattern textPattern = getTextPattern(pattern, inst);
-    boolean continueFlag = true;
     for (String childName : tree.children.keySet()) {
+      Matcher matcher = textPattern.matcher(childName);
+      boolean matched = matcher.find();
       // iterate for child
       for (URINode child : tree.children.get(childName)) {
-        continueFlag &= getNodesByNodePattern(child, pattern, inst, type, res);
-      }
-    }
-    if (!continueFlag) return false;
+        if (matched) {
+          ElementInstance newInstance = inst.clone();
+          // check type
+          if (!checkType(pattern.type, child.type)) {
+            res.addAll(getNodesByNodePattern(child, pattern, inst, type));
+            continue;
+          }
 
-    if (tree.getName() == null) return true;
-    if (!checkType(pattern.type, tree.type)) {
-      return true;
-    }
-    Matcher matcher = textPattern.matcher(tree.getName());
-    boolean matched = matcher.find();
-    if (matched) {
-      ElementInstance newInstance = inst.clone();
+          // check attribute
+          ElementInstance childInst = checkAttr(pattern, child, newInstance);
 
-      // check attribute
-      ElementInstance childInst = checkAttr(pattern, tree, newInstance);
+          if (pattern.parent != null && pattern.parent.segType == SegmentType.EDGE) {
+            childInst = checkEdge((SegmentPattern) pattern.parent, child.edgeToParent, childInst);
+          }
 
-      if (pattern.parent != null && pattern.parent.segType == SegmentType.EDGE) {
-        childInst = checkEdge((SegmentPattern) pattern.parent, tree.edgeToParent, childInst);
-      }
-
-      if (childInst != null) {
-        if (type == MatchedType.FILE) childInst.setFilePath(tree);
-        else if (type == MatchedType.ELEMENT) childInst.element = tree;
-        for (String capture : pattern.text.captures) {
-          if (!childInst.capVal.containsKey(capture)) {
-            childInst.addCapture(capture, matcher.group(capture));
+          if (childInst != null) {
+            if (type == MatchedType.FILE) childInst.setFilePath(child);
+            else if (type == MatchedType.ELEMENT) childInst.element = child;
+            for (String capture : pattern.text.captures) {
+              if (!childInst.capVal.containsKey(capture)) {
+                childInst.addCapture(capture, matcher.group(capture));
+              }
+            }
+            res.add(childInst);
           }
         }
-        res.add(childInst);
-      } else if (pattern.isLeafType()) {
-        return false;
+        res.addAll(getNodesByNodePattern(child, pattern, inst, type));
       }
-    } else if (pattern.isLeafType()) {
-      return false;
     }
-    return true;
+    return res;
   }
 
   private static Pattern getTextPattern(SegmentPattern pattern, ElementInstance instance) {
@@ -475,8 +457,7 @@ public class DatabaseBuilder {
     return null;
   }
 
-  private static String replaceCaptureAndRemoveEscape(
-      IdentifierPattern text, ElementInstance instance) {
+  private static String replaceCaptureAndRemoveEscape(IdentifierPattern text, ElementInstance instance) {
     String regex = StringUtil.escapedForRegex(text.text, false);
     regex = regex.replaceAll("(?<!\\\\)\\*", ".+");
     for (String capName : text.captures) {

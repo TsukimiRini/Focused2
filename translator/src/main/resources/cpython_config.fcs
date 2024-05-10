@@ -2,12 +2,12 @@
     CPyModuleCreate:
         lang: CLike
         file: *
-        element: (pymodule)::declaration[decl_type=PyModuleDef]//**/~arg[idx=1]~/"(modName)"::string_literal[range=(eleRange)]
+        element: (pymodule)::declaration[decl_type=PyModuleDef]//**/~arg[idx=1]~/"(modName)"::string_literal
 
     CPyModuleAdd<api>:
         lang: CLike
         file: *
-        element: <api>::call_expression#func//**/~arg[idx=1]~/"(attrName)"::string_literal[range=(eleRange)]
+        element: <api>::call_expression#func//**/~arg[idx=1]~/"(attrName)"::string_literal
 
     CPyModuleAddIntConst: CPyModuleAdd<"PyModule_AddIntConstant">
     CPyModuleAddStringConst: CPyModuleAdd<"PyModule_AddStringConstant">
@@ -17,20 +17,20 @@
     CPyFuncCreate:
         lang: CLike
         file: *
-        element: (func)::declaration[decl_type=PyMethodDef]//**/~arg[idx=0]~/"(attrName)"::string_literal[range=(eleRange)]
+        element: (func)::declaration[decl_type=PyMethodDef]//**/~arg[idx=0]~/"(attrName)"::string_literal
 
     CCallFunc:
         lang: CLike
         file: *
-        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/"(attrName)"::string_literal[range=(eleRange)]
+        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/"(attrName)"::string_literal
     CCallFuncVarParam:
         lang: CLike
         file: *
-        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/(attrName)::identifier[range=(eleRange)]
+        element: (func)::call_expression//*::argument_list/~arg[idx=(paramIdx)]~/(attrName)::identifier
     CFuncDefCallPyAPI<api>:
         lang: CLike
         file: *
-        element: (func)::function_definition#def//**//<api>::call_expression//**/~arg[idx=1]~/(varParam)::identifier[range=(eleRange)]
+        element: (func)::function_definition#def//**//<api>::call_expression//**/~arg[idx=1]~/(varParam)::identifier
         branches:
             - @def//**//(func)::function_declarator//*::param_list/~arg[idx=(paramIdx)]~/(varParam)[var_type=string]
     CMacroDefCallPyAPI<api>:
@@ -38,13 +38,13 @@
         file: *
         element: (func)::preproc_function_def#def//*<api>\(*, (varParam), *\)*::preproc_arg
         branches:
-            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier[range=(eleRange)]
+            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier
     CMacroDefCallPyAPIStr<api>:
         lang: CLike
         file: *
         element: (func)::preproc_function_def#def//*<api>\(*, \#(varParam), *\)*::preproc_arg
         branches:
-            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier[range=(eleRange)]
+            - @def//*::preproc_params/~arg[idx=(paramIdx)]~/(varParam)::identifier
 
     CFuncDefCallPyAPIIntConst: CFuncDefCallPyAPI<"PyModule_AddIntConstant">
     CFuncDefCallPyAPIStringConst: CFuncDefCallPyAPI<"PyModule_AddStringConstant">
@@ -61,39 +61,21 @@
     CMacroDefCallPyAPIStrObj: CMacroDefCallPyAPIStr<"PyModule_AddObject">
     CMacroDefCallPyAPIStrObjRef: CMacroDefCallPyAPIStr<"PyModule_AddObjectRef">
 
-    PybindDefT<api>:
-        lang: CLike
-        file: *
-        element: *.<api>::call_expression//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(eleRange)]
-
-    PybindSubDefT<api>:
-        lang: CLike
-        file: *
-        element: *.<api>::call_expression#def//*::argument_list/~arg[idx=0]~/"(attrName)"::string_literal[range=(attrRange)]
-        branches:
-            - @def//**//py\:\:*_*::call_expression//*::argument_list/~arg[idx=1]~/"(submodule)"::string_literal[range=(modRange)]
-
-    PybindDefSimple: PybindDefT<"def">
-    PybindSubDefSimple: PybindSubDefT<"def">
-
-    PybindDefOther: PybindDefT<"def*">
-    PybindSubDefOther: PybindSubDefT<"def*">
-
 
     PythonModuleRefDot:
         lang: Python
         file: *.py
-        element: *::dotted_name#dotted/~part[idx=0]~/(modName)[range=(modRange)]
+        element: *::dotted_name#dotted/~part[idx=0]~/(modName)
     PythonModuleFieldDot: PythonModuleRefDot
         branches:
-            - @dotted/~part[idx=1]~/(attrName)[range=(attrRange)]
+            - @dotted/~part[idx=1]~/(attrName)
     PythonModuleRefAttr:
         lang: Python
         file: *.py
-        element: *::attribute#attr/~part[idx=0]~/(modName)[range=(modRange)]
+        element: *::attribute#attr/~part[idx=0]~/(modName)
     PythonModuleFieldAttr: PythonModuleRefAttr
         branches:
-            - @attr/~part[idx=1]~/(attrName)[range=(attrRange)]
+            - @attr/~part[idx=1]~/(attrName)
 [Links]
     Native {
     public:
@@ -129,118 +111,17 @@
         ModName(modName):
             & CPyModuleCreate(cdef)
             & match(modName, cdef[modName])
-        PybindNotSubDef(cdef):
-            & PybindDef(cdef)
-            & PybindSubDef(subdef)
-            & !match(cdef.element, subdef.element)
-        RefHead(ref):
-            &   | PythonModuleRefDot(ref)
-                | PythonModuleRefAttr(ref)
-            &   | PythonModuleFieldDot(refAsField)
-                | PythonModuleFieldAttr(refAsField)
-            & !match(ref.element, refAsField.branches[0])
-        RefParentChild(ref,refAsField):
-            &   | PythonModuleRefDot(ref)
-                | PythonModuleRefAttr(ref)
-            &   | PythonModuleFieldDot(refAsField)
-                | PythonModuleFieldAttr(refAsField)
-            & match(ref.element, refAsField.branches[0])
-        FullRef(ref, fullname):
-            |   & RefHead(ref)
-                & match(fullname, "")
-            |   & RefParentChild(ref,refAsField)
-                & RefParentChild(refP,refPAsField)
-                & match(refP.element, refAsField.element)
-                & FullRef(refP, fullnameP)
-                & match(fullnamePDot, cat(fullnameP, "."))
-                & match(fullname, cat(fullnamePDot, refP[modName]))
-            |   & RefParentChild(refP,ref)
-                & FullRef(refP, fullnameP)
-                & match(fullnamePDot, cat(fullnameP, "."))
-                & match(fullname, cat(fullnamePDot, refP[modName]))
-        PathNames(name):
-            |   &   | PythonModuleRefDot(mod)
-                    | PythonModuleRefAttr(mod)
-                & match(name, mod[modName])
-            |   &   | PythonModuleFieldDot(ref)
-                    | PythonModuleFieldAttr(ref)
-                & match(name, ref[attrName])
-        SplitModNameEle(cdef, name):
-            & CPyModuleCreate(cdef)
-            & match(fullname, cdef[modName])
-            & PathNames(name)
-            & PathNames(path)
-            & match(prefix, cat(path, "."))
-            &   |   & contains(".",fullname)
-                    & match(fullname, cat(prefix, name))
-                |   & !contains(".",fullname)
-                    & match(name, fullname)
-        SplitModName(name):
-            | SplitModNameEle(cdef, name)
-            | match(name, "_ti_core")
-            | match(name, "ti_python_core")
-
-        PybindDef(def):
-            | PybindDefSimple(def)
-            | PybindDefOther(def)
-        PybindSubDef(subdef):
-            | PybindSubDefSimple(subdef)
-            | PybindSubDefOther(subdef)
     public:
-        PyModuleLink(cdef, pyref, defRange, refRange):
-            & SplitModNameEle(cdef, mod)
+        PyModuleLink(cdef, pyref):
+            & CPyModuleCreate(cdef)
             &   | PythonModuleRefDot(pyref)
                 | PythonModuleRefAttr(pyref)
-            & match(mod, pyref[modName])
-            & match(defRange, cdef[eleRange])
-            & match(refRange, pyref[modRange])
-        PyModuleAttrLink(cdef, pyref, defRange, refRange):
+            & match(cdef[modName], pyref[modName])
+        PyModuleAttrLink(cdef, pyref):
             &   | CModuleAttrEle(cdef)
                 | CCallFuncToCreateModuleAttr(cdef)
             &   | PythonModuleFieldDot(pyref)
                 | PythonModuleFieldAttr(pyref)
             & match(cdef[attrName], pyref[attrName])
-            & SplitModName(pyref[modName])
-            & match(defRange, cdef[eleRange])
-            & match(refRange, pyref[attrRange])
-        PybindLink(cdef, pyref, defRange, refRange):
-            & PybindNotSubDef(cdef)
-            &   | PythonModuleFieldDot(pyref)
-                | PythonModuleFieldAttr(pyref)
-            & match(cdef[attrName], pyref[attrName])
-            & SplitModName(mod)
-            & match(pyref[modName], mod)
-            & match(defRange, cdef[eleRange])
-            & match(refRange, pyref[attrRange])
-        PybindSubmodule(cdef, pyref, defRange, refRange):
-            & PybindSubDef(cdef)
-            &   | PythonModuleFieldDot(pyref)
-                | PythonModuleFieldAttr(pyref)
-            & match(cdef[submodule], pyref[attrName])
-            & SplitModName(mod)
-            & match(pyref[modName], mod)
-            & match(defRange, cdef[modRange])
-            & match(refRange, pyref[attrRange])
-        PybindSubLink(cdef, pyref, defRange, refRange):
-            & PybindSubDef(cdef)
-            &   | PythonModuleFieldDot(pyref)
-                | PythonModuleFieldAttr(pyref)
-            & match(cdef[attrName], pyref[attrName])
-            & match(snake2pascal(cdef[submodule]), snake2pascal(pyref[modName]))
-            & match(defRange, cdef[attrRange])
-            & match(refRange, pyref[attrRange])
-        AggregatedInfo(defFile, defRange, refFile, refRange):
-            &   | PyModuleLink(cdef, pyref, defRange, refRange)
-                | PyModuleAttrLink(cdef, pyref, defRange, refRange)
-                | PybindLink(cdef, pyref, defRange, refRange)
-                | PybindSubmodule(cdef, pyref, defRange, refRange)
-                | PybindSubLink(cdef, pyref, defRange, refRange)
-            & match(defFile, cdef.file)
-            & match(refFile, pyref.file)
-        Links(defRange, refRange, cdef, pyref):
-            | PyModuleLink(cdef, pyref, defRange, refRange)
-            | PyModuleAttrLink(cdef, pyref, defRange, refRange)
-            | PybindLink(cdef, pyref, defRange, refRange)
-            | PybindSubmodule(cdef, pyref, defRange, refRange)
-            | PybindSubLink(cdef, pyref, defRange, refRange)
+            & ModName(pyref[modName])
     }

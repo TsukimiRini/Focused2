@@ -1,4 +1,3 @@
-import me.tongfei.progressbar.ProgressBar;
 import model.CSTTree;
 import model.TreeInfo.TreeInfoConf;
 import model.URI.URINode;
@@ -15,13 +14,8 @@ public class URITreeBuilder {
 
   public URINode buildFromCST(Map<String, CSTTree> tree) {
     URINode uriTree = new URINode("", "ROOT");
-    for(Map.Entry<String, CSTTree> entry : ProgressBar.wrap(tree.entrySet(), "Building URI Tree")) {
-      String filePath = entry.getKey();
-      CSTTree curTree = entry.getValue();
-      uriTree.addCST(FileUtil.getRelativePath(filePath), curTree, conf);
-    }
-//    tree.forEach((filePath, curTree) -> uriTree.addCST(FileUtil.getRelativePath(filePath), curTree, conf));
-
+    // redundant file path
+    tree.forEach((filePath, curTree) -> uriTree.addCST(FileUtil.getRelativePath(filePath), curTree, conf));
     return uriTree;
   }
 }
