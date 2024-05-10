@@ -14,14 +14,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Focused2Souffle {
-  private static String framework = "android";
-  public static final String config_path =
-      System.getProperty("user.dir")
-          + "/translator/src/main/resources/"
+  private static String framework = "Rust";
+  private static String projectName = "CVE-2020-35906";
+  public static final String config_path = System.getProperty("user.home")
+          + "/home/code/projects/focused-inoutput/"
           + framework
-          + "_config.fcs";
-  public static final String souffle_output =
-      System.getProperty("user.dir") + "/translator/src/main/resources/" + framework + "_config.dl";
+          + "/"
+          + projectName
+          + "/"
+          + projectName
+          + ".fcs";
+  public static final String souffle_output = System.getProperty("user.home")
+          + "/home/code/projects/focused-inoutput/"
+          + framework
+          + "/"
+          + projectName
+          + "/"
+          + projectName
+          + ".dl";
 
   public static void main(String[] args) throws IOException {
     Pair<List<URIPattern>, List<ConfigLinkBlock>> pair = ConfigLoader.load(config_path);

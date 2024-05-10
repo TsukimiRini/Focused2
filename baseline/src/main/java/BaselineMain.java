@@ -23,7 +23,7 @@ public class BaselineMain {
 
   public static void main(String[] args) {
     Baseline baseline = new TextBased(framework, projectName, projectDir, outputDir);
-    SharedStatus.initProjectInfo(framework, projectDir);
+    SharedStatus.initProjectInfo(framework, projectDir, projectName);
     Map<String, List<String>> categorizedFiles =
         FileUtil.listFilePathsInLanguages(
             SharedStatus.projectInfo.projectDir, SharedStatus.projectInfo.languages);

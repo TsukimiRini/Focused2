@@ -19,19 +19,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DatabaseBuilder {
-  public static final String framework = "web";
-  public static final String projectName = "latex-css";
+  public static final String framework = "Rust";
+  public static final String projectName = "CVE-2020-35906";
   public static final String projectDir =
-      System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
-  //  public static final String projectDir =
-  //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
+      System.getProperty("user.home") + "/home/code/projects/rust-playground/" + projectName;
   public static final String outputDir =
       System.getProperty("user.home")
-          + "/coding/dlData/"
+          + "/home/code/projects/focused-inoutput/"
           + framework
           + "/"
-          + projectName
-          + "/inputs";
+          + projectName;
 
   public static Map<Language, TreeInfoConf> treeInfoConfs = new HashMap<>();
 
@@ -45,12 +42,24 @@ public class DatabaseBuilder {
   }
 
   public static void main(String[] args) throws IOException {
-    SharedStatus.initProjectInfo(framework, projectDir);
+    SharedStatus.initProjectInfo(framework, projectDir, projectName);
     mapConfs();
+    // get CVE.tree
+    treeInfoConfs.put(
+            Language.Rust,
+            new TreeInfoConf(
+                    System.getProperty("user.home")
+                            + "/home/code/projects/focused-inoutput/"
+                            + framework
+                            + "/"
+                            + projectName
+                            + "/"
+                            + projectName
+                            + ".tree"));
 
     // get cst
     Map<Language, Map<String, CSTTree>> cstForLangs = null;
-    if (framework.equals("web") || framework.equals("cpython")) cstForLangs = CSTBuilderNG.buildCST();
+    if (framework.equals("web") || framework.equals("cpython") || framework.equals("Rust")) cstForLangs = CSTBuilderNG.buildCST();
     else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast
@@ -59,6 +68,12 @@ public class DatabaseBuilder {
       URITreeBuilder builder = new URITreeBuilder(treeInfoConfs.get(lang));
       URINode tree = builder.buildFromCST(cstTree);
       uriTrees.put(lang, tree);
+    }
+
+    // output ast
+    for (Language lang : uriTrees.keySet()) {
+      URINode tree = uriTrees.get(lang);
+      outputAST(tree, outputDir + "/asts/" + lang + ".ast", lang.toString(), projectName);
     }
 
     // load focused config
@@ -90,7 +105,7 @@ public class DatabaseBuilder {
             (lang, tree) -> instances.addAll(getInstancesFromSingleTree(lang, pattern, tree)));
       }
 
-      outputInstances(pattern, instances, outputDir + "/" + pattern.label + ".facts");
+      outputInstances(pattern, instances, outputDir + "/facts/" + pattern.label + ".facts");
     }
   }
 
@@ -120,6 +135,12 @@ public class DatabaseBuilder {
               lang,
               new TreeInfoConf(
                   System.getProperty("user.dir") + "/parser/src/main/resources/css.tree"));
+          break;
+        case Rust:
+          treeInfoConfs.put(
+              lang,
+              new TreeInfoConf(
+                  System.getProperty("user.dir") + "/parser/src/main/resources/rust.tree"));
           break;
         case CLike:
         case C:
@@ -556,5 +577,14 @@ public class DatabaseBuilder {
     for (ElementInstance instance : instances) {
       FileUtil.appendTo(outputFile, instance.toOutputString(pattern) + "\n");
     }
+  }
+
+  private static void outputAST(
+          URINode tree, String outputPath, String lang, String file) throws IOException {
+      File outputFile = FileUtil.createOrClearFile(outputPath);
+      FileUtil.appendTo(outputFile, "lang: " + lang + "\n");
+      FileUtil.appendTo(outputFile, "file: " + file + "\n");
+      StringBuilder sb = URINode.renderURINode(tree);
+      FileUtil.appendTo(outputFile, sb.toString());   
   }
 }

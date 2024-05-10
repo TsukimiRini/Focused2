@@ -216,13 +216,29 @@ public class URINode extends URISegment {
   private static StringBuilder renderURINode(URINode node, int level, StringBuilder sb, boolean isLast,
       List<Boolean> hierarchyTree) {
     // the toString method is already overridden in URINode
-    String attrs = node.getAttrStr();
+    String node_attr = node.getAttrStr();
+    if (node_attr.equals("{}")) {
+      node_attr = "";
+    } else {
+        node_attr = " PROP:" + node_attr;
+    }
+    String edge_attr;
+    if (node.edgeToParent == null) {
+      edge_attr = "";
+    } else {
+      String tmp = node.edgeToParent.toString();
+      if (tmp.startsWith("~[]~")) {
+        edge_attr = "";
+      } else {
+        edge_attr = " EDGE:" + tmp;
+      }      
+    }
     indent(sb, level, isLast, hierarchyTree)
         .append(node.getName())
         .append("::")
         .append(node.type)
-        .append("->")
-        .append(attrs)
+        .append(node_attr)
+        .append(edge_attr)
         .append("\n");
 
     if (node.children != null) {

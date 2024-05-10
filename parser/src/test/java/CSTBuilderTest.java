@@ -10,7 +10,7 @@ public class CSTBuilderTest {
   @Test
   public void testCSTBuilder() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-        "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
+        "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader", "CloudReader");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilder.buildCST();
     System.out.println(cstTrees);
   }
@@ -18,7 +18,7 @@ public class CSTBuilderTest {
   @Test
   public void testCSTBuilderNG() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader");
+            "android", System.getProperty("user.home") + "/coding/xll/android/CloudReader", "CloudReader");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
     System.out.println(cstTrees);
   }
@@ -26,7 +26,7 @@ public class CSTBuilderTest {
   @Test
   public void testWebCST() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css");
+            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css", "latex-css");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilder.buildCST();
     System.out.println(cstTrees);
   }
@@ -34,7 +34,7 @@ public class CSTBuilderTest {
   @Test
   public void testWebNG() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css");
+            "web", System.getProperty("user.home") + "/coding/xll/web/latex-css", "latex-css");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
     System.out.println(cstTrees);
   }
@@ -44,7 +44,7 @@ public class CSTBuilderTest {
 //    SharedStatus.initProjectInfo(
 //            "cpython", System.getProperty("user.home") + "/Projects/ffi-navigator/tests/dgl");
     SharedStatus.initProjectInfo(
-            "cpython", System.getProperty("user.home") + "/coding/xll/cpython/python-ldap");
+            "cpython", System.getProperty("user.home") + "/coding/xll/cpython/python-ldap", "python-ldap");
     Map<Language, Map<String, CSTTree>> cstTrees = CSTBuilderNG.buildCST();
     System.out.println(cstTrees);
   }

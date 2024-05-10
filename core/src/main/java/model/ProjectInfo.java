@@ -9,15 +9,19 @@ public class ProjectInfo {
   public String framework;
   public Set<Language> languages = new HashSet<>();
   public String projectDir;
+  public String projectName;
   public String configPath;
 
-  public ProjectInfo(String framework, String projectDir) {
+  public ProjectInfo(String framework, String projectDir, String projectName) {
     this.framework = framework;
-    configPath =
-        System.getProperty("user.dir")
-            + "/translator/src/main/resources/"
+    configPath = System.getProperty("user.home")
+            + "/home/code/projects/focused-inoutput/"
             + framework
-            + "_config.fcs";
+            + "/"
+            + projectName
+            + "/"
+            + projectName
+            + ".fcs";
     switch (framework) {
       case "android":
         addLanguage(Language.JAVA);
@@ -45,12 +49,13 @@ public class ProjectInfo {
         addLanguage(Language.CC);
         addLanguage(Language.CPP);
         addLanguage(Language.HPP);
-      case "rust":
+      case "Rust":
         addLanguage(Language.Rust);
         break;
       default:
         addLanguage(Language.JAVA);
     }
+    this.projectName = projectName;
     this.projectDir = projectDir;
     FileUtil.setRootPath(projectDir);
   }
