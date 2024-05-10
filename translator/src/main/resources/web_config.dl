@@ -1,8 +1,8 @@
 .type Capture = ZeroCap {}
-              | CSSNotLeafAttributeSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, opList: symbol, valueList: symbol, attrNameList: symbol}
+              | CSSNotLeafAttributeSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, attrNameList: symbol, opList: symbol, valueList: symbol}
               | CSSNotLeafPseudoClassSelectorCap {identifier: symbol, cssFile: symbol, left: symbol, className: symbol}
               | CSSNestingSelectorCap {cssFile: symbol}
-              | CSSAttributeSelectorCap {identifier: symbol, cssFile: symbol, opList: symbol, valueList: symbol, attrNameList: symbol}
+              | CSSAttributeSelectorCap {identifier: symbol, cssFile: symbol, attrNameList: symbol, opList: symbol, valueList: symbol}
               | HTMLElementWithClassCap {htmlFile: symbol, tag: symbol, class: symbol, eleRange: symbol}
               | CSSPseudoElementSelectorCap {identifier: symbol, cssFile: symbol, tagName: symbol}
               | CSSNotLeafIDSelectorCap {identifier: symbol, cssFile: symbol, idName: symbol, left: symbol}

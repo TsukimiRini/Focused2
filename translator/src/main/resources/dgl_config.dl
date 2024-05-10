@@ -1,0 +1,63 @@
+.type Capture = ZeroCap {}
+              | PythonModuleFieldDotCap {var: symbol, eleRange: symbol}
+              | CRegisterObjCap {eleRange: symbol, attrName: symbol}
+              | PyRegisterObjCap {eleRange: symbol, attrName: symbol}
+              | CTypeKeyCap {eleRange: symbol, key: symbol}
+              | PythonModuleFieldAttrCap {var: symbol, eleRange: symbol}
+              | PyObjRefCap {file: symbol, obj: symbol, eleRange: symbol}
+              | PyInitLibCap {file: symbol, libName: symbol, eleRange: symbol}
+
+.type Branch = ZeroBranch {}
+             | PythonModuleFieldAttrBr {_0: symbol}
+             | PythonModuleFieldDotBr {_0: symbol}
+             | CTypeKeyBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl PyRegisterObj(uri:URI)
+.decl PyObjRef(uri:URI)
+.decl CRegisterObj(uri:URI)
+.decl PythonModuleRefAttr(uri:URI)
+.decl PythonModuleFieldDot(uri:URI)
+.decl PyInitLib(uri:URI)
+.decl PythonModuleFieldAttr(uri:URI)
+.decl PythonModuleRefDot(uri:URI)
+.decl CTypeKey(uri:URI)
+.input PyRegisterObj
+.input PyObjRef
+.input CRegisterObj
+.input PythonModuleRefAttr
+.input PythonModuleFieldDot
+.input PyInitLib
+.input PythonModuleFieldAttr
+.input PythonModuleRefDot
+.input CTypeKey
+
+.comp Native {
+    .decl PyFileInternal(param0:symbol)
+    .decl GlobalObjLink(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl InternalObjLink(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl PyFileToApiPrefix(param0:symbol, param1:symbol)
+    .decl TypeKeyLink(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl AggregatedInfo(param0:symbol, param1:symbol, param2:symbol, param3:symbol)
+    PyFileInternal(file) :- PyObjRef(obj), obj=[_attrObjLang,attrObjFile,_attrObjElement,_attrObjBr,_capobj], file=attrObjFile, PyInitLib(init), init=[_attrInitLang,attrInitFile,_attrInitElement,_attrInitBr,_capinit], file!=attrInitFile.
+    GlobalObjLink(cdef, pyref, defRange, refRange) :- CRegisterObj(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CRegisterObjCap(capCdefEleRange,capCdefAttrName)], PyObjRef(pyref), pyref=[_attrPyrefLang,attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PyObjRefCap(_capPyrefFile,capPyrefObj,capPyrefEleRange)], cat("dgl.", capCdefAttrName)=cat(prefix, capPyrefObj), PyFileToApiPrefix(attrPyrefFile, prefix), defRange=capCdefEleRange, refRange=capPyrefEleRange.
+    InternalObjLink(cdef, pyref, defRange, refRange) :- CRegisterObj(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CRegisterObjCap(capCdefEleRange,capCdefAttrName)], ( PythonModuleFieldDot(pyref), pyref=[_attrPyrefLang,attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldDotCap(capPyrefVar,capPyrefEleRange)] ; PythonModuleFieldAttr(pyref), pyref=[_attrPyrefLang,attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldAttrCap(capPyrefVar,capPyrefEleRange)] ), PyFileInternal(attrPyrefFile), capCdefAttrName=capPyrefVar, PyFileInternal(attrPyrefFile), defRange=capCdefEleRange, refRange=capPyrefEleRange.
+    PyFileToApiPrefix(file, prefix) :- PyInitLib(init), init=[_attrInitLang,attrInitFile,_attrInitElement,_attrInitBr,$PyInitLibCap(_capInitFile,capInitLibName,_capInitEleRange)], file=attrInitFile, prefix=cat(capInitLibName, ".").
+    TypeKeyLink(cdef, pyref, defRange, refRange) :- CTypeKey(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CTypeKeyCap(capCdefEleRange,capCdefKey)], PyRegisterObj(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PyRegisterObjCap(capPyrefEleRange,capPyrefAttrName)], capCdefKey=capPyrefAttrName, defRange=capCdefEleRange, refRange=capPyrefEleRange.
+    AggregatedInfo(defFile, defRange, refFile, refRange) :- ( TypeKeyLink(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref] ; GlobalObjLink(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref] ; InternalObjLink(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref] ), defFile=attrDefFile, refFile=attrRefFile.
+}
+.init nativeInstance = Native
+.output nativeInstance.PyFileInternal(IO=file, rfc4180=true)
+.output nativeInstance.GlobalObjLink(IO=file, rfc4180=true)
+.output nativeInstance.InternalObjLink(IO=file, rfc4180=true)
+.output nativeInstance.PyFileToApiPrefix(IO=file, rfc4180=true)
+.output nativeInstance.TypeKeyLink(IO=file, rfc4180=true)
+.output nativeInstance.AggregatedInfo(IO=file, rfc4180=true)
+
