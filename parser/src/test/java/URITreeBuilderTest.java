@@ -95,7 +95,7 @@ public class URITreeBuilderTest {
   @Test
   public void  testPython() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "python", System.getProperty("user.home") + "/coding/xll-gt/cpython/projects/dgl/python/dgl/global_config.py"
+            "python", System.getProperty("user.home") + "/coding/xll-gt/cpython/projects/dgl/python/dgl/global_config.py", "global_config"
     );
     Map<String, CSTTree> cstTrees =
             CSTBuilderNG.buildCST(
@@ -115,7 +115,7 @@ public class URITreeBuilderTest {
   @Test
   public void testCPP() throws UnsupportedEncodingException {
     SharedStatus.initProjectInfo(
-            "cpp", System.getProperty("user.home") + "/coding/xll/cpython/python-ldap"
+            "cpp", System.getProperty("user.home") + "/coding/xll/cpython/python-ldap", "python-ldap"
     );
     Map<String, CSTTree> cstTrees =
             CSTBuilderNG.buildCST(

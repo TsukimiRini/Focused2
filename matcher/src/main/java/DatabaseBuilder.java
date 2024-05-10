@@ -23,7 +23,7 @@ public class DatabaseBuilder {
   public static final String framework = "Rust";
   public static final String projectName = "CVE-2020-35906";
   public static final String projectDir =
-      System.getProperty("user.home") + "/coding/xll/" + framework + "/" + projectName;
+    System.getProperty("user.home") + "/home/code/projects/rust-playground/" + projectName;
   //  public static final String projectDir =
   //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
   public static final String outputDir =
@@ -62,7 +62,7 @@ public class DatabaseBuilder {
 
     // get cst
     Map<Language, Map<String, CSTTree>> cstForLangs = null;
-    if (framework.equals("web") || framework.equals("cpython")) cstForLangs = CSTBuilderNG.buildCST();
+    if (framework.equals("web") || framework.equals("cpython") || framework.equals("Rust")) cstForLangs = CSTBuilderNG.buildCST();
     else cstForLangs = CSTBuilder.buildCST();
 
     // cst -> ast

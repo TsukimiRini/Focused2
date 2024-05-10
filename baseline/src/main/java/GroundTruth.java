@@ -85,7 +85,7 @@ public class GroundTruth extends Baseline {
             + ".csv";
   }
 
-  private List<Pair<Location, Location>> readInRangeGroundTruth() throws IOException {
+  private List<Pair<Location, Location>> readInRangeGroundTruth() throws IOException, CsvException{
     Reader reader = Files.newBufferedReader(Path.of(gt_path));
     CSVReader csvReader = new CSVReader(reader);
     csvReader.readNext();
@@ -97,7 +97,7 @@ public class GroundTruth extends Baseline {
     return res;
   }
 
-  private List<Pair<Location, Location>> readInOurResults(String resPath) throws IOException {
+  private List<Pair<Location, Location>> readInOurResults(String resPath) throws IOException, CsvException {
     List<Pair<Location, Location>> res = new ArrayList<>();
     BufferedReader reader = Files.newBufferedReader(Path.of(resPath));
     CSVReader csvReader = new CSVReader(reader);
