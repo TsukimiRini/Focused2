@@ -1,0 +1,56 @@
+.type Capture = ZeroCap {}
+              | PythonModuleFieldDotCap {mod: symbol, var: symbol, eleRange: symbol}
+              | CRegisterObjCap {eleRange: symbol, attrName: symbol}
+              | PythonModuleRefAttrCap {mod: symbol}
+              | PyRegisterObjCap {eleRange: symbol, attrName: symbol}
+              | CTypeKeyCap {eleRange: symbol, key: symbol}
+              | PythonModuleFieldAttrCap {mod: symbol, var: symbol, eleRange: symbol}
+              | PythonModuleRefDotCap {mod: symbol}
+              | PyInitLibCap {file: symbol, libName: symbol, eleRange: symbol}
+
+.type Branch = ZeroBranch {}
+             | PythonModuleFieldAttrBr {_0: symbol}
+             | PythonModuleFieldDotBr {_0: symbol}
+             | CTypeKeyBr {_0: symbol}
+
+.type URI = [
+    lang: symbol,
+    file: symbol,
+    element: symbol,
+    branches: Branch,
+    caps: Capture
+]
+
+.decl PyRegisterObj(uri:URI)
+.decl CRegisterObj(uri:URI)
+.decl PythonModuleRefAttr(uri:URI)
+.decl PythonModuleFieldDot(uri:URI)
+.decl PyInitLib(uri:URI)
+.decl PythonModuleFieldAttr(uri:URI)
+.decl PythonModuleRefDot(uri:URI)
+.decl CTypeKey(uri:URI)
+.input PyRegisterObj
+.input CRegisterObj
+.input PythonModuleRefAttr
+.input PythonModuleFieldDot
+.input PyInitLib
+.input PythonModuleFieldAttr
+.input PythonModuleRefDot
+.input CTypeKey
+
+.comp Native {
+    .decl ModToPath(param0:symbol, param1:symbol)
+    .decl GlobalObjLink(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl TypeKeyLink(param0:URI, param1:URI, param2:symbol, param3:symbol)
+    .decl AggregatedInfo(param0:symbol, param1:symbol, param2:symbol, param3:symbol)
+    ModToPath(mod, path) :- PyInitLib(init), init=[_attrInitLang,_attrInitFile,_attrInitElement,_attrInitBr,$PyInitLibCap(capInitFile,capInitLibName,_capInitEleRange)], mod=capInitFile, path=cat(capInitLibName, ".").
+    GlobalObjLink(cdef, pyref, defRange, refRange) :- CRegisterObj(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CRegisterObjCap(capCdefEleRange,capCdefAttrName)], ( PythonModuleFieldDot(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldDotCap(capPyrefMod,capPyrefVar,capPyrefEleRange)] ; PythonModuleFieldAttr(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PythonModuleFieldAttrCap(capPyrefMod,capPyrefVar,capPyrefEleRange)] ), ModToPath(capPyrefMod, path), cat(path, capPyrefVar)=capCdefAttrName, defRange=capCdefEleRange, refRange=capPyrefEleRange.
+    TypeKeyLink(cdef, pyref, defRange, refRange) :- CTypeKey(cdef), cdef=[_attrCdefLang,_attrCdefFile,_attrCdefElement,_attrCdefBr,$CTypeKeyCap(capCdefEleRange,capCdefKey)], PyRegisterObj(pyref), pyref=[_attrPyrefLang,_attrPyrefFile,_attrPyrefElement,_attrPyrefBr,$PyRegisterObjCap(capPyrefEleRange,capPyrefAttrName)], capCdefKey=capPyrefAttrName, defRange=capCdefEleRange, refRange=capPyrefEleRange.
+    AggregatedInfo(defFile, defRange, refFile, refRange) :- ( TypeKeyLink(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref] ; GlobalObjLink(def, ref, defRange, refRange), def=[_attrDefLang,attrDefFile,_attrDefElement,_attrDefBr,_capdef], ref=[_attrRefLang,attrRefFile,_attrRefElement,_attrRefBr,_capref] ), defFile=attrDefFile, refFile=attrRefFile.
+}
+.init nativeInstance = Native
+.output nativeInstance.ModToPath(IO=file, rfc4180=true)
+.output nativeInstance.GlobalObjLink(IO=file, rfc4180=true)
+.output nativeInstance.TypeKeyLink(IO=file, rfc4180=true)
+.output nativeInstance.AggregatedInfo(IO=file, rfc4180=true)
+
