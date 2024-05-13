@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 
 public class Focused2Souffle {
   private static String framework = "Rust";
-  private static String projectName = "CVE-2020-35906";
+  private static String projectName = "CVE-2018-21000";
   public static final String config_path = System.getProperty("user.home")
-          + "/home/code/projects/focused-inoutput/"
+          + "/home/code/projects/Focused2Output/"
           + framework
           + "/"
           + projectName
@@ -25,7 +25,7 @@ public class Focused2Souffle {
           + projectName
           + ".fcs";
   public static final String souffle_output = System.getProperty("user.home")
-          + "/home/code/projects/focused-inoutput/"
+          + "/home/code/projects/Focused2Output/"
           + framework
           + "/"
           + projectName

@@ -21,14 +21,14 @@ import java.util.regex.Pattern;
 
 public class DatabaseBuilder {
   public static final String framework = "Rust";
-  public static final String projectName = "CVE-2020-35906";
+  public static final String projectName = "CVE-2018-21000";
   public static final String projectDir =
     System.getProperty("user.home") + "/home/code/projects/rust-playground/" + projectName;
   //  public static final String projectDir =
   //      System.getProperty("user.dir") + "/matcher/src/main/resources/toy_android";
   public static final String outputDir =
       System.getProperty("user.home")
-          + "/home/code/projects/focused-inoutput/"
+          + "/home/code/projects/Focused2Output/"
           + framework
           + "/"
           + projectName;
@@ -52,7 +52,7 @@ public class DatabaseBuilder {
             Language.Rust,
             new TreeInfoConf(
                     System.getProperty("user.home")
-                            + "/home/code/projects/focused-inoutput/"
+                            + "/home/code/projects/Focused2Output/"
                             + framework
                             + "/"
                             + projectName
@@ -82,6 +82,9 @@ public class DatabaseBuilder {
     // load focused config
     Pair<List<URIPattern>, List<ConfigLinkBlock>> config =
         ConfigLoader.load(SharedStatus.projectInfo.configPath);
+
+    // empty all files in outputDir/facts/
+    deleteDirectory(outputDir + "/facts/");    
 
     // match uris for each rule
     for (URIPattern pattern : config.getLeft()) {
@@ -605,5 +608,20 @@ public class DatabaseBuilder {
       FileUtil.appendTo(outputFile, "file: " + file + "\n");
       StringBuilder sb = URINode.renderURINode(tree);
       FileUtil.appendTo(outputFile, sb.toString());   
+  }
+
+  private static void deleteDirectory(String path) {
+      File dir = new File(path);
+      if (dir.isDirectory() == false) {
+          System.out.println("Not a directory. Do nothing");
+          return;
+      }
+      File[] listFiles = dir.listFiles();
+      for (File file : listFiles) {
+          System.out.println("Deleting " + file.getName());
+          file.delete();
+      }
+      // 现在目录为空，所以可以删除它
+      System.out.println("Deleting Directory. Success = " + dir.delete());
   }
 }

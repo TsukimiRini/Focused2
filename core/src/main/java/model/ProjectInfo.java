@@ -16,7 +16,7 @@ public class ProjectInfo {
   public ProjectInfo(String framework, String projectDir, String projectName) {
     this.framework = framework;
     configPath = System.getProperty("user.home")
-            + "/home/code/projects/focused-inoutput/"
+            + "/home/code/projects/Focused2Output/"
             + framework
             + "/"
             + projectName
